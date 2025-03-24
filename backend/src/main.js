@@ -12,12 +12,9 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
 
   try {
-    const average = await calculateAverages(database);
-    log(`Average: ${average}`);
-
-    let newData = {math1za3avg: average}
+    const averages = await calculateAverages(database);
     
-    await database.createDocument('MacStats','StatData',ID.unique(),newData);
+    await database.updateDocument('MacStats','StatData','67e0e127003b68b2be82',averages);
 
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
@@ -53,14 +50,118 @@ export default async ({ req, res, log, error }) => {
 async function calculateAverages(database) {
   const databaseResponse = await database.listDocuments('MacStats','UserData');
   
-  let total = 0;
-  let count = 0;
+  let math1za3total = 0;
+  let math1zb3total = 0;
+  let math1zc3total = 0;
+  let phys1d03total = 0;
+  let phys1e03total = 0;
+  let chem1e03total = 0;
+  let eng1p13total = 0;
+  
+  let math1za3count = 0;
+  let math1zb3count = 0;
+  let math1zc3count = 0;
+  let phys1d03count = 0;
+  let phys1e03count = 0;
+  let chem1e03count = 0;
+  let eng1p13count = 0;
 
   for (let i = 0; i < databaseResponse.documents.length; i++) {
-    total += databaseResponse.documents[i].math1za3;
-    count++;
+    const doc = databaseResponse.documents[i];
+    
+    if (doc.math1za3 > 0) {
+      math1za3total += doc.math1za3;
+      math1za3count++;
+    }
+    
+    if (doc.math1zb3 > 0) {
+      math1zb3total += doc.math1zb3;
+      math1zb3count++;
+    }
+    
+    if (doc.math1zc3 > 0) {
+      math1zc3total += doc.math1zc3;
+      math1zc3count++;
+    }
+    
+    if (doc.phys1d03 > 0) {
+      phys1d03total += doc.phys1d03;
+      phys1d03count++;
+    }
+    
+    if (doc.phys1e03 > 0) {
+      phys1e03total += doc.phys1e03;
+      phys1e03count++;
+    }
+    
+    if (doc.chem1e03 > 0) {
+      chem1e03total += doc.chem1e03;
+      chem1e03count++;
+    }
+    
+    if (doc.eng1p13 > 0) {
+      eng1p13total += doc.eng1p13;
+      eng1p13count++;
+    }
   }
-  const average = total / count;
   
-  return average;
+  const math1za3average = math1za3count > 0 ? math1za3total / math1za3count : 0;
+  const math1zb3average = math1zb3count > 0 ? math1zb3total / math1zb3count : 0;
+  const math1zc3average = math1zc3count > 0 ? math1zc3total / math1zc3count : 0;
+  const phys1d03average = phys1d03count > 0 ? phys1d03total / phys1d03count : 0;
+  const phys1e03average = phys1e03count > 0 ? phys1e03total / phys1e03count : 0;
+  const chem1e03average = chem1e03count > 0 ? chem1e03total / chem1e03count : 0;
+  const eng1p13average = eng1p13count > 0 ? eng1p13total / eng1p13count : 0;
+  
+  // Calculate weighted GPA only using courses that have valid counts
+  let weightedTotal = 0;
+  let weightedCredits = 0;
+  
+  if (math1za3count > 0) {
+    weightedTotal += math1za3average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (math1zb3count > 0) {
+    weightedTotal += math1zb3average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (math1zc3count > 0) {
+    weightedTotal += math1zc3average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (phys1d03count > 0) {
+    weightedTotal += phys1d03average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (phys1e03count > 0) {
+    weightedTotal += phys1e03average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (chem1e03count > 0) {
+    weightedTotal += chem1e03average * 3;
+    weightedCredits += 3;
+  }
+  
+  if (eng1p13count > 0) {
+    weightedTotal += eng1p13average * 13;
+    weightedCredits += 13;
+  }
+  
+  const averagegpa = weightedCredits > 0 ? weightedTotal / weightedCredits : 0;
+  
+  return {
+    gpaavg: averagegpa,
+    math1za3avg: math1za3average,
+    math1zb3avg: math1zb3average,
+    math1zc3avg: math1zc3average,
+    phys1d03avg: phys1d03average,
+    phys1e03avg: phys1e03average,
+    chem1e03avg: chem1e03average,
+    eng1p13avg: eng1p13average
+  };
 }
