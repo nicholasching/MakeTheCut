@@ -16,12 +16,12 @@ export default function Home() {
     const [phys1e03, setPhysics1e03] = useState<string>("");
     const [chem1e03, setChemistry1e03] = useState<string>("");
     const [eng1p13, setEngineering1p13] = useState<string>("");
-    const [elec1, setElec1] = useState<string>("");
-    const [elec2, setElec2] = useState<string>("");
     
     // Add state for selected elective courses
     const [selectedElective1, setSelectedElective1] = useState<string>("");
     const [selectedElective2, setSelectedElective2] = useState<string>("");
+    const [elective1Value, setElective1Value] = useState<string>("");
+    const [elective2Value, setElective2Value] = useState<string>("");
     
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -55,10 +55,10 @@ export default function Home() {
                 setEngineering1p13(numericValue);
                 break;
             case "elec1":
-                setElec1(numericValue);
+                setElective1Value(numericValue);
                 break;
             case "elec2":
-                setElec2(numericValue);
+                setElective2Value(numericValue);
                 break;
         }
     };
@@ -80,6 +80,9 @@ export default function Home() {
             setIsSubmitting(true);
             setError(null);
 
+            let elec1 = selectedElective1 + "," + elective1Value
+            let elec2 = selectedElective2 + "," + elective2Value
+
             // Create grades object to send to logActions
             const gradesData = {
                 math1za3,
@@ -90,10 +93,7 @@ export default function Home() {
                 chem1e03,
                 eng1p13,
                 elec1,
-                elec2,
-                // Add the selected elective course codes
-                elective1Course: selectedElective1,
-                elective2Course: selectedElective2
+                elec2
             };
 
             console.log("Submitting grades with electives:", gradesData);
@@ -134,7 +134,7 @@ export default function Home() {
                         inputMode="numeric" 
                         name="elec1" 
                         placeholder="Elective 1 Grade" 
-                        value={elec1} 
+                        value={elective1Value} 
                         onChange={handleInputChange} 
                         maxLength={2} 
                     />  
@@ -152,7 +152,7 @@ export default function Home() {
                         inputMode="numeric" 
                         name="elec2" 
                         placeholder="Elective 2 Grade" 
-                        value={elec2} 
+                        value={elective2Value} 
                         onChange={handleInputChange} 
                         maxLength={2} 
                     />  
