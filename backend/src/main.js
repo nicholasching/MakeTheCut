@@ -19,6 +19,29 @@ export default async ({ req, res, log, error }) => {
     // Recalculate cutoff estimation
     const cutoffs = await calculateCutoffs(database);
 
+    const chemStats = {streamCount: cutoffs.chemCount, streamCutoff: cutoffs.chemCut};
+    const chembioStats = {streamCount: cutoffs.chembioCount, streamCutoff: cutoffs.chembioCut};
+    const civStats = {streamCount: cutoffs.civCount, streamCutoff: cutoffs.civCut};
+    const compStats = {streamCount: cutoffs.compCount, streamCutoff: cutoffs.compCut};
+    const elecStats = {streamCount: cutoffs.elecCount, streamCutoff: cutoffs.elecCut};
+    const engphysStats = {streamCount: cutoffs.engphysCount, streamCutoff: cutoffs.engphysCut};
+    const matStats = {streamCount: cutoffs.matCount, streamCutoff: cutoffs.matCut};
+    const mechStats = {streamCount: cutoffs.mechCount, streamCutoff: cutoffs.mechCut};
+    const tronStats = {streamCount: cutoffs.tronCount, streamCutoff: cutoffs.tronCut};
+    const softStats = {streamCount: cutoffs.softCount, streamCutoff: cutoffs.softCut};
+
+    await database.updateDocument('MacStats','StatData','chem',chemStats);
+    await database.updateDocument('MacStats','StatData','chembio',chembioStats);
+    await database.updateDocument('MacStats','StatData','civ',civStats);
+    await database.updateDocument('MacStats','StatData','comp',compStats);
+    await database.updateDocument('MacStats','StatData','elec',elecStats);
+    await database.updateDocument('MacStats','StatData','engphys',engphysStats);
+    await database.updateDocument('MacStats','StatData','mat',matStats);
+    await database.updateDocument('MacStats','StatData','mech',mechStats);
+    await database.updateDocument('MacStats','StatData','tron',tronStats);
+    await database.updateDocument('MacStats','StatData','soft',softStats);
+
+
     // Logging
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
@@ -172,6 +195,14 @@ async function calculateAverages(database) {
 
 async function calculateCutoffs(database) {
   const databaseResponse = await database.listDocuments('MacStats','UserData');
-
   
+  // Create a sortedDatabase array sorted by GPA in descending order
+  const sortedDatabase = [...databaseResponse.documents].sort((a, b) => {
+    // Sort in descending order (higher GPA first) using the existing gpa property
+    return b.gpa - a.gpa;
+  });
+  
+  
+  
+  return {chemCut: 0, chemCount: 0, chembioCut: 0, chembioCount: 0, civCut: 0, civCount: 0, compCut: 0, compCount: 0, elecCut: 0, elecCount: 0, engphysCut: 0, engphysCount: 0, matCut: 0, matCount: 0, mechCut: 0, mechCount: 0, tronCut: 0, tronCount: 0, softCut: 0, softCount: 0};
 }
