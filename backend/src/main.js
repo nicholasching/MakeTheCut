@@ -15,6 +15,7 @@ export default async ({ req, res, log, error }) => {
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
     log(`Total users: ${response.total}`);
+    log(`Users: ${JSON.stringify(response.users)}`);
   } catch(err) {
     error("Could not list users: " + err.message);
   }
@@ -23,7 +24,6 @@ export default async ({ req, res, log, error }) => {
   if (req.path === "/ping") {
     // Use res object to respond with text(), json(), or binary()
     // Don't forget to return a response!
-    context.log()
     return res.text("Pong");
   }
 
