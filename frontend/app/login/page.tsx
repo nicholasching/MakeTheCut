@@ -57,7 +57,7 @@ const LoginPage = () => {
 
   return (
     <div>
-      <div className="w-2/3 md:w-1/4 text-center mt-40 p-10 py-30 mx-auto rounded-lg shadow-gray-50 shadow-lg">
+      <div className="w-2/3 md:w-1/4 text-center mt-40 p-10 py-30 mx-auto rounded-lg bg-[#0e0e0e]">
         <h1 className="text-3xl mb-10">Welcome Back</h1>
         <form className="flex flex-col justify-center items-center gap-7">
           {error && <p className="text-red-500 font-bold">{error}</p>}
