@@ -1,89 +1,112 @@
 "use client";
 
 import { useState } from "react";
+import { addLog } from "../../actions/logActions"; // Adjust the import path as needed
+import { useRouter } from "next/navigation";
+import GridBackground from "@/components/GridBackground";
+import HomeButton from "@/components/HomeButton";
 
 export default function Home() {
-    const [class1, setClass1] = useState<string>("");
+    const router = useRouter();
+    const [math1za3, setMath1za3] = useState<string>("");
+    const [math1zb3, setMath1zb3] = useState<string>("");
+    const [math1zc3, setMath1zc3] = useState<string>("");
+    const [physics1d03, setPhysics1d03] = useState<string>("");
+    const [physics1e03, setPhysics1e03] = useState<string>("");
+    const [chemistry1e03, setChemistry1e03] = useState<string>("");
+    const [engineering1p13, setEngineering1p13] = useState<string>("");
+    const [elec1, setElec1] = useState<string>("");
+    const [elec2, setElec2] = useState<string>("");
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setClass1(e.target.value);
+        const { name, value } = e.target;
+        // Only allow numbers and limit to 2 characters
+        const numericValue = value.replace(/[^0-9]/g, '').slice(0, 2);
+        
+        switch (name) {
+            case "math1za3":
+                setMath1za3(numericValue);
+                break;
+            case "math1zb3":
+                setMath1zb3(numericValue);
+                break;
+            case "math1zc3":
+                setMath1zc3(numericValue);
+                break;
+            case "physics1d03":
+                setPhysics1d03(numericValue);
+                break;
+            case "physics1e03":
+                setPhysics1e03(numericValue);
+                break;
+            case "chemistry1e03":
+                setChemistry1e03(numericValue);
+                break;
+            case "engineering1p13":
+                setEngineering1p13(numericValue);
+                break;
+            case "elec1":
+                setElec1(numericValue);
+                break;
+            case "elec2":
+                setElec2(numericValue);
+                break;
+        }
+    };
+
+    const handleSubmit = async () => {
+        try {
+            setIsSubmitting(true);
+            setError(null);
+
+            // Create grades object to send to logActions
+            const gradesData = {
+                math1za3,
+                math1zb3,
+                math1zc3,
+                physics1d03,
+                physics1e03,
+                chemistry1e03,
+                engineering1p13,
+                elec1,
+                elec2
+            };
+
+            // Call the addLog function with the grades data
+            const response = await addLog(gradesData);
+            
+            console.log("Grades submitted successfully:", response);
+            
+            // Optional: Redirect to a success page or dashboard
+            router.push('/dashboard'); // Adjust this path as needed
+            
+        } catch (err) {
+            console.error("Error submitting grades:", err);
+            setError("Failed to submit grades. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
-        <div className="bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:8vw_8vw] md:bg-[size:4vw_4vw] h-[100vh] pt-[18vh] relative overflow-hidden">
-            <div className="absolute w-[100vh] h-[70vh] bg-gradient-to-br from-yellow-500 via-red-100 to-orange-500 blur-[100px] top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-[pulse_9s_ease-in_infinite] rounded-full opacity-25"></div>
-            <div className="absolute w-[100vh] h-[70vh] bg-gradient-to-br from-blue-500 via-pink-200 to-green-800 blur-[100px] top-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2 animate-[pulse_7s_ease-in-out_infinite] rounded-full opacity-25"></div>
-            <div className="w-1/2 mx-auto flex flex-col gap-5 justify-center align-center text-center z-50 relative">
-                <h1 className="text-xl">Enter GPA /12</h1>
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Math 1ZA3"
-                    value={class1}
-                    onChange={handleInputChange}
-                />
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Math 1ZB3"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Math 1ZC3"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Physics 1D03"
-                    value={class1}
-                    onChange={handleInputChange}
-                />
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Physics 1E03"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Chemistry 1E03"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Engineering 1P13"
-                    value={class1}
-                    onChange={handleInputChange}
-                />
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Elective 1"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-                <input
-                    className="border-2 border-gray-200 p-2 rounded-sm border-none outline-none bg-[#202020] w-1/3 mx-auto focus:w-3/8 transition-all duration-300 opactiy-50" 
-                    type="class1"
-                    placeholder="Elective 2"
-                    value={class1}
-                    onChange={handleInputChange}
-                />  
-                <button className="bg-white text-black p-2 rounded-sm border-none outline-none w-1/3 mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-10">
-                    Submit
-                </button>
+        <GridBackground className="pt-[18vh]">
+            <HomeButton />
+            <div className="w-3/4 md:w-1/3 lg:w-1/4 flex flex-col gap-4 mx-auto text-center">
+                <h1 className="text-xl text-white">Enter GPA /12</h1>
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300"  type="text" inputMode="numeric" name="math1za3" placeholder="Math 1ZA3" value={math1za3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zb3" placeholder="Math 1ZB3" value={math1zb3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300"  type="text" inputMode="numeric" name="math1zc3" placeholder="Math 1ZC3" value={math1zc3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1d03" placeholder="Physics 1D03" value={physics1d03} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={physics1e03} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chemistry1e03} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={engineering1p13} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1" value={elec1} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2" value={elec2} onChange={handleInputChange} maxLength={2} />  
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+                <button className="bg-white text-black p-2 rounded-sm border-none w-1/3 mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Submit"}</button>
             </div>
-        </div>
-
+        </GridBackground>
     );
 }

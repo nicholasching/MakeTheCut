@@ -16,35 +16,31 @@ import {
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
+
+// Removed mobile data from chart data
 const chartData = [
-  { month: "Chemical", desktop: 186, mobile: 80 },
-  { month: "Civil", desktop: 305, mobile: 200 },
-  { month: "Computer", desktop: 237, mobile: 120 },
-  { month: "Electrical", desktop: 73, mobile: 190 },
-  { month: "Engineering Physics", desktop: 209, mobile: 130 },
-  { month: "Materials", desktop: 214, mobile: 140 },
-  { month: "Mechanical", desktop: 314, mobile: 120 },
-  { month: "Mechatronics", desktop: 100, mobile: 20 },
-  { month: "Software", desktop: 22, mobile: 70 },
+  { month: "Chemical", desktop: 8 },
+  { month: "Civil", desktop: 11 },
+  { month: "Computer", desktop: 3 },
+  { month: "Electrical", desktop: 5 },
+  { month: "Engineering Physics", desktop: 6 },
+  { month: "Materials", desktop: 7 },
+  { month: "Mechanical", desktop: 8 },
+  { month: "Mechatronics", desktop: 9 },
+  { month: "Software", desktop: 2 },
 ]
 
 const chartConfig = {
   desktop: {
     label: "Desktop",
-    color: "red",
-  },
-  mobile: {
-    label: "Mobile",
-    color: "blue",
+    color: "#f4ab33",
   },
 } satisfies ChartConfig
 
 export default function HorizontalBarChart() {
   return (
-    <Card className="bg-black text-white">
+    <Card className="bg-neutral-900 text-white w-2/3 mx-auto border-none">
       <CardHeader>
         <CardTitle>Chart</CardTitle>
         <CardDescription>Description</CardDescription>
@@ -61,21 +57,15 @@ export default function HorizontalBarChart() {
               axisLine={false}
               width={80}
             />
-            <XAxis type="number" tickLine={false} axisLine={false} />
-            <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+            <XAxis type="number" tickLine={false} axisLine={true} />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar
               dataKey="desktop"
-              stackId="a"
               fill="var(--color-desktop)"
-              radius={[4, 0, 0, 4]}
+              radius={[0, 4, 4, 0]} // Rounded corners on the right side
+              isAnimationActive={false}
             />
-            <Bar
-              dataKey="mobile"
-              stackId="a"
-              fill="var(--color-mobile)"
-              radius={[0, 4, 4, 0]}
-            />
+            {/* Removed the mobile Bar component entirely */}
           </BarChart>
         </ChartContainer>
       </CardContent>

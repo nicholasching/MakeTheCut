@@ -109,7 +109,7 @@ export default function TextCycle({
         {words[currentIndex]}
         {/* Animated underline */}
         <span 
-          className={`absolute left-0 bottom-0 h-[2px] bg-blue-500 transition-all duration-1000 ease-out`}
+          className={`absolute left-0 bottom-0 h-[2px] bg-red-500 transition-all duration-1000 ease-out`}
           style={{ 
             width: showUnderline ? '100%' : '0%',
             transformOrigin: 'left',
@@ -117,7 +117,6 @@ export default function TextCycle({
           }}
         ></span>
       </span>
-      {/* Invisible text to maintain consistent width */}
       <span className="invisible">{longestWord}</span>
     </span>
   );

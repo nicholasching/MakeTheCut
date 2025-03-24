@@ -1,29 +1,20 @@
 import Image from "next/image";
 
+import GridBackground from "@/components/GridBackground";
+
 import TextCycle, { engineeringMajors } from "@/components/TextCycle";
 
 import Link from "next/link";
+import GradientPulse from "@/components/GradientPulse";
 
 export default function Home() {
   return (
-    <main className="p-36 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:8vw_8vw] md:bg-[size:4vw_4vw] h-[100vh] relative overflow-hidden">
-      <div className="absolute w-[175vh] h-[150vh] bg-gradient-to-br from-blue-800 via-orange-700 to-orange-900 blur-[200px] bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 animate-[pulse_9s_linear_infinite] rounded-full opacity-25"></div>
-      <h1 className="text-title leading-none mb-5 font-light"> What's the cutoff<br />to get into{" "}<TextCycle words={engineeringMajors} />{" "}<br />engineering?</h1>
-      <h2 className="flex gap-3 mb-25">
-        MacStats will help you find out
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-        </svg>
-      </h2>
-      <div className="flex gap-5">
-      <Link href="/grades">
-          <button className="bg-white text-black py-2 px-8 rounded-sm hover:scale-[1.05] transition-transoform duration-300 cursor-pointer">Learn More</button>
-        </Link>
-        <Link href="/login">
-          <button className="bg-blue-500 py-2 px-10 rounded-sm hover:scale-[1.05] transition-transoform duration-200 cursor-pointer">Log In</button>
-        </Link>
-      </div>
-    </main>
+    <GridBackground className="p-8 md:p-24 lg:p-36">
+      <GradientPulse />
+      <h1 className="text-title leading-none mb-5 font-light w-full md:w-2/3">What's the cutoff<br className="md:hidden" /> to get into{" "}<TextCycle words={engineeringMajors} />{" "} engineering?</h1>
+      <h2 className="text-subtitle mb-25">McMaster Engineering Stream Prediction</h2>
+      <Link href="/login"><button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transoform duration-200 cursor-pointer">Log In</button></Link>
+    </GridBackground>
   );
 }
 
