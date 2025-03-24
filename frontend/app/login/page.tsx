@@ -10,19 +10,10 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [gpa, setGPA] = useState("");
-  const [error, setError] = useState("");
 
   const login = async (email: string, password: string) => {
-    setError(""); // Clear any existing errors
-    if (!email.includes("@mcmaster.ca")){
-      setError("Email must be @mcmaster.ca");
-      return false;
-    }
-
     const session = await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
-
-    return true
   };
 
   const logout = async () => {
