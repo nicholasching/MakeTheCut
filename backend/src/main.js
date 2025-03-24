@@ -32,7 +32,7 @@ export default async ({ req, res, log, error }) => {
     log(`User JSON: ${JSON.stringify(usersResponse)}`);
     log(`Documents JSON: ${JSON.stringify(databaseResponse)}`);
   } catch(err) {
-    error("Could not list users: " + err.message);
+    error(err.message);
   }
 
   // The req object contains the request data
@@ -57,7 +57,7 @@ async function calculateAverages(database) {
   let count = 0;
 
   for (let i = 0; i < databaseResponse.documents.length; i++) {
-    total += databaseResponse.documents[i].data['math1za3'];
+    total += databaseResponse.documents[i].data['gpa'];
     count++;
   }
   const average = total / count;
