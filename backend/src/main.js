@@ -14,7 +14,7 @@ export default async ({ req, res, log, error }) => {
   try {
     const averages = await calculateAverages(database);
     
-    await database.updateDocument('MacStats','StatData','67e0e127003b68b2be82',averages);
+    await database.updateDocument('MacStats','StatData','averages',averages);
 
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
