@@ -57,7 +57,7 @@ async function calculateAverages(database) {
   let count = 0;
 
   for (let i = 0; i < databaseResponse.documents.length; i++) {
-    total += databaseResponse.documents[i].data['gpa'];
+    total += databaseResponse.documents[i].math1za3;
     count++;
   }
   const average = total / count;
