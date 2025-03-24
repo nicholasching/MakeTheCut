@@ -12,10 +12,14 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
 
   try {
+    // Recalculate averages and update the averages document
     const averages = await calculateAverages(database);
-    
     await database.updateDocument('MacStats','StatData','averages',averages);
 
+    // Recalculate cutoff estimation
+    const cutoffs = await calculateCutoffs(database);
+
+    // Logging
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
     // Log messages and errors to the Appwrite Console
@@ -164,4 +168,10 @@ async function calculateAverages(database) {
     chem1e03avg: chem1e03average,
     eng1p13avg: eng1p13average
   };
+}
+
+async function calculateCutoffs(database) {
+  const databaseResponse = await database.listDocuments('MacStats','UserData');
+
+  
 }

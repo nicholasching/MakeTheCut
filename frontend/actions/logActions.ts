@@ -31,9 +31,11 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
         phys1e03: parseFloat(gradesInput.phys1e03) || 0,
         chem1e03: parseFloat(gradesInput.chem1e03) || 0,
         eng1p13: parseFloat(gradesInput.eng1p13) || 0,
-        elec1: gradesInput.elec1 || "0",
-        elec2: gradesInput.elec2 || "0"
+        elec1: gradesInput.elec1 || "null",
+        elec2: gradesInput.elec2 || "null"
     };
+
+    console.log(newLog);
     
     const response = await database.createDocument(
         'MacStats',
@@ -86,6 +88,14 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
   if (parseFloat(grades.eng1p13) > 0) {
     totalGrade += parseFloat(grades.eng1p13) * 13;
     totalUnits += 13;
+  }
+  if (grades.elec1 != null && parseFloat(grades.elec1.split(',')[1]) > 0) {
+    totalGrade += parseFloat(grades.elec1.split(',')[1]) * parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
+    totalUnits += parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
+  }
+  if (grades.elec2 != null && parseFloat(grades.elec2.split(',')[1]) > 0) {
+    totalGrade += parseFloat(grades.elec2.split(',')[1]) * parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
+    totalUnits += parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
   }
 
   return totalGrade / totalUnits;
