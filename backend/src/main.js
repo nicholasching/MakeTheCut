@@ -12,13 +12,18 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
 
   try {
-    const response = await users.list();
+    const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
-    log(`Total users: ${response.total}`);
-    log(`Users: ${response.users.map(user => user.name).join(', ')}`);
-    log(`Documents: ${JSON.stringify(databaseResponse)}`);
+    log(`Total users: ${usersResponse.total}`);
+    log(`Users: ${usersResponse.users.map(user => user.name).join(', ')}`);
+    for (let i = 0; i < databaseResponse.documents.length; i++) {
+      log(`Document ${i}: ${JSON.stringify(databaseResponse.documents[i])}`);
+    }
+
+    log(`User JSON: ${JSON.stringify(usersResponse)}`);
+    log(`Documents JSON: ${JSON.stringify(databaseResponse)}`);
   } catch(err) {
     error("Could not list users: " + err.message);
   }
