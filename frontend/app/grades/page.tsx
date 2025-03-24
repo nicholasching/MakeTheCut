@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Combobox from "@/components/Combobox";
+import ComboboxStreams from "@/components/ComboboxStream";
 
 export default function Home() {
     const router = useRouter();
@@ -22,6 +23,11 @@ export default function Home() {
     const [selectedElective2, setSelectedElective2] = useState<string>("");
     const [elective1Value, setElective1Value] = useState<string>("");
     const [elective2Value, setElective2Value] = useState<string>("");
+    
+    // Add state for stream selections
+    const [stream1Choice, setStream1Choice] = useState<string>("");
+    const [stream2Choice, setStream2Choice] = useState<string>("");
+    const [stream3Choice, setStream3Choice] = useState<string>("");
     
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -75,6 +81,22 @@ export default function Home() {
         console.log("Selected Elective 2:", value);
     };
 
+    // Handle change for stream choice comboboxes
+    const handleStream1Change = (value: string) => {
+        setStream1Choice(value);
+        console.log("Selected Stream 1:", value);
+    };
+
+    const handleStream2Change = (value: string) => {
+        setStream2Choice(value);
+        console.log("Selected Stream 2:", value);
+    };
+
+    const handleStream3Change = (value: string) => {
+        setStream3Choice(value);
+        console.log("Selected Stream 3:", value);
+    };
+
     const handleSubmit = async () => {
         try {
             setIsSubmitting(true);
@@ -93,22 +115,25 @@ export default function Home() {
                 chem1e03,
                 eng1p13,
                 elec1,
-                elec2
+                elec2,
+                stream1Choice,
+                stream2Choice,
+                stream3Choice
             };
 
-            console.log("Submitting grades with electives:", gradesData);
+            console.log("Submitting grades with electives and streams:", gradesData);
 
             // Call the addLog function with the grades data
             const response = await addLog(gradesData);
             
-            console.log("Grades submitted successfully:", response);
+            console.log("Grades and stream choices submitted successfully:", response);
             
             // Optional: Redirect to a success page or dashboard
             router.push('/dashboard'); // Adjust this path as needed
             
         } catch (err) {
-            console.error("Error submitting grades:", err);
-            setError("Failed to submit grades. Please try again.");
+            console.error("Error submitting data:", err);
+            setError("Failed to submit data. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
@@ -174,11 +199,21 @@ export default function Home() {
                     </button>
                 </div>
                 <div className="w-1/2">
-                <Combobox 
-                            value={selectedElective1} 
-                            onChange={handleElective1Change}
-                            placeholder="Stream 1 Choice" 
-                        />
+                <ComboboxStreams 
+                    value={stream1Choice} 
+                    onChange={handleStream1Change}
+                    placeholder="Stream 1 Choice" 
+                />
+                <ComboboxStreams 
+                    value={stream2Choice} 
+                    onChange={handleStream2Change}
+                    placeholder="Stream 2 Choice" 
+                />
+                <ComboboxStreams 
+                    value={stream3Choice} 
+                    onChange={handleStream3Change}
+                    placeholder="Stream 3 Choice" 
+                />
                 </div>
             </div>
         </GridBackground>
