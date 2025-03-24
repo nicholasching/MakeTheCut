@@ -1,4 +1,4 @@
-import { Client, Users } from 'node-appwrite';
+import { Client, Databases, Users } from 'node-appwrite';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
@@ -9,11 +9,11 @@ export default async ({ req, res, log, error }) => {
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
     .setKey(req.headers['x-appwrite-key'] ?? '');
   const users = new Users(client);
-  const database = new Database(client);
+  const database = new Databases(client);
 
   try {
     const response = await users.list();
-    const databaseResponse = await database.listDocuments('616f3b3b7f5e5');
+    const databaseResponse = await database.listDocuments('MacStats','UserData');
     // Log messages and errors to the Appwrite Console
     // These logs won't be seen by your end users
     log(`Total users: ${response.total}`);
