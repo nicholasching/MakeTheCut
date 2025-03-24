@@ -18,7 +18,7 @@ export default async ({ req, res, log, error }) => {
     // These logs won't be seen by your end users
     log(`Total users: ${response.total}`);
     log(`Users: ${response.users.map(user => user.name).join(', ')}`);
-    log(`Documents: ${databaseResponse.documents.map(doc => doc.name).join(', ')}`);
+    log(`Documents: ${JSON.stringify(databaseResponse)}`);
   } catch(err) {
     error("Could not list users: " + err.message);
   }
