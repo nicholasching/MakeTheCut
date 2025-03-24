@@ -1,4 +1,4 @@
-import { Client, Databases, Users } from 'node-appwrite';
+import { Client, Databases, Users, ID } from 'node-appwrite';
 
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
@@ -12,6 +12,13 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
 
   try {
+    const average = await calculateAverages(database);
+    log(`Average: ${average}`);
+
+    newData = {average: average}
+    
+    await database.createDocument('MacStats','StatData',ID.unique(),newData);
+
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
     // Log messages and errors to the Appwrite Console
@@ -42,3 +49,18 @@ export default async ({ req, res, log, error }) => {
     getInspired: "https://builtwith.appwrite.io",
   });
 };
+
+async function calculateAverages(database) {
+  const databaseResponse = await database.listDocuments('MacStats','UserData');
+  
+  let total = 0;
+  let count = 0;
+
+  for (let i = 0; i < databaseResponse.documents.length; i++) {
+    total += databaseResponse.documents[i].data['math1za3'];
+    count++;
+  }
+  const average = total / count;
+  
+  return average;
+}
