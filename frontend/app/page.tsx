@@ -6,7 +6,8 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="p-36">
+    <main className="p-36 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:8vw_8vw] md:bg-[size:4vw_4vw] h-[100vh] relative overflow-hidden">
+      <div className="absolute w-[175vh] h-[150vh] bg-gradient-to-br from-blue-800 via-orange-700 to-orange-900 blur-[200px] bottom-0 right-0 transform translate-x-1/2 translate-y-1/2 animate-[pulse_9s_linear_infinite] rounded-full opacity-25"></div>
       <h1 className="text-title leading-none mb-5 font-light"> What's the cutoff<br />to get into{" "}<TextCycle words={engineeringMajors} />{" "}<br />engineering?</h1>
       <h2 className="flex gap-3 mb-25">
         MacStats will help you find out
@@ -15,7 +16,7 @@ export default function Home() {
         </svg>
       </h2>
       <div className="flex gap-5">
-      <Link href="/learn-more">
+      <Link href="/grades">
           <button className="bg-white text-black py-2 px-8 rounded-sm hover:scale-[1.05] transition-transoform duration-300 cursor-pointer">Learn More</button>
         </Link>
         <Link href="/login">
