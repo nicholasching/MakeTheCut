@@ -89,6 +89,7 @@ const LoginPage = () => {
           placeholder="Password"
           value={password}
             onClick={() => handleLogin(email, password)}
+          onChange={(e) => setPassword(e.target.value)}
         />
         </div>
           <button 
