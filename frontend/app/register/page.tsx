@@ -10,6 +10,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [gpa, setGPA] = useState("");
+  const [error, setError] = useState("");
 
   const login = async (email: string, password: string) => {
     const session = await account.createEmailPasswordSession(email, password);
@@ -17,6 +18,13 @@ const LoginPage = () => {
   };
 
   const register = async () => {
+
+    setError(""); // Clear any existing errors
+    if (!email.includes("@mcmaster.ca")){
+      setError("Email must be under an @mcmaster.ca domain");
+      return false;
+    }
+
     await account.create(ID.unique(), email, password, name);
     login(email, password);
   };
@@ -56,6 +64,7 @@ const LoginPage = () => {
       <div className="width-1/2 text-center mt-50">
       <p>Not logged in</p>
       <form className="flex flex-col justify-center items-center gap-5">
+      {error && <p className="text-red-500 font-bold">{error}</p>}
         <input
           className="w-1/6"
           type="email"
@@ -77,9 +86,6 @@ const LoginPage = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <button type="button" onClick={() => login(email, password)}>
-          Login
-        </button>
         <button type="button" onClick={register}>
           Register
         </button>
