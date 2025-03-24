@@ -92,7 +92,7 @@ export default function Home() {
     };
 
     return (
-        <GridBackground className="pt-[18vh]">
+        <GridBackground className="pt-20">
             <HomeButton />
             <div className="w-3/4 md:w-1/3 lg:w-1/4 flex flex-col gap-4 mx-auto text-center">
                 <h1 className="text-xl text-white">Enter GPA /12</h1>
@@ -103,10 +103,14 @@ export default function Home() {
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={physics1e03} onChange={handleInputChange} maxLength={2} />  
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chemistry1e03} onChange={handleInputChange} maxLength={2} />  
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={engineering1p13} onChange={handleInputChange} maxLength={2} />  
-                <Combobox />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1" value={elec1} onChange={handleInputChange} maxLength={2} />  
-                <Combobox />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2" value={elec2} onChange={handleInputChange} maxLength={2} />  
+                <div>
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1" value={elec1} onChange={handleInputChange} maxLength={2} />  
+                    <Combobox />
+                </div>
+                <div>
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2" value={elec2} onChange={handleInputChange} maxLength={2} />  
+                    <Combobox />
+                </div>
                 {error && <p className="text-red-500 mt-2">{error}</p>}
                 <button className="bg-white text-black p-2 rounded-sm border-none w-1/3 mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Submit"}</button>
             </div>
