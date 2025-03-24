@@ -12,6 +12,7 @@ export interface GradesInput {
   eng1p13: string;
   elec1: string;
   elec2: string;
+  streams: string;
 }
 
 export async function addLog(gradesInput: GradesInput): Promise<Log> {
@@ -32,7 +33,8 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
         chem1e03: parseFloat(gradesInput.chem1e03) || 0,
         eng1p13: parseFloat(gradesInput.eng1p13) || 0,
         elec1: gradesInput.elec1 || "null",
-        elec2: gradesInput.elec2 || "null"
+        elec2: gradesInput.elec2 || "null",
+        streams: gradesInput.streams || "null"
     };
 
     console.log(newLog);

@@ -20,16 +20,16 @@ import {
 } from "@/components/ui/popover"
 
 const streams = [
-    { label: "Chemical", value: "chemical" },
-    { label: "Chemical and Biology", value: "chemical and biology" },
-    { label: "Civil", value: "civil" },
-    { label: "Computer", value: "computer" },
-    { label: "Electrical", value: "electrical" },
-    { label: "Engineering Physics", value: "engineering physics" },
-    { label: "Materials", value: "materials" },
-    { label: "Mechanical", value: "mechanical" },
-    { label: "Mechatronics", value: "mechatronics" },
-    { label: "Software", value: "software" }
+    { label: "Chemical", value: "chem" },
+    { label: "Chemical and Biology", value: "chembio" },
+    { label: "Civil", value: "civ" },
+    { label: "Computer", value: "comp" },
+    { label: "Electrical", value: "elec" },
+    { label: "Engineering Physics", value: "engphys" },
+    { label: "Materials", value: "mat" },
+    { label: "Mechanical", value: "mech" },
+    { label: "Mechatronics", value: "tron" },
+    { label: "Software", value: "soft" }
   ]
 
 interface ComboboxProps {

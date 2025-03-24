@@ -17,7 +17,7 @@ export default function Home() {
     const [phys1e03, setPhysics1e03] = useState<string>("");
     const [chem1e03, setChemistry1e03] = useState<string>("");
     const [eng1p13, setEngineering1p13] = useState<string>("");
-    
+
     // Add state for selected elective courses
     const [selectedElective1, setSelectedElective1] = useState<string>("");
     const [selectedElective2, setSelectedElective2] = useState<string>("");
@@ -104,6 +104,7 @@ export default function Home() {
 
             let elec1 = selectedElective1 + "," + elective1Value
             let elec2 = selectedElective2 + "," + elective2Value
+            let streams = stream1Choice + "," + stream2Choice + "," + stream3Choice
 
             // Create grades object to send to logActions
             const gradesData = {
@@ -116,9 +117,7 @@ export default function Home() {
                 eng1p13,
                 elec1,
                 elec2,
-                stream1Choice,
-                stream2Choice,
-                stream3Choice
+                streams
             };
 
             console.log("Submitting grades with electives and streams:", gradesData);
