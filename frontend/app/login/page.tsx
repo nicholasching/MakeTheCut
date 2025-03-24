@@ -10,10 +10,19 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [gpa, setGPA] = useState("");
+  const [error, setError] = useState("");
 
   const login = async (email: string, password: string) => {
+    setError(""); // Clear any existing errors
+    if (!email.includes("@mcmaster.ca")){
+      setError("Email must be under an @mcmaster.ca domain");
+      return false;
+    }
+
     const session = await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
+
+    return true
   };
 
   const logout = async () => {
@@ -51,6 +60,7 @@ const LoginPage = () => {
       <div className="w-2/3 md:w-1/4 text-center mt-40 p-10 py-30 mx-auto rounded-lg bg-[#0e0e0e]">
         <h1 className="text-3xl mb-10">Welcome Back</h1>
         <form className="flex flex-col justify-center items-center gap-7">
+          {error && <p className="text-red-500 font-bold">{error}</p>}
           <div className="mb-15 flex flex-col gap-5">
             <input
               className="border-2 border-gray-200 p-2 rounded-sm"
