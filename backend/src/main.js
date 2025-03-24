@@ -15,7 +15,7 @@ export default async ({ req, res, log, error }) => {
     const average = await calculateAverages(database);
     log(`Average: ${average}`);
 
-    newData = {average: average}
+    newData = {math1za3avg: average}
     
     await database.createDocument('MacStats','StatData',ID.unique(),newData);
 
