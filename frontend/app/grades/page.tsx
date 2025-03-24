@@ -12,10 +12,10 @@ export default function Home() {
     const [math1za3, setMath1za3] = useState<string>("");
     const [math1zb3, setMath1zb3] = useState<string>("");
     const [math1zc3, setMath1zc3] = useState<string>("");
-    const [physics1d03, setPhysics1d03] = useState<string>("");
-    const [physics1e03, setPhysics1e03] = useState<string>("");
-    const [chemistry1e03, setChemistry1e03] = useState<string>("");
-    const [engineering1p13, setEngineering1p13] = useState<string>("");
+    const [phys1d03, setPhysics1d03] = useState<string>("");
+    const [phys1e03, setPhysics1e03] = useState<string>("");
+    const [chem1e03, setChemistry1e03] = useState<string>("");
+    const [eng1p13, setEngineering1p13] = useState<string>("");
     const [elec1, setElec1] = useState<string>("");
     const [elec2, setElec2] = useState<string>("");
     
@@ -85,10 +85,10 @@ export default function Home() {
                 math1za3,
                 math1zb3,
                 math1zc3,
-                physics1d03,
-                physics1e03,
-                chemistry1e03,
-                engineering1p13,
+                phys1d03,
+                phys1e03,
+                chem1e03,
+                eng1p13,
                 elec1,
                 elec2,
                 // Add the selected elective course codes
