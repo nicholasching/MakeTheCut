@@ -18,7 +18,7 @@ export default function Home() {
       <Link href="/learn-more">
           <button className="bg-white text-black py-2 px-8 rounded-sm hover:scale-[1.05] transition-transoform duration-300 cursor-pointer">Learn More</button>
         </Link>
-        <Link href="/dashboard">
+        <Link href="/login">
           <button className="bg-blue-500 py-2 px-10 rounded-sm hover:scale-[1.05] transition-transoform duration-200 cursor-pointer">Log In</button>
         </Link>
       </div>
