@@ -74,6 +74,9 @@ const LoginPage = () => {
   return (
     <GridBackground className="pt-[18vh]">
       <HomeButton />
+      <button className="w-1/4 bg-red-500" type="button" onClick={logout}>
+        Logout
+      </button>
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
         <h1 className="text-4xl mb-10 font-semibold">Log In</h1>
         <div className="mb-15 flex flex-col gap-5">

@@ -5,6 +5,7 @@ import { addLog } from "../../actions/logActions"; // Adjust the import path as 
 import { useRouter } from "next/navigation";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
+import Combobox from "@/components/Combobox";
 
 export default function Home() {
     const router = useRouter();
@@ -102,7 +103,9 @@ export default function Home() {
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={physics1e03} onChange={handleInputChange} maxLength={2} />  
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chemistry1e03} onChange={handleInputChange} maxLength={2} />  
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={engineering1p13} onChange={handleInputChange} maxLength={2} />  
+                <Combobox />
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1" value={elec1} onChange={handleInputChange} maxLength={2} />  
+                <Combobox />
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2" value={elec2} onChange={handleInputChange} maxLength={2} />  
                 {error && <p className="text-red-500 mt-2">{error}</p>}
                 <button className="bg-white text-black p-2 rounded-sm border-none w-1/3 mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}>{isSubmitting ? "Submitting..." : "Submit"}</button>
