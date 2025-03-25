@@ -21,7 +21,6 @@ import {
 
 const streams = [
     { label: "Chemical", value: "chem" },
-    { label: "Chemical and Biology", value: "chembio" },
     { label: "Civil", value: "civ" },
     { label: "Computer", value: "comp" },
     { label: "Electrical", value: "elec" },
