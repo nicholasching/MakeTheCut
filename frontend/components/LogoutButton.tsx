@@ -12,29 +12,10 @@ interface LogoutButtonProps {
 
 const LogoutButton = ({ 
 }: LogoutButtonProps) => {
-    const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
-    const [visible, setVisible] = useState(false);
-
-    useEffect(() => {
-        // Check if user is logged in when component mounts
-        const checkUser = async () => {
-            try {
-                const user = await account.get();
-                setLoggedInUser(user);
-                // Add slight delay before showing to ensure smooth fade in
-                setTimeout(() => setVisible(true), 100);
-            } catch (error) {
-                setLoggedInUser(null);
-            }
-        };
-        
-        checkUser();
-    }, []);
 
     const logout = async () => {
         try {
             await account.deleteSession("current");
-            setLoggedInUser(null);
             // Optionally redirect after logout
             window.location.href = "/login";
         } catch (error) {
@@ -42,11 +23,10 @@ const LogoutButton = ({
         }
     };
 
-    if (!loggedInUser) return null;
 
     return (
         <AnimatePresence>
-            {visible && (
+            {(
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="absolute top-10 right-10">
                     <Dialog>
                         <DialogTrigger asChild>
