@@ -2,6 +2,7 @@
 
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label } from "recharts"
+import { account, database, ID } from "../app/appwrite"
 
 import {
   Card,
@@ -20,17 +21,37 @@ import {
 
 const yourValue = 8;
 
+let averages = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materials: 4, mechanical: 4, mechatronics: 4, software: 4};
+
+const chemDoc = await database.getDocument('MacStats', 'StatData','chem');
+averages.chem = parseFloat(chemDoc.streamCutoff);
+const civilDoc = await database.getDocument('MacStats', 'StatData','civ');
+averages.civil = parseFloat(civilDoc.streamCutoff);
+const computerDoc = await database.getDocument('MacStats', 'StatData','comp');
+averages.computer = parseFloat(computerDoc.streamCutoff);
+const electricalDoc = await database.getDocument('MacStats', 'StatData','elec');
+averages.electrical = parseFloat(electricalDoc.streamCutoff);
+const engphysDoc = await database.getDocument('MacStats', 'StatData','engphys');
+averages.engphys = parseFloat(engphysDoc.streamCutoff);
+const materialsDoc = await database.getDocument('MacStats', 'StatData','mat');
+averages.materials = parseFloat(materialsDoc.streamCutoff);
+const mechanicalDoc = await database.getDocument('MacStats', 'StatData','mech');
+averages.mechanical = parseFloat(mechanicalDoc.streamCutoff);
+const mechatronicsDoc = await database.getDocument('MacStats', 'StatData','tron');
+averages.mechatronics = parseFloat(mechatronicsDoc.streamCutoff);
+const softwareDoc = await database.getDocument('MacStats', 'StatData','soft');
+averages.software = parseFloat(softwareDoc.streamCutoff);
+
 const chartData = [
-  { stream: "Chemical", GPA: 5 },
-  { stream: "Chemical Bioengineering", GPA: 2 },
-  { stream: "Civil", GPA: 11 },
-  { stream: "Computer", GPA: 3 },
-  { stream: "Electrical", GPA: 5 },
-  { stream: "Engineering Physics", GPA: 6 },
-  { stream: "Materials", GPA: 7 },
-  { stream: "Mechanical", GPA: 8 },
-  { stream: "Mechatronics", GPA: 9 },
-  { stream: "Software", GPA: 2 },
+  { stream: "Chemical", GPA: averages.chem },
+  { stream: "Civil", GPA: averages.civil},
+  { stream: "Computer", GPA: averages.computer },
+  { stream: "Electrical", GPA: averages.electrical },
+  { stream: "Engineering Physics", GPA: averages.engphys },
+  { stream: "Materials", GPA: averages.materials },
+  { stream: "Mechanical", GPA: averages.mechanical },
+  { stream: "Mechatronics", GPA: averages.mechatronics },
+  { stream: "Software", GPA: averages.software },
 ]
 
 const chartConfig = {

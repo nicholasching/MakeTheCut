@@ -44,7 +44,7 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
         chem1e03: parseFloat(gradesInput.chem1e03) || 0,
         eng1p13: parseFloat(gradesInput.eng1p13) || 0,
         elec1: elective1 || "null",
-        elec2: elective1 || "null",
+        elec2: elective2 || "null",
         streams: gradesInput.streams || "null",
         freechoice: gradesInput.freechoice || false
     };
@@ -107,7 +107,7 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
     totalGrade += parseFloat(grades.elec1.split(',')[1]) * parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
     totalUnits += parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
   }
-  if (grades.elec2 != "," && grades.elec1.split(',')[0] != "" && grades.elec1.split(',')[1] != "" && parseFloat(grades.elec2.split(',')[1]) > 0) {
+  if (grades.elec2 != "," && grades.elec2.split(',')[0] != "" && grades.elec2.split(',')[1] != "" && parseFloat(grades.elec2.split(',')[1]) > 0) {
     totalGrade += parseFloat(grades.elec2.split(',')[1]) * parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
     totalUnits += parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
   }
