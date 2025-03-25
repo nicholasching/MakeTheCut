@@ -49,7 +49,7 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','StatData','tron',tronStats);
     await database.updateDocument('MacStats','StatData','soft',softStats);
 
-
+    /*
     // Logging
     const usersResponse = await users.list();
     const databaseResponse = await database.listDocuments('MacStats','UserData');
@@ -63,6 +63,9 @@ export default async ({ req, res, log, error }) => {
 
     log(`User JSON: ${JSON.stringify(usersResponse)}`);
     log(`Documents JSON: ${JSON.stringify(databaseResponse)}`);
+    */
+
+
   } catch(err) {
     error(err.message);
   }
