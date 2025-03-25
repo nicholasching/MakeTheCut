@@ -1,17 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { account, ID } from "../appwrite";
 import { Models } from "appwrite";
-import {addLog} from "../../actions/logActions";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [gpa, setGPA] = useState("");
+
+  const router = useRouter();
+  useEffect(() => {
+    async function initiatePage() {
+        try {
+            let loggedInUser = await account.get();
+            router.push('/dashboard');
+        }
+        catch (error) {
+            
+        }
+    }
+    initiatePage();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -22,11 +35,6 @@ const LoginPage = () => {
       console.error("Login failed:", error);
       return false;
     }
-  };
-
-  const logout = async () => {
-    await account.deleteSession("current");
-    setLoggedInUser(null);
   };
 
   // const newLog = async () => {

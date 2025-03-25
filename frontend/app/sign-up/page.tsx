@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { account, ID } from "../appwrite";
 import { Models } from "appwrite";
-import {addLog} from "../../actions/logActions";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -15,6 +15,20 @@ const RegisterPage = () => {
   const [name, setName] = useState("");
   const [gpa, setGPA] = useState("");
   const [error, setError] = useState("");
+
+  const router = useRouter();
+  useEffect(() => {
+    async function initiatePage() {
+        try {
+            let loggedInUser = await account.get();
+            router.push('/dashboard');
+        }
+        catch (error) {
+            
+        }
+    }
+    initiatePage();
+  }, []);
 
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
