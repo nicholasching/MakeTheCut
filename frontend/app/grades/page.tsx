@@ -35,6 +35,8 @@ export default function Home() {
 
     const [freechoice, setFreeChoice] = useState<boolean>(false);
 
+    const [status, setStatus] = useState<string>("Submit");
+
     useEffect(() => {
         async function initiatePage() {
             try {
@@ -42,6 +44,7 @@ export default function Home() {
 
                 try {
                     const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
+                    setStatus("Update");
                     setMath1za3(pastData.math1za3);
                     setMath1zb3(pastData.math1zb3);
                     setMath1zc3(pastData.math1zc3);
@@ -231,7 +234,7 @@ export default function Home() {
                     </label>
                 </div>
                 {error && <p className="text-red-500 mt-2 text-xs">{error}</p>}
-                <button className="text-subtext bg-white text-black w-1/3 p-2 rounded-sm border-none mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}> {isSubmitting ? "Submitting..." : "Submit"} </button>
+                <button className="text-subtext bg-white text-black w-1/3 p-2 rounded-sm border-none mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}> {isSubmitting ? "Submitting..." : status} </button>
             </div>
         </GridBackground>
     );
