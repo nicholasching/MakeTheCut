@@ -7,6 +7,8 @@ import TextCycle, { engineeringMajors } from "@/components/TextCycle";
 import Link from "next/link";
 import GradientPulse from "@/components/GradientPulse";
 
+import LogoutButton from "@/components/LogoutButton";
+
 export default function Home() {
   return (
     <GridBackground className="p-8 md:p-24 lg:p-36">
