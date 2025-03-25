@@ -203,17 +203,144 @@ async function calculateAverages(database) {
 
 async function calculateCutoffs(database) {
   const databaseResponse = await database.listDocuments('MacStats','UserData');
-  
-  // Create a sortedDatabase array sorted by GPA in descending order
+  // Create a sortedDatabase array with freechoice users first, then sorted by GPA in descending order
   const sortedDatabase = [...databaseResponse.documents].sort((a, b) => {
-    // Sort in descending order (higher GPA first) using the existing gpa property
+    // First sort by freechoice (true values come first)
+    if (a.freechoice && !b.freechoice) return -1;
+    if (!a.freechoice && b.freechoice) return 1;
+    
+    // If freechoice status is the same, sort by GPA in descending order
     return b.gpa - a.gpa;
   });
 
   const totalSeats = totalChemSeats + totalCivSeats + totalCompSeats + totalElecSeats + totalEngPhysSeats + totalMatSeats + totalMechSeats + totalTronSeats + totalSoftSeats;
   const allocations = {chem: totalChemSeats/totalSeats, civ: totalCivSeats/totalSeats, comp: totalCompSeats/totalSeats, elec: totalElecSeats/totalSeats, engphys: totalEngPhysSeats/totalSeats, mat: totalMatSeats/totalSeats, mech: totalMechSeats/totalSeats, tron: totalTronSeats/totalSeats, soft: totalSoftSeats/totalSeats};
-  log(`Test JSON: ${allocations}`);
+  const actualSeats = {chem: Math.ceil(allocations.chem * sortedDatabase.length), civ: Math.ceil(allocations.civ * sortedDatabase.length), comp: Math.ceil(allocations.comp * sortedDatabase.length), elec: Math.ceil(allocations.elec * sortedDatabase.length), engphys: Math.ceil(allocations.engphys * sortedDatabase.length), mat: Math.ceil(allocations.mat * sortedDatabase.length), mech: Math.ceil(allocations.mech * sortedDatabase.length), tron: Math.ceil(allocations.tron * sortedDatabase.length), soft: Math.ceil(allocations.soft * sortedDatabase.length)};
   
+  // Initialize stream counts and assigned students
+  const streamCounts = {
+    chem: 0,
+    civ: 0,
+    comp: 0,
+    elec: 0,
+    engphys: 0,
+    mat: 0,
+    mech: 0,
+    tron: 0,
+    soft: 0
+  };
   
-  return {chemCut: 0, chemCount: 0, civCut: 0, civCount: 0, compCut: 0, compCount: 0, elecCut: 0, elecCount: 0, engphysCut: 0, engphysCount: 0, matCut: 0, matCount: 0, mechCut: 0, mechCount: 0, tronCut: 0, tronCount: 0, softCut: 0, softCount: 0};
+  // Track cutoff GPAs (initialized as 0)
+  const cutoffGPAs = {
+    chem: 0,
+    civ: 0,
+    comp: 0,
+    elec: 0,
+    engphys: 0,
+    mat: 0,
+    mech: 0,
+    tron: 0,
+    soft: 0
+  };
+  
+  // Track the lowest non-freechoice GPA assigned to each stream
+  const lowestGPAs = {
+    chem: -1,
+    civ: -1,
+    comp: -1,
+    elec: -1,
+    engphys: -1,
+    mat: -1,
+    mech: -1,
+    tron: -1,
+    soft: -1
+  };
+  
+  // Keep track of assigned students to avoid double-counting
+  const assignedStudents = new Set();
+  
+  // First pass: Handle free choice students
+  const freeChoiceStudents = [];
+  const regularStudents = [];
+  
+  sortedDatabase.forEach(student => {
+    if (student.freechoice) {
+      freeChoiceStudents.push(student);
+    } else {
+      regularStudents.push(student);
+    }
+  });
+  
+  // Assign free choice students first
+  freeChoiceStudents.forEach(student => {
+    if (!student.streams) return; // Skip if no stream preferences
+    
+    const streamPreferences = student.streams.split(',').map(stream => stream.trim().toLowerCase());
+    if (streamPreferences.length > 0) {
+      // Take first choice for free choice students
+      const firstChoice = streamPreferences[0];
+      if (firstChoice in streamCounts) {
+        streamCounts[firstChoice]++;
+        assignedStudents.add(student.$id);
+      }
+    }
+  });
+  
+  // Second pass: Regular students by GPA
+  regularStudents.forEach(student => {
+    if (assignedStudents.has(student.$id) || !student.streams) return;
+    
+    const streamPreferences = student.streams.split(',').map(stream => stream.trim().toLowerCase());
+    
+    // Try to assign based on preferences
+    for (const stream of streamPreferences) {
+      if (stream in streamCounts && streamCounts[stream] < actualSeats[stream]) {
+        streamCounts[stream]++;
+        assignedStudents.add(student.$id);
+        
+        // Update the lowest GPA for this stream
+        if (lowestGPAs[stream] === -1 || student.gpa < lowestGPAs[stream]) {
+          lowestGPAs[stream] = student.gpa;
+        }
+        break; // Student has been assigned, stop trying other preferences
+      }
+    }
+  });
+  
+  // Calculate cutoffs
+  Object.keys(streamCounts).forEach(stream => {
+    // If stream is filled or partially filled by non-freechoice students
+    if (lowestGPAs[stream] !== -1) {
+      cutoffGPAs[stream] = lowestGPAs[stream];
+    } 
+    // If stream filled entirely by freechoice students
+    else if (streamCounts[stream] >= actualSeats[stream]) {
+      cutoffGPAs[stream] = 12; // Maximum GPA if all seats are filled by free choice
+    }
+    // Stream not filled at all
+    else {
+      cutoffGPAs[stream] = 4;
+    }
+  });
+
+  return {
+    chemCut: cutoffGPAs.chem,
+    chemCount: streamCounts.chem,
+    civCut: cutoffGPAs.civ,
+    civCount: streamCounts.civ,
+    compCut: cutoffGPAs.comp, 
+    compCount: streamCounts.comp,
+    elecCut: cutoffGPAs.elec,
+    elecCount: streamCounts.elec,
+    engphysCut: cutoffGPAs.engphys,
+    engphysCount: streamCounts.engphys,
+    matCut: cutoffGPAs.mat,
+    matCount: streamCounts.mat,
+    mechCut: cutoffGPAs.mech,
+    mechCount: streamCounts.mech,
+    tronCut: cutoffGPAs.tron,
+    tronCount: streamCounts.tron,
+    softCut: cutoffGPAs.soft,
+    softCount: streamCounts.soft
+  };
 }
