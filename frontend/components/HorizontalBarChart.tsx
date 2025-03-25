@@ -23,24 +23,20 @@ const yourValue = 8;
 
 let averages = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materials: 4, mechanical: 4, mechatronics: 4, software: 4};
 
-const chemDoc = await database.getDocument('MacStats', 'StatData','chem');
-averages.chem = parseFloat(chemDoc.streamCutoff);
-const civilDoc = await database.getDocument('MacStats', 'StatData','civ');
-averages.civil = parseFloat(civilDoc.streamCutoff);
-const computerDoc = await database.getDocument('MacStats', 'StatData','comp');
-averages.computer = parseFloat(computerDoc.streamCutoff);
-const electricalDoc = await database.getDocument('MacStats', 'StatData','elec');
-averages.electrical = parseFloat(electricalDoc.streamCutoff);
-const engphysDoc = await database.getDocument('MacStats', 'StatData','engphys');
-averages.engphys = parseFloat(engphysDoc.streamCutoff);
-const materialsDoc = await database.getDocument('MacStats', 'StatData','mat');
-averages.materials = parseFloat(materialsDoc.streamCutoff);
-const mechanicalDoc = await database.getDocument('MacStats', 'StatData','mech');
-averages.mechanical = parseFloat(mechanicalDoc.streamCutoff);
-const mechatronicsDoc = await database.getDocument('MacStats', 'StatData','tron');
-averages.mechatronics = parseFloat(mechatronicsDoc.streamCutoff);
-const softwareDoc = await database.getDocument('MacStats', 'StatData','soft');
-averages.software = parseFloat(softwareDoc.streamCutoff);
+let documents = await database.listDocuments('MacStats', 'StatData');
+
+// Access documents by their $id
+documents.documents.forEach(doc => {
+  if (doc.$id === 'chem') averages.chem = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'civ') averages.civil = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'comp') averages.computer = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'elec') averages.electrical = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'engphys') averages.engphys = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'mat') averages.materials = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'mech') averages.mechanical = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'tron') averages.mechatronics = parseFloat(doc.streamCutoff);
+  if (doc.$id === 'soft') averages.software = parseFloat(doc.streamCutoff);
+});
 
 const chartData = [
   { stream: "Chemical", GPA: averages.chem },
