@@ -1,5 +1,15 @@
 import { Client, Databases, Users, ID } from 'node-appwrite';
 
+const totalChemSeats = 261/4
+const totalCivSeats = 374/4
+const totalCompSeats = 372/4
+const totalElecSeats = 550/4
+const totalEngPhysSeats = 217/4
+const totalMatSeats = 138/4
+const totalMechSeats = 583/4
+const totalTronSeats = 291/4
+const totalSoftSeats = 438/4
+
 // This Appwrite function will be executed every time your function is triggered
 export default async ({ req, res, log, error }) => {
   // You can use the Appwrite SDK to interact with other services
@@ -20,7 +30,6 @@ export default async ({ req, res, log, error }) => {
     const cutoffs = await calculateCutoffs(database);
 
     const chemStats = {streamCount: cutoffs.chemCount, streamCutoff: cutoffs.chemCut};
-    const chembioStats = {streamCount: cutoffs.chembioCount, streamCutoff: cutoffs.chembioCut};
     const civStats = {streamCount: cutoffs.civCount, streamCutoff: cutoffs.civCut};
     const compStats = {streamCount: cutoffs.compCount, streamCutoff: cutoffs.compCut};
     const elecStats = {streamCount: cutoffs.elecCount, streamCutoff: cutoffs.elecCut};
@@ -31,7 +40,6 @@ export default async ({ req, res, log, error }) => {
     const softStats = {streamCount: cutoffs.softCount, streamCutoff: cutoffs.softCut};
 
     await database.updateDocument('MacStats','StatData','chem',chemStats);
-    await database.updateDocument('MacStats','StatData','chembio',chembioStats);
     await database.updateDocument('MacStats','StatData','civ',civStats);
     await database.updateDocument('MacStats','StatData','comp',compStats);
     await database.updateDocument('MacStats','StatData','elec',elecStats);
@@ -201,8 +209,11 @@ async function calculateCutoffs(database) {
     // Sort in descending order (higher GPA first) using the existing gpa property
     return b.gpa - a.gpa;
   });
+
+  const totalSeats = totalChemSeats + totalCivSeats + totalCompSeats + totalElecSeats + totalEngPhysSeats + totalMatSeats + totalMechSeats + totalTronSeats + totalSoftSeats;
+  const allocations = {chem: totalChemSeats/totalSeats, civ: totalCivSeats/totalSeats, comp: totalCompSeats/totalSeats, elec: totalElecSeats/totalSeats, engphys: totalEngPhysSeats/totalSeats, mat: totalMatSeats/totalSeats, mech: totalMechSeats/totalSeats, tron: totalTronSeats/totalSeats, soft: totalSoftSeats/totalSeats};
+  console.log(allocations);
   
   
-  
-  return {chemCut: 0, chemCount: 0, chembioCut: 0, chembioCount: 0, civCut: 0, civCount: 0, compCut: 0, compCount: 0, elecCut: 0, elecCount: 0, engphysCut: 0, engphysCount: 0, matCut: 0, matCount: 0, mechCut: 0, mechCount: 0, tronCut: 0, tronCount: 0, softCut: 0, softCount: 0};
+  return {chemCut: 0, chemCount: 0, civCut: 0, civCount: 0, compCut: 0, compCount: 0, elecCut: 0, elecCount: 0, engphysCut: 0, engphysCount: 0, matCut: 0, matCount: 0, mechCut: 0, mechCount: 0, tronCut: 0, tronCount: 0, softCut: 0, softCount: 0};
 }
