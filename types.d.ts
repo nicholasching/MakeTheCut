@@ -1,7 +1,6 @@
 export interface Log {
     $id: string
     $createdAt: string
-    user: string
     gpa: float
     math1za3?: number
     math1zb3?: number

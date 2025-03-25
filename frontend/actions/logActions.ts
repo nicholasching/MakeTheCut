@@ -16,7 +16,7 @@ export interface GradesInput {
   freechoice: boolean;
 }
 
-export async function addLog(gradesInput: GradesInput): Promise<Log> {
+export async function addLog(gradesInput: GradesInput) {
     let loggedInUser = await account.get();
     
     const averageGPA = calculateAverages(gradesInput).toFixed(2);
@@ -34,7 +34,6 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
     }
 
     const newLog = {
-        user: loggedInUser.$id, 
         gpa: parseFloat(averageGPA),
         math1za3: parseFloat(gradesInput.math1za3) || 0,
         math1zb3: parseFloat(gradesInput.math1zb3) || 0,
@@ -50,23 +49,23 @@ export async function addLog(gradesInput: GradesInput): Promise<Log> {
     };
 
     console.log(newLog);
-    
-    const response = await database.createDocument(
+
+    try{
+      const response = await database.updateDocument(
         'MacStats',
         'UserData',
-        ID.unique(),
+        loggedInUser.$id,
         newLog
-    );
-
-    const log = {
-        $id: response.$id,
-        $createdAt: response.$createdAt,
-        user: response.user,
-        gpa: response.gpa
-    };
-
-    console.log(log);
-    return log;
+      )
+    }
+    catch (error) {
+      const response = await database.createDocument(
+        'MacStats',
+        'UserData',
+        loggedInUser.$id,
+        newLog
+      );
+    }
 }
 
 

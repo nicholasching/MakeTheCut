@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState, useEffect } from "react";
 import { addLog } from "../../actions/logActions";
 import { useRouter } from "next/navigation";
 import GridBackground from "@/components/GridBackground";
@@ -9,6 +9,7 @@ import Combobox from "@/components/Combobox";
 import ComboboxStreams from "@/components/ComboboxStream";
 import LogoutButton from "@/components/LogoutButton";
 import { Checkbox } from "@/components/ui/checkbox";
+import {account, database, ID} from "../appwrite";
 
 export default function Home() {
     const router = useRouter();
@@ -33,6 +34,44 @@ export default function Home() {
     const [error, setError] = useState<string | null>(null);
 
     const [freechoice, setFreeChoice] = useState<boolean>(false);
+
+    useEffect(() => {
+        async function initiatePage() {
+            try {
+                let loggedInUser = await account.get();
+
+                try {
+                    const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
+                    setMath1za3(pastData.math1za3);
+                    setMath1zb3(pastData.math1zb3);
+                    setMath1zc3(pastData.math1zc3);
+                    setPhysics1d03(pastData.phys1d03);
+                    setPhysics1e03(pastData.phys1e03);
+                    setChemistry1e03(pastData.chem1e03);
+                    setEngineering1p13(pastData.eng1p13);
+                    if (pastData.elec1 != "null") {
+                        setElective1Value(pastData.elec1.split(',')[1]);
+                        setSelectedElective1(pastData.elec1.split(',')[0]);
+                    }
+                    if (pastData.elec2 != "null") {
+                        setElective2Value(pastData.elec2.split(',')[1]);
+                        setSelectedElective2(pastData.elec2.split(',')[0]);
+                    }
+                    setStream1Choice(pastData.streams.split(',')[0]);
+                    setStream2Choice(pastData.streams.split(',')[1]);
+                    setStream3Choice(pastData.streams.split(',')[2]);
+                    setFreeChoice(pastData.freechoice);
+                }
+                catch (error) {
+                    console.error("No previous data:", error);
+                }
+            }
+            catch (error) {
+                router.push('/login');
+            }
+        }
+        initiatePage();
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -148,8 +187,7 @@ export default function Home() {
             };
 
             console.log("Submitting grades with electives and streams:", gradesData);
-            const response = await addLog(gradesData);
-            console.log("Grades and stream choices submitted successfully:", response);
+            await addLog(gradesData);
             router.push('/dashboard'); 
         } catch (err) {
             console.error("Error submitting data:", err);
