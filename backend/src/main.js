@@ -212,7 +212,7 @@ async function calculateCutoffs(database) {
 
   const totalSeats = totalChemSeats + totalCivSeats + totalCompSeats + totalElecSeats + totalEngPhysSeats + totalMatSeats + totalMechSeats + totalTronSeats + totalSoftSeats;
   const allocations = {chem: totalChemSeats/totalSeats, civ: totalCivSeats/totalSeats, comp: totalCompSeats/totalSeats, elec: totalElecSeats/totalSeats, engphys: totalEngPhysSeats/totalSeats, mat: totalMatSeats/totalSeats, mech: totalMechSeats/totalSeats, tron: totalTronSeats/totalSeats, soft: totalSoftSeats/totalSeats};
-  log(allocations);
+  log(`Test JSON: ${allocations}`);
   
   
   return {chemCut: 0, chemCount: 0, civCut: 0, civCount: 0, compCut: 0, compCount: 0, elecCut: 0, elecCount: 0, engphysCut: 0, engphysCount: 0, matCut: 0, matCount: 0, mechCut: 0, mechCount: 0, tronCut: 0, tronCount: 0, softCut: 0, softCount: 0};
