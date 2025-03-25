@@ -139,81 +139,30 @@ export default function Home() {
     };
 
     return (
-        <GridBackground className="pt-20">
+        <GridBackground className="pt-30 pb-20 overflow-y-scroll">
             <HomeButton />
-            <div className="flex mx-auto w-3/4 border-1">
-                <div className="w-1/2 flex flex-col gap-4 text-center">
-                    <h1 className="text-xl text-white">Enter GPA /12</h1>
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1za3" placeholder="Math 1ZA3" value={math1za3} onChange={handleInputChange} maxLength={2} />
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zb3" placeholder="Math 1ZB3" value={math1zb3} onChange={handleInputChange} maxLength={2} />
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zc3" placeholder="Math 1ZC3" value={math1zc3} onChange={handleInputChange} maxLength={2} />
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1d03" placeholder="Physics 1D03" value={phys1d03} onChange={handleInputChange} maxLength={2} />
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={phys1e03} onChange={handleInputChange} maxLength={2} />  
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chem1e03} onChange={handleInputChange} maxLength={2} />  
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={eng1p13} onChange={handleInputChange} maxLength={2} />
-                    
-                    <div className="space-y-1">
-                        <input 
-                            className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" 
-                            type="text" 
-                            inputMode="numeric" 
-                            name="elec1" 
-                            placeholder="Elective 1 Grade" 
-                            value={elective1Value} 
-                            onChange={handleInputChange} 
-                            maxLength={2} 
-                        />  
-                        <Combobox 
-                            value={selectedElective1} 
-                            onChange={handleElective1Change}
-                            placeholder="Select first elective" 
-                        />
-                    </div>
-                    
-                    <div className="space-y-1">
-                        <input 
-                            className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" 
-                            type="text" 
-                            inputMode="numeric" 
-                            name="elec2" 
-                            placeholder="Elective 2 Grade" 
-                            value={elective2Value} 
-                            onChange={handleInputChange} 
-                            maxLength={2} 
-                        />  
-                        <Combobox 
-                            value={selectedElective2} 
-                            onChange={handleElective2Change}
-                            placeholder="Select second elective" 
-                        />
-                    </div>
-                    
-                    {error && <p className="text-red-500 mt-2">{error}</p>}
-                    <button 
-                        className="bg-white text-black p-2 rounded-sm border-none w-1/3 mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"
-                        onClick={handleSubmit}
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? "Submitting..." : "Submit"}
-                    </button>
+            <h1 className="text-center text-subtext text-neutral-400 hover:text-white transition-all">Input your GPA for each class (out of 12) <br /> and your preferred streams (1-3):</h1>
+            <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center align-center gap-5 text-center  py-10 rounded-md">
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1za3" placeholder="Math 1ZA3" value={math1za3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zb3" placeholder="Math 1ZB3" value={math1zb3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zc3" placeholder="Math 1ZC3" value={math1zc3} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1d03" placeholder="Physics 1D03" value={phys1d03} onChange={handleInputChange} maxLength={2} />
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={phys1e03} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chem1e03} onChange={handleInputChange} maxLength={2} />  
+                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={eng1p13} onChange={handleInputChange} maxLength={2} />
+                <div>
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1 Grade" value={elective1Value} onChange={handleInputChange} maxLength={2}/>  
+                    <Combobox value={selectedElective1} onChange={handleElective1Change}placeholder="Select first elective"/>
                 </div>
-                <div className="w-1/2">
-                <ComboboxStreams 
-                    value={stream1Choice} 
-                    onChange={handleStream1Change}
-                    placeholder="Stream 1 Choice" 
-                />
-                <ComboboxStreams 
-                    value={stream2Choice} 
-                    onChange={handleStream2Change}
-                    placeholder="Stream 2 Choice" 
-                />
-                <ComboboxStreams 
-                    value={stream3Choice} 
-                    onChange={handleStream3Change}
-                    placeholder="Stream 3 Choice" 
-                />
+                <div>
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2 Grade" value={elective2Value} onChange={handleInputChange} maxLength={2} />  
+                    <Combobox value={selectedElective2} onChange={handleElective2Change}placeholder="Select second elective"/>
                 </div>
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+                <ComboboxStreams value={stream1Choice} onChange={handleStream1Change}placeholder="Stream 1 Choice" />
+                <ComboboxStreams value={stream2Choice} onChange={handleStream2Change}placeholder="Stream 2 Choice" />
+                <ComboboxStreams value={stream3Choice} onChange={handleStream3Change}placeholder="Stream 3 Choice" />
+                <button className="text-subtext bg-white text-black w-1/3 p-2 rounded-sm border-none mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}> {isSubmitting ? "Submitting..." : "Submit"} </button>
             </div>
         </GridBackground>
     );
