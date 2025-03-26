@@ -166,8 +166,8 @@ export default function HorizontalBarChart() {
               data={chartData} 
               layout="vertical" 
               margin={isMobile ? 
-              { top: 30, right: 20, left: 5, bottom: 30 } : 
-              { top: 30, right: 30, left: 30, bottom: 30 }
+              { top: 30, right: 20, left: 5, bottom: 10 } : 
+              { top: 30, right: 30, left: 30, bottom: 10 }
               }
             >
               <CartesianGrid horizontal={false} stroke="#333" />

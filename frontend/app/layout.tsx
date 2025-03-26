@@ -11,6 +11,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "MakeTheCut",
   description: "McMaster Stream Statistics",
+  icons: {
+    icon: [
+      { url: "/makethecut.ico", sizes: "any" }
+    ],
+    shortcut: { url: "/makethecut.ico" }
+  }
 };
 
 export default function RootLayout({

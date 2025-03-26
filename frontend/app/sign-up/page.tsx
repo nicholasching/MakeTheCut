@@ -58,7 +58,7 @@ const RegisterPage = () => {
   // }
 
   return (
-    <GridBackground className="pt-[18vh]">
+    <GridBackground className="h-screen flex items-center justify-center">
       <HomeButton />
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
         <h1 className="text-4xl mb-10 font-semiboldr">Sign Up</h1>
