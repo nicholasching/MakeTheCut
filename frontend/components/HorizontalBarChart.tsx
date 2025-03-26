@@ -99,15 +99,31 @@ const chartConfig = {
 const SpinningLoader = () => {
   return (
     <div className="flex justify-center items-center">
-      <div 
-        className="h-50 w-50 rounded-full animate-spin"
-        style={{
-          border: '30px dotted #e5e5e5',
-          borderStyle: 'dotted',
-          width: '150px',
-          height: '150px'
-        }}
-      ></div>
+      <svg className="animate-spin" width="250" height="250" viewBox="0 0 250 250">
+        <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="10" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <g filter="url(#glow)">
+          {[...Array(6)].map((_, i) => {
+            const angle = (i * 60) * Math.PI / 180;
+            const cx = 125 + 85 * Math.cos(angle);
+            const cy = 125 + 85 * Math.sin(angle);
+            const opacity = 0.2 + (0.8 * (1 - (i % 6) / 6));
+            return (
+              <circle 
+                key={i} 
+                cx={cx} 
+                cy={cy} 
+                r={18} 
+                fill={`rgba(255, 255, 255, ${opacity})`} 
+              />
+            );
+          })}
+        </g>
+      </svg>
     </div>
   );
 };

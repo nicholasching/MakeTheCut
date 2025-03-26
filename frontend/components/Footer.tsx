@@ -14,7 +14,7 @@ export default function Footer() {
       </div>
       <div className="flex items-center gap-4">
         <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
-        <Link size={15} />
+          <Link size={12} />
         </a>
       </div>
     </footer>
