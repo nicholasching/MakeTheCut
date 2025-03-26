@@ -59,7 +59,7 @@ const LoginPage = () => {
       <HomeButton />
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg text-center">
         <h1 className="text-4xl mb-5 font-semibold">Log In</h1>
-        <p className="mb-10 text-teenytiny text-red-500">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
+        <p className="mb-10 text-teenytiny text-red-800 font-semibold">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
         <div className="mb-15 flex flex-col gap-5">
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300"  type="password" placeholder="Password" value={password} onClick={() => handleLogin(email, password)} onChange={(e) => setPassword(e.target.value)} />
@@ -68,7 +68,7 @@ const LoginPage = () => {
         <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10" type="button" onClick={() => login(email, password)}>Login</button>
         <div className="flex gap-2 justify-center">
           <p className="text-subtext">Don't have an account? </p>
-          <Link className="text-red-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/sign-up">
+          <Link className="text-blue-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/sign-up">
               Sign Up
           </Link>
         </div>

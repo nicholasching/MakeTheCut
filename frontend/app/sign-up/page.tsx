@@ -72,21 +72,39 @@ const RegisterPage = () => {
   // }
 
   return (
+    
     <GridBackground className="h-svh flex items-center justify-center">
       <HomeButton />
+            {/* Animated Marquee */}
+      {/* Animated Marquee */}
+      <div className="fixed top-0 left-0 w-full bg-neutral-950 py-2 overflow-hidden z-50">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {/* Repeating content multiple times ensures continuous flow */}
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
+        </div>
+      </div>
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
         <h1 className="text-4xl mb-5 font-semibold">Sign Up</h1>
-        <p className="mb-10 text-teenytiny text-red-500">Register currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
+        <p className="mb-7 text-teenytiny text-red-800 font-semibold">Registration currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
+
         <div className="mb-15 flex flex-col gap-5">
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)}/>
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)}/>
         </div>
+
         {error && <p className="mb-3 text-red-500 text-tiny">{error}</p>}
         <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10" type="button" onClick={register}>Create</button>
         <div className="flex gap-2 justify-center">
           <p className="text-subtext">Already have an account?</p>
-          <Link className="text-red-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/login">
+          <Link className="text-blue-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/login">
             Log In 
           </Link>
         </div>
