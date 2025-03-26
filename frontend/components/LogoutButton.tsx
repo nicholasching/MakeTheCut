@@ -31,7 +31,7 @@ const LogoutButton = ({
                     <Dialog>
                         <DialogTrigger asChild>
                             <button className="w-7">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="white" className="transition-colors duration-200 hover:fill-red-600 hover:scale-105 cursor-pointer w-[1.25vw] min-w-[1rem]">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="white" className="transition-colors duration-200 hover:fill-[#e0534f] hover:scale-105 cursor-pointer w-[1.25vw] min-w-[1rem]">
                                 <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
                                 </svg>
                             </button>
@@ -39,7 +39,7 @@ const LogoutButton = ({
                         <DialogContent className="bg-neutral-900 border-none w-1/5">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
-                            <button onClick={logout} className="bg-red-600 text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all">Logout</button>
+                            <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all">Logout</button>
                         </DialogContent>
                     </Dialog>
                 </motion.div>

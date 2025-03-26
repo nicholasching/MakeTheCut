@@ -1,15 +1,15 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 
 export const engineeringMajors = [
-    "Mechanical",
-    "Computer",
-    "Software",
-    "Mechatronics",
-    "Electrical",
-    "Chemical",
-    "Civil",
-    "Materials",
+  "Mechanical",
+  "Computer",
+  "Software",
+  "Mechatronics",
+  "Electrical",
+  "Chemical",
+  "Civil",
+  "Materials",
 ];
 
 interface TextCycleProps {
@@ -18,6 +18,7 @@ interface TextCycleProps {
   fadeTime?: number;
   underlineDelay?: number;
   initialDelay?: number;
+  className?: string;
 }
 
 export default function TextCycle({ 
@@ -25,18 +26,12 @@ export default function TextCycle({
   interval = 4000, 
   fadeTime = 500,
   underlineDelay = 200,
-  initialDelay = 2000
+  initialDelay = 2000,
+  className = ""
 }: TextCycleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [showUnderline, setShowUnderline] = useState(false); // Start with underline hidden
-  
-  // Find the longest word to determine the container width
-  const longestWord = useMemo(() => {
-    return words.reduce((longest, current) => 
-      current.length > longest.length ? current : longest
-    , "");
-  }, [words]);
+  const [showUnderline, setShowUnderline] = useState(false);
   
   useEffect(() => {
     // First show the underline on initial load
@@ -95,29 +90,24 @@ export default function TextCycle({
     };
   }, [words, interval, fadeTime, underlineDelay, initialDelay]);
   
+  // Get max width by measuring all words
+  const placeholderText = words.reduce((a, b) => 
+    a.length > b.length ? a : b
+  );
+  
   return (
-    <span 
-      className="inline-block font-bold"
-      style={{ 
-        width: `${longestWord.length}ch`,
-        position: 'relative'
-      }}
-    >
-      <span 
-        className={`absolute left-0 transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
-      >
+    <span className={`inline font-semibold font-inherit relative ${className}`}>
+      <span className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
         {words[currentIndex]}
         {/* Animated underline */}
         <span 
-          className={`absolute left-0 bottom-0 h-[2px] bg-red-500 transition-all duration-1000 ease-out`}
-          style={{ 
-            width: showUnderline ? '100%' : '0%',
-            transformOrigin: 'left',
-            opacity: showUnderline ? 1 : 0
-          }}
+          className={`absolute left-0 bottom-0 h-0.5 bg-red-500 transition-all duration-1000 ease-out origin-left ${
+            showUnderline ? 'w-full opacity-100' : 'w-0 opacity-0'
+          }`}
         ></span>
       </span>
-      <span className="invisible">{longestWord}</span>
+      {/* Placeholder to maintain width */}
+      <span className="invisible absolute">{placeholderText}</span>
     </span>
   );
 }
