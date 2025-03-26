@@ -1,26 +1,23 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell } from "recharts"
-import { account, database, ID } from "../app/appwrite"
-import GradientPulse from "./GradientPulse"
+
+import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
+import { account, database } from "../app/appwrite";
+import GradientPulse from "./GradientPulse";
 
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
-} from "@/components/ui/chart"
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 let cutoffs = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materials: 4, mechanical: 4, mechatronics: 4, software: 4};
 var loggedInUser;
@@ -99,7 +96,7 @@ const chartConfig = {
 const SpinningLoader = () => {
   return (
     <div className="flex justify-center items-center">
-      <div className="h-100 w-100 border-10 border-t-blue-500 border-r-orange-500 border-b-orange-700 border-l-blue-700 rounded-full animate-spin"></div>
+      <div className="h-50 w-50 border-40 border-dotted border-spacing-4 border-neutral-200 rounded-full animate-spin"></div>
     </div>
   );
 };
@@ -177,6 +174,10 @@ export default function HorizontalBarChart() {
               <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4" ifOverflow="extendDomain" label={false}>
                 <Label value="You" position="top" fill="white" fontSize={14} dy={-10} />
               </ReferenceLine>
+              <ChartTooltip
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
+              />
               <Bar 
                 dataKey="GPA" 
                 radius={[0, 4, 4, 0]} 

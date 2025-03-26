@@ -21,12 +21,11 @@ export default function Home() {
           </h1>
           <div className="flex justify-center md:justify-normal">
             <Link href="/login">
-              <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer mt-20">
+              <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer mt-20 mb-100">
                 Log In
               </button>
             </Link>
           </div>
-          <p className="mt-[40vh]">Hello</p>
         </div>
       </GridBackground>
       <Footer />

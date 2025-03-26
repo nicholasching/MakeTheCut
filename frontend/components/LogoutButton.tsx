@@ -4,6 +4,7 @@ import { account } from "../app/appwrite";
 import { Models } from "appwrite";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 
 interface LogoutButtonProps {
     buttonText?: string;
@@ -39,6 +40,7 @@ const LogoutButton = ({
                         <DialogContent className="bg-neutral-900 border-none w-1/5">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
+                            <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Edit Grades</button></Link>
                             <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all">Logout</button>
                         </DialogContent>
                     </Dialog>

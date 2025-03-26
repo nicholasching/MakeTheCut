@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "MacStats",
+  title: "MakeTheCut",
   description: "McMaster Stream Statistics",
 };
 
