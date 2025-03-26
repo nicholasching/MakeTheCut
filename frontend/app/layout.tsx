@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "MakeTheCut",
-  description: "McMaster Stream Statistics",
+  description: "McMaster Stream Predictions",
   icons: {
     icon: [
       { url: "/makethecut.ico", sizes: "any" }
