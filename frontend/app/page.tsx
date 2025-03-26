@@ -26,6 +26,9 @@ export default function Home() {
               </button>
             </Link>
           </div>
+          <div>
+            <h2>MacStats</h2>
+          </div>
         </div>
       </GridBackground>
       <Footer />

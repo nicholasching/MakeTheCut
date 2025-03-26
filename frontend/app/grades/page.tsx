@@ -255,7 +255,10 @@ export default function Home() {
         <GridBackground className="pt-30 pb-20 overflow-y-scroll">
             <HomeButton />
             <LogoutButton />
-            <h1 className="text-center text-subtext text-neutral-400 hover:text-white transition-all">Input your GPA for each class (out of 12) <br /> and your preferred streams (1-3):</h1>
+            <h1 className="text-center text-subtext text-neutral-400">
+                Enter your GPA for each course (out of 12)<br/>and rank your preferred streams (1-3).
+                Input projected<br/>mark or leave fields blank for unknown grades.
+            </h1>
             <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center align-center gap-5 text-center  py-10 rounded-md">
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1za3" placeholder="Math 1ZA3" value={math1za3} onChange={handleInputChange} maxLength={2} />
                 <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zb3" placeholder="Math 1ZB3" value={math1zb3} onChange={handleInputChange} maxLength={2} />

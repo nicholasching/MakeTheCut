@@ -7,6 +7,9 @@ import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, Respo
 import { account, database } from "../app/appwrite";
 import GradientPulse from "./GradientPulse";
 
+
+import Link from "next/link";
+
 import {
   Card,
   CardContent,
@@ -136,12 +139,11 @@ export default function HorizontalBarChart() {
   if (key === 0) {
     return (
       <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
-        <CardHeader className="text-neutral-400">
-          <CardTitle className="text-subtitle">Loading Stream Data...</CardTitle>
+        <CardHeader className="text-neutral-500">
+          <CardTitle className="text-subtitle ">Loading Stream Data...</CardTitle>
         </CardHeader>
         <CardContent className="h-[500px] md:h-[600px] flex items-center justify-center">
           <div className="relative w-full h-full">
-            <GradientPulse className="opacity-40" />
             <div className="absolute inset-0 flex items-center justify-center">
               <SpinningLoader />
             </div>
@@ -152,11 +154,11 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10">
-      <CardHeader className="text-neutral-400">
-        <CardTitle className="text-subtitle">Live Estimated Stream Cutoffs</CardTitle>
+    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10">
+      <CardHeader className="text-neutral-500">
+        <CardTitle className="text-subtitle flex items-center justify-center gap-3"><div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>Live Estimated Stream Cutoffs</CardTitle>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pl-0 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
@@ -164,15 +166,17 @@ export default function HorizontalBarChart() {
               data={chartData} 
               layout="vertical" 
               margin={isMobile ? 
-              { top: 30, right: 0, left: 0, bottom: 30 } : 
+              { top: 30, right: 20, left: 5, bottom: 30 } : 
               { top: 30, right: 30, left: 30, bottom: 30 }
               }
             >
               <CartesianGrid horizontal={false} stroke="#333" />
               <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
               <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#474747', textAnchor: 'middle' }}}/>
-              <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4" ifOverflow="extendDomain" label={false}>
-                <Label value="You" position="top" fill="white" fontSize={14} dy={-10} />
+              <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
+              <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
+                You ✎
+              </Label>
               </ReferenceLine>
               <ChartTooltip
               cursor={false}
