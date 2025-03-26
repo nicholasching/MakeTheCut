@@ -37,11 +37,13 @@ const LogoutButton = ({
                                 </svg>
                             </button>
                         </DialogTrigger>
-                        <DialogContent className="bg-neutral-900 border-none md:w-1/5 w-2/3">
+                        <DialogContent className="bg-neutral-900 border-none md:w-1/5 w-2/3 pt-10">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
-                            <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Edit Grades</button></Link>
-                            <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all">Logout</button>
+                            <Link href="/dashboard"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all ">Dashboard</button></Link>
+                            <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Grades</button></Link>
+                            <Link href="/"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Home</button></Link>
+                            <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button>
                         </DialogContent>
                     </Dialog>
                 </motion.div>

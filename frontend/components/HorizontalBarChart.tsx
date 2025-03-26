@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
 import { account, database } from "../app/appwrite";
+import { CardDescription } from "@/components/ui/card";
 import GradientPulse from "./GradientPulse";
 
 
@@ -99,7 +100,31 @@ const chartConfig = {
 const SpinningLoader = () => {
   return (
     <div className="flex justify-center items-center">
-      <div className="h-50 w-50 border-40 border-dotted border-spacing-4 border-neutral-200 rounded-full animate-spin"></div>
+      <svg className="animate-spin" width="250" height="250" viewBox="0 0 250 250">
+        <defs>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="10" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+        <g filter="url(#glow)">
+          {[...Array(6)].map((_, i) => {
+            const angle = (i * 60) * Math.PI / 180;
+            const cx = 125 + 85 * Math.cos(angle);
+            const cy = 125 + 85 * Math.sin(angle);
+            const opacity = 0.2 + (0.8 * (1 - (i % 6) / 6));
+            return (
+              <circle 
+                key={i} 
+                cx={cx} 
+                cy={cy} 
+                r={18} 
+                fill={`rgba(255, 255, 255, ${opacity})`} 
+              />
+            );
+          })}
+        </g>
+      </svg>
     </div>
   );
 };
@@ -141,6 +166,7 @@ export default function HorizontalBarChart() {
       <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
         <CardHeader className="text-neutral-500">
           <CardTitle className="text-subtitle ">Loading Stream Data...</CardTitle>
+
         </CardHeader>
         <CardContent className="h-[500px] md:h-[600px] flex items-center justify-center">
           <div className="relative w-full h-full">
@@ -154,9 +180,20 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-0 lg:pb-5">
+    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5 mb-20">
       <CardHeader className="text-neutral-500">
-        <CardTitle className="text-subtitle flex items-center justify-center gap-3"><div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>Live Estimated Stream Cutoffs</CardTitle>
+        <div className="flex flex-col justify-center items-center">
+        <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
+          <div className="relative w-3 h-3">
+            <div className="absolute inset-0 rounded-full bg-red-500"></div>
+            <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+          </div>
+          Live Estimated Stream Cutoffs
+        </CardTitle>
+        <CardDescription className="text-teenytiny">Data will become more accurate with more users</CardDescription>
+        </div>
+
+        
       </CardHeader>
       <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">
@@ -166,8 +203,8 @@ export default function HorizontalBarChart() {
               data={chartData} 
               layout="vertical" 
               margin={isMobile ? 
-              { top: 30, right: 20, left: 5, bottom: 30 } : 
-              { top: 30, right: 30, left: 30, bottom: 30 }
+              { top: 30, right: 20, left: 5, bottom: 20 } : 
+              { top: 30, right: 30, left: 30, bottom: 20 }
               }
             >
               <CartesianGrid horizontal={false} stroke="#333" />

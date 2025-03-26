@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { Github, Twitter, Mail } from "lucide-react";
+import { Link } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -14,14 +13,8 @@ export default function Footer() {
         </p>
       </div>
       <div className="flex items-center gap-4">
-        <a href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white transition-colors" >
-        <Github size={15} />
-        </a>
-        <a href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" className="text-neutral-400 hover:text-white transition-colors" >
-        <Twitter size={15} />
-        </a>
-        <a href="mailto:contact@macstats.com" className="text-neutral-400 hover:text-white transition-colors" >
-        <Mail size={15} />
+        <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
+          <Link size={12} />
         </a>
       </div>
     </footer>
