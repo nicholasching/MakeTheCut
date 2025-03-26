@@ -18,7 +18,7 @@ export default function Home() {
         <GradientPulse />
         <div className="flex-1">
           <h1 className="text-title leading-none mb-5 font-light w-full md:w-2/3">
-            What's the<br className="block md:hidden"/>cutoff to get into <br className="block sm:hidden"/>
+            What's the <br className="block md:hidden"/>cutoff to get into <br className="block sm:hidden"/>
             <TextCycle words={engineeringMajors}/><br/> engineering?
           </h1>
           <div className="flex justify-center md:justify-normal gap-5 flex-col-reverse md:flex-row mt-20">
