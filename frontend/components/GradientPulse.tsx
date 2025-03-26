@@ -11,16 +11,16 @@ import React from 'react';
                 absolute
                 w-[200vw]
                 h-[200vw]
-                md:w-[150vw]
-                md:h-[150vw]
-                lg:w-[100vw]
-                lg:h-[100vw]
+                md:w-[125vw]
+                md:h-[125vw]
+                lg:w-[75vw]
+                lg:h-[75vw]
                 bg-gradient-to-br 
                 from-blue-800 
                 via-orange-700 
                 to-orange-900 
                 blur-3xl
-                bottom-0 
+                bottom-[75svh] 
                 right-0 
                 translate-x-1/2 
                 translate-y-1/2
