@@ -147,7 +147,44 @@ export default function Home() {
             setIsSubmitting(true);
             setError(null);
 
-            // Validate input values
+            // Validate that all stream choices are provided.
+            if (!stream1Choice || !stream2Choice || !stream3Choice) {
+                setError("Please select all three stream choices.");
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Validate that the streams are distinct.
+            if (
+                stream1Choice === stream2Choice ||
+                stream1Choice === stream3Choice ||
+                stream2Choice === stream3Choice
+            ) {
+                setError("Please select three different stream choices.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Validate that at least one grade field is filled (non-empty).
+            const gradeFields = [
+                math1za3,
+                math1zb3,
+                math1zc3,
+                phys1d03,
+                phys1e03,
+                chem1e03,
+                eng1p13,
+                elective1Value,
+                elective2Value
+            ];
+            const hasAtLeastOneGrade = gradeFields.some(field => /\S/.test(field));
+            if (!hasAtLeastOneGrade) {
+                setError("Please submit at least one grade.");
+                setIsSubmitting(false);
+                return;
+            }
+            
+            // Validate numeric range for each filled grade field.
             const gradesToCheck = [
                 { name: 'Math 1ZA3', value: math1za3 },
                 { name: 'Math 1ZB3', value: math1zb3 },
@@ -161,10 +198,10 @@ export default function Home() {
             ];
 
             for (const grade of gradesToCheck) {
-                if (grade.value) {
+                if (/\S/.test(grade.value)) {
                     const numValue = parseInt(grade.value);
-                    if (isNaN(numValue) || numValue < 0 || numValue > 12) {
-                        setError(` ${grade.name} grade must be between 0 and 12.`);
+                    if (isNaN(numValue) || numValue < 1 || numValue > 12) {
+                        setError(`${grade.name} grade must be between 1 and 12.`);
                         setIsSubmitting(false);
                         return;
                     }
