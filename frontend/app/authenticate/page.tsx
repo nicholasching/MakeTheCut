@@ -1,11 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { account } from "../appwrite";
+
 
 export default function Home() {
+    const router = useRouter();
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        async function initiatePage() {
+            try {
+                let loggedInUser = await account.get();
+                if (loggedInUser.emailVerification) {
+                    router.push('/dashboard');
+                }
+            }
+            catch (error) {
+                router.push('/login');
+            }
+        }
+        initiatePage();
+      }, []);
+
     return (
         <div className="flex flex-col h-svh items-center justify-center gap-5">
-            <h1 className="text-subtitle text-white">Check email for verification link</h1>
+            <h1 className="text-subtitle text-white">Please check your email for the verification link</h1>
+            {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4">
+                    {error}
+                </div>
+            )}
             {(() => {
                 const [countdown, setCountdown] = useState(20);
                 const [buttonClicked, setButtonClicked] = useState(false);
@@ -26,6 +52,19 @@ export default function Home() {
                     setIsDisabled(true);
                 };
 
+                const resendVerifcation = async () => {
+                    try{
+                        await account.createVerification(
+                          'https://www.makethecut.ca/verify'
+                        );
+                        setButtonClicked(true);
+                        setIsDisabled(true);
+                        setError("");
+                      } catch (error){
+                        setError("Too many signups in the last hour. Please try again later.");
+                    }
+                }
+
                 return (
                     <button 
                         className={`p-1 w-40 rounded-sm transition-all ${
@@ -34,7 +73,7 @@ export default function Home() {
                                 : "bg-white text-black hover:scale-110 cursor-pointer"
                         }`}
                         disabled={isDisabled}
-                        onClick={handleClick}
+                        onClick={resendVerifcation}
                     >
                         {buttonClicked 
                             ? "Email Sent" 
