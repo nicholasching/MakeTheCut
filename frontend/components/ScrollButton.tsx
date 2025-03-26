@@ -18,7 +18,7 @@ export default function ScrollButton() {
             onClick={handleClick}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
-            className="bg-white py-2 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer text-black flex items-center justify-center w-30 mx-auto"
+            className="bg-white py-2 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer text-black flex items-center justify-center w-30 mx-auto md:mx-0"
         >
             <div className="relative h-6 w-full flex items-center justify-center">
                 <span 
