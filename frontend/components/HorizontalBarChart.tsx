@@ -162,7 +162,7 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-0 lg:pb-5">
+    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-5 lg:pb-5 mb-20">
       <CardHeader className="text-neutral-500">
         <CardTitle className="text-subtitle flex items-center justify-center gap-3">
           <div className="relative w-3 h-3">
