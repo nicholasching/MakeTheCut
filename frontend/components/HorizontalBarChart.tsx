@@ -99,7 +99,15 @@ const chartConfig = {
 const SpinningLoader = () => {
   return (
     <div className="flex justify-center items-center">
-      <div className="h-50 w-50 border-40 border-dotted border-spacing-4 border-neutral-200 rounded-full animate-spin"></div>
+      <div 
+        className="h-50 w-50 rounded-full animate-spin"
+        style={{
+          border: '30px dotted #e5e5e5',
+          borderStyle: 'dotted',
+          width: '150px',
+          height: '150px'
+        }}
+      ></div>
     </div>
   );
 };
@@ -156,7 +164,13 @@ export default function HorizontalBarChart() {
   return (
     <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-0 lg:pb-5">
       <CardHeader className="text-neutral-500">
-        <CardTitle className="text-subtitle flex items-center justify-center gap-3"><div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>Live Estimated Stream Cutoffs</CardTitle>
+        <CardTitle className="text-subtitle flex items-center justify-center gap-3">
+          <div className="relative w-3 h-3">
+            <div className="absolute inset-0 rounded-full bg-red-500"></div>
+            <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+          </div>
+          Live Estimated Stream Cutoffs
+        </CardTitle>
       </CardHeader>
       <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">
