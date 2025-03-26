@@ -7,6 +7,7 @@ import { Models } from "appwrite";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
+import MarqueeText from "@/components/MarqueeText";
 
 const RegisterPage = () => {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
@@ -75,20 +76,8 @@ const RegisterPage = () => {
     
     <GridBackground className="h-svh flex items-center justify-center">
       <HomeButton />
-            {/* Animated Marquee */}
-      {/* Animated Marquee */}
-      <div className="fixed top-0 left-0 w-full bg-neutral-950 py-2 overflow-hidden z-50">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {/* Repeating content multiple times ensures continuous flow */}
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-          <span className="text-blue-300 font-semibold mx-15 inline-block">Due to server limitations, we can only support 10 sign-ups per hour. If you recieve an error, please try again later.</span>
-        </div>
+      <div className="fixed top-0 left-0 w-full bg-neutral-950 py-1 overflow-hidden z-50">
+        <MarqueeText />
       </div>
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
         <h1 className="text-4xl mb-5 font-semibold">Sign Up</h1>
