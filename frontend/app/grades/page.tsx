@@ -42,6 +42,10 @@ export default function Home() {
             try {
                 let loggedInUser = await account.get();
 
+                if (!loggedInUser.emailVerification){
+                    router.push('/authenticate');
+                }
+
                 try {
                     const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
                     setStatus("Update");

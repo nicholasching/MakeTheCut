@@ -32,7 +32,7 @@ const RegisterPage = () => {
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
-    router.push('/grades');
+    //router.push('/grades');
   };
 
   const register = async () => {
@@ -44,11 +44,18 @@ const RegisterPage = () => {
       }
   
       await account.create(ID.unique(), email, password, name);
-      await account.createVerification(
-      'https://www.makethecut.ca/verify'
-    )
+      await login(email, password);
+      try{
+        await account.createVerification(
+          'https://www.makethecut.ca/verify'
+        )
+        router.push('/authenticate');
+      } catch (error){
+        setError("Too many signups in the last hour. Please try again later.");
+        return false;
+      }
 
-    //login(email, password);
+      
     } catch (error) {
       setError("Account already exists with this email");
       return false;

@@ -44,6 +44,10 @@ async function initPage(router: any) {
   try {
     loggedInUser = await account.get();
 
+    if (!loggedInUser.emailVerification){
+      router.push('/authenticate');
+    }
+
     try{
       user = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
       userGPA = user.gpa;
