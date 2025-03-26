@@ -154,7 +154,7 @@ export default function HorizontalBarChart() {
   return (
     <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10">
       <CardHeader className="text-neutral-400">
-        <CardTitle className="text-subtitle">Estimated Stream Cutoffs</CardTitle>
+        <CardTitle className="text-subtitle">Live Estimated Stream Cutoffs</CardTitle>
       </CardHeader>
       <CardContent className="h-[500px] md:h-[600px] pl-0 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">

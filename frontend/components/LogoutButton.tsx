@@ -37,7 +37,7 @@ const LogoutButton = ({
                                 </svg>
                             </button>
                         </DialogTrigger>
-                        <DialogContent className="bg-neutral-900 border-none w-1/5">
+                        <DialogContent className="bg-neutral-900 border-none md:w-1/5 w-2/3">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
                             <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Edit Grades</button></Link>

@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-neutral-950 border-t border-neutral-800 py-8 mt-auto">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="md:flex flex-col md:flex-row justify-between items-center hidden">
           <div className="mb-6 md:mb-0">
             <div className="flex items-center">
               <span className="text-xl font-bold text-white">MacStats</span>
@@ -65,9 +65,9 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="mt-8 pt-6 border-t border-neutral-800 text-center md:text-left">
-          <p className="text-neutral-500 text-sm">
-            © {currentYear} MacStats. All rights reserved.
+        <div className="mt-0 md:mt-8 pt-2 border-none md:border-t border-neutral-800 text-center md:text-left">
+          <p className="text-neutral-500 text-xs">
+            Made with ❤️ by McMaster Students / © {currentYear} MacStats. All rights reserved.
           </p>
           <p className="text-neutral-600 text-xs mt-1">
             Built with Next.js, Tailwind CSS, and Appwrite.

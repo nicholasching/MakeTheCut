@@ -16,7 +16,7 @@ export default function Home() {
         <GradientPulse />
         <div className="flex-1">
           <h1 className="text-title leading-none mb-5 font-light w-full md:w-2/3">
-            What's the cutoff to get <br/> into <br className="block sm:hidden"/>
+            What's the cutoff to get into <br className="block sm:hidden"/>
             <TextCycle words={engineeringMajors}/><br/> engineering
           </h1>
           <div className="flex justify-center md:justify-normal">
