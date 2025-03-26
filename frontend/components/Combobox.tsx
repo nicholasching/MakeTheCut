@@ -96,6 +96,8 @@ const courses = [
   { value: "italian 1a03", label: "ITALIAN 1A03" },
   { value: "italian 1aa3", label: "ITALIAN 1AA3" },
   { value: "italian 1z06", label: "ITALIAN 1Z06" },
+  { value: "innovate 1x03", label: "INNOVATE 1X03" },
+  { value: "innovate 1z03", label: "INNOVATE 1Z03" },
   { value: "inspire 1a03", label: "INSPIRE 1A03" },
   { value: "inspire 1pl3", label: "INSPIRE 1PL3" },
   { value: "inspire 3el3", label: "INSPIRE 3EL3" },
@@ -169,6 +171,7 @@ const courses = [
   { value: "sustain 2ss3", label: "SUSTAIN 2SS3" },
   { value: "worklabr 1a03", label: "WORKLABR 1A03" },
   { value: "worklabr 1e03", label: "WORKLABR 1E03" },
+
 ]
 
 interface ComboboxProps {
