@@ -45,13 +45,27 @@ export default function Home() {
                 try {
                     const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
                     setStatus("Update");
-                    setMath1za3(pastData.math1za3);
-                    setMath1zb3(pastData.math1zb3);
-                    setMath1zc3(pastData.math1zc3);
-                    setPhysics1d03(pastData.phys1d03);
-                    setPhysics1e03(pastData.phys1e03);
-                    setChemistry1e03(pastData.chem1e03);
-                    setEngineering1p13(pastData.eng1p13);
+                    if (pastData.math1za3 != 0) {
+                        setMath1za3(pastData.math1za3);
+                    }
+                    if (pastData.math1zb3 != 0) {
+                        setMath1zb3(pastData.math1zb3);
+                    }
+                    if (pastData.math1zc3 != 0) {
+                        setMath1zc3(pastData.math1zc3);
+                    }
+                    if (pastData.phys1d03 != 0) {
+                        setPhysics1d03(pastData.phys1d03);
+                    }
+                    if (pastData.phys1e03 != 0) {
+                        setPhysics1e03(pastData.phys1e03);
+                    }
+                    if (pastData.chem1e03 != 0) {
+                        setChemistry1e03(pastData.chem1e03);
+                    }
+                    if (pastData.eng1p13 != 0) {
+                        setEngineering1p13(pastData.eng1p13);
+                    }
                     if (pastData.elec1 != "null") {
                         setElective1Value(pastData.elec1.split(',')[1]);
                         setSelectedElective1(pastData.elec1.split(',')[0]);
