@@ -28,7 +28,7 @@ export default function Home() {
   }, []);
 
   return (
-    <GridBackground className="lg:p-30 pt-20">
+    <GridBackground className="p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
         <HomeButton />
         <LogoutButton />
         <HorizontalBarChart />
