@@ -1,9 +1,11 @@
 "use client"
 
 import { TrendingUp } from "lucide-react"
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell } from "recharts"
 import { account, database, ID } from "../app/appwrite"
+import GradientPulse from "./GradientPulse"
 
 import {
   Card,
@@ -20,36 +22,71 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart"
 
-const yourValue = 8;
+let cutoffs = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materials: 4, mechanical: 4, mechatronics: 4, software: 4};
+var loggedInUser;
+var user;
+var userGPA = 4;
 
-let averages = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materials: 4, mechanical: 4, mechatronics: 4, software: 4};
-
-let documents = await database.listDocuments('MacStats', 'StatData');
-
-// Access documents by their $id
-documents.documents.forEach(doc => {
-  if (doc.$id === 'chem') averages.chem = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'civ') averages.civil = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'comp') averages.computer = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'elec') averages.electrical = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'engphys') averages.engphys = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'mat') averages.materials = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'mech') averages.mechanical = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'tron') averages.mechatronics = parseFloat(doc.streamCutoff);
-  if (doc.$id === 'soft') averages.software = parseFloat(doc.streamCutoff);
-});
-
-const chartData = [
-  { stream: "Chemical", GPA: averages.chem },
-  { stream: "Civil", GPA: averages.civil},
-  { stream: "Computer", GPA: averages.computer },
-  { stream: "Electrical", GPA: averages.electrical },
-  { stream: "Engineering Physics", GPA: averages.engphys },
-  { stream: "Materials", GPA: averages.materials },
-  { stream: "Mechanical", GPA: averages.mechanical },
-  { stream: "Mechatronics", GPA: averages.mechatronics },
-  { stream: "Software", GPA: averages.software },
+let chartData = [
+  { stream: "Chemical", GPA: cutoffs.chem },
+  { stream: "Civil", GPA: cutoffs.civil},
+  { stream: "Computer", GPA: cutoffs.computer },
+  { stream: "Electrical", GPA: cutoffs.electrical },
+  { stream: "Engineering Physics", GPA: cutoffs.engphys },
+  { stream: "Materials", GPA: cutoffs.materials },
+  { stream: "Mechanical", GPA: cutoffs.mechanical },
+  { stream: "Mechatronics", GPA: cutoffs.mechatronics },
+  { stream: "Software", GPA: cutoffs.software },
 ]
+
+async function initPage(router: any) {
+  try {
+    loggedInUser = await account.get();
+
+    try{
+      user = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
+      userGPA = user.gpa;
+      
+      let documents = await database.listDocuments('MacStats', 'StatData');
+      
+      // Access documents by their $id
+      documents.documents.forEach(doc => {
+        if (doc.$id === 'chem') cutoffs.chem = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'civ') cutoffs.civil = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'comp') cutoffs.computer = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'elec') cutoffs.electrical = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'engphys') cutoffs.engphys = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'mat') cutoffs.materials = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'mech') cutoffs.mechanical = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'tron') cutoffs.mechatronics = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'soft') cutoffs.software = parseFloat(doc.streamCutoff);
+      });
+      
+      chartData = [
+        { stream: "Chemical", GPA: cutoffs.chem },
+        { stream: "Civil", GPA: cutoffs.civil},
+        { stream: "Computer", GPA: cutoffs.computer },
+        { stream: "Electrical", GPA: cutoffs.electrical },
+        { stream: "Engineering Physics", GPA: cutoffs.engphys },
+        { stream: "Materials", GPA: cutoffs.materials },
+        { stream: "Mechanical", GPA: cutoffs.mechanical },
+        { stream: "Mechatronics", GPA: cutoffs.mechatronics },
+        { stream: "Software", GPA: cutoffs.software },
+      ]
+
+      return 1
+    }
+    catch (error) {
+      router.push('/grades');
+    }
+  }
+  catch (error) {
+    router.push('/login');
+  }
+
+  return 0
+}
+
 
 const chartConfig = {
   GPA: {
@@ -58,10 +95,27 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
+// Spinning Loader Component 
+const SpinningLoader = () => {
+  return (
+    <div className="flex justify-center items-center">
+      <div className="h-100 w-100 border-10 border-t-blue-500 border-r-orange-500 border-b-orange-700 border-l-blue-700 rounded-full animate-spin"></div>
+    </div>
+  );
+};
+
 export default function HorizontalBarChart() {
   const [isMobile, setIsMobile] = useState(false);
+  const [key, setKey] = useState(0);
+  const router = useRouter();
   
   useEffect(() => {
+    const fetchData = async () => {
+      setKey(key + await initPage(router));
+    };
+    
+    fetchData();
+    
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -81,6 +135,24 @@ export default function HorizontalBarChart() {
     return barColors[index % barColors.length];
   };
   
+  // Show loading animation when key is 0
+  if (key === 0) {
+    return (
+      <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
+        <CardHeader className="text-neutral-400">
+          <CardTitle className="text-subtitle">Loading Stream Data...</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[500px] md:h-[600px] flex items-center justify-center">
+          <div className="relative w-full h-full">
+            <GradientPulse className="opacity-40" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <SpinningLoader />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10">
@@ -102,7 +174,7 @@ export default function HorizontalBarChart() {
               <CartesianGrid horizontal={false} stroke="#333" />
               <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
               <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#474747', textAnchor: 'middle' }}}/>
-              <ReferenceLine x={yourValue} stroke="white" strokeDasharray="4 4" ifOverflow="extendDomain" label={false}>
+              <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4" ifOverflow="extendDomain" label={false}>
                 <Label value="You" position="top" fill="white" fontSize={14} dy={-10} />
               </ReferenceLine>
               <Bar 

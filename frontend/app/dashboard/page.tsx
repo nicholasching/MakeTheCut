@@ -14,6 +14,7 @@ import { account } from "../appwrite";
 import { useRouter } from "next/navigation";
 
 export default function Home() {
+  /*
   const router = useRouter();
   useEffect(() => {
     async function initiatePage() {
@@ -26,6 +27,7 @@ export default function Home() {
     }
     initiatePage();
   }, []);
+  */
 
   return (
     <GridBackground className="p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
