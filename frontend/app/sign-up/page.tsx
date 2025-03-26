@@ -33,6 +33,7 @@ const RegisterPage = () => {
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
+    router.push('/grades');
   };
 
   const register = async () => {

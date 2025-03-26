@@ -234,7 +234,7 @@ export default function Home() {
                     </label>
                 </div>
                 {error && <p className="text-red-500 mt-2 text-xs">{error}</p>}
-                <button className="text-subtext bg-white text-black w-1/3 p-2 rounded-sm border-none mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}> {isSubmitting ? "Submitting..." : status} </button>
+                <button className="text-subtext bg-white text-black w-1/3 p-2 rounded-sm border-none mx-auto hover:scale-105 transition-all duration-300 cursor-pointer mt-5"onClick={handleSubmit}disabled={isSubmitting}> {isSubmitting ? "Submitting..." : status}</button>
             </div>
         </GridBackground>
     );

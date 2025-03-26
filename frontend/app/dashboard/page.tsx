@@ -9,9 +9,8 @@ import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 
 import LogoutButton from "@/components/LogoutButton";
-import { useEffect } from "react";
-import { account } from "../appwrite";
-import { useRouter } from "next/navigation";
+
+import Footer from "@/components/Footer";
 
 export default function Home() {
   /*
@@ -30,10 +29,13 @@ export default function Home() {
   */
 
   return (
-    <GridBackground className="p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
-        <HomeButton />
-        <LogoutButton />
-        <HorizontalBarChart />
-    </GridBackground>
+    <div className="flex flex-col min-h-screen">
+      <GridBackground className="flex flex-1 p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
+          <HomeButton />
+          <LogoutButton />
+          <HorizontalBarChart />
+      </GridBackground>
+      <Footer />
+    </div>
   );
 }
