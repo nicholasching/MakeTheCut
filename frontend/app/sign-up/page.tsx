@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { account, ID } from "../appwrite";
+import { client, account, ID } from "../appwrite";
 import { Models } from "appwrite";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
@@ -45,7 +45,11 @@ const RegisterPage = () => {
     }
 
     await account.create(ID.unique(), email, password, name);
-    login(email, password);
+    await account.createVerification(
+      'https://www.makethecut.ca/verify'
+    )
+
+    //login(email, password);
   };
 
   const logout = async () => {
