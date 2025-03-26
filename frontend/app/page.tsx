@@ -25,7 +25,7 @@ export default function Home() {
             <ScrollButton />
             <Link href="/login">
               <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer">
-                Open
+                Login
               </button>
             </Link>
           </div>
