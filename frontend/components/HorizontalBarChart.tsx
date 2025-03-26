@@ -154,7 +154,7 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10">
+    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-0 lg:pb-5">
       <CardHeader className="text-neutral-500">
         <CardTitle className="text-subtitle flex items-center justify-center gap-3"><div className="w-3 h-3 rounded-full bg-red-500 animate-pulse"></div>Live Estimated Stream Cutoffs</CardTitle>
       </CardHeader>
