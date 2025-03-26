@@ -9,6 +9,8 @@ import GradientPulse from "@/components/GradientPulse";
 
 import Footer from "@/components/Footer";
 
+import ScrollButton from "@/components/ScrollButton";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -19,9 +21,10 @@ export default function Home() {
             What's the cutoff to get into <br className="block sm:hidden"/>
             <TextCycle words={engineeringMajors}/><br/> engineering
           </h1>
-          <div className="flex justify-center md:justify-normal">
+          <div className="flex justify-center md:justify-normal gap-5 flex-col md:flex-row mt-20 mb-1000">
+            <ScrollButton />
             <Link href="/login">
-              <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer mt-20 mb-100">
+              <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer">
                 Log In
               </button>
             </Link>
