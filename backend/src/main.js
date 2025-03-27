@@ -325,6 +325,13 @@ async function calculateCutoffs(database) {
       cutoffGPAs[stream] = 4;
     }
   });
+  
+  // Final check: ensure any stream with fewer filled seats than available seats has cutoff of 4
+  Object.keys(streamCounts).forEach(stream => {
+    if (streamCounts[stream] < actualSeats[stream]) {
+      cutoffGPAs[stream] = 4;
+    }
+  });
 
   return {
     chemCut: cutoffGPAs.chem,
