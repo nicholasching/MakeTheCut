@@ -41,10 +41,13 @@ export default function Home() {
         async function initiatePage() {
             try {
                 let loggedInUser = await account.get();
-
+                
+                // Uncomment to enable verification
+                /* 
                 if (!loggedInUser.emailVerification){
                     router.push('/authenticate');
                 }
+                */
 
                 try {
                     const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
