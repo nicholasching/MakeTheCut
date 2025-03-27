@@ -200,7 +200,8 @@ async function calculateAverages(database) {
     phys1d03avg: phys1d03average,
     phys1e03avg: phys1e03average,
     chem1e03avg: chem1e03average,
-    eng1p13avg: eng1p13average
+    eng1p13avg: eng1p13average,
+    streamCount: databaseResponse.documents.length
   };
 }
 
