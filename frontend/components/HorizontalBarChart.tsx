@@ -15,6 +15,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter  // Import CardFooter
 } from "@/components/ui/card";
 import {
   ChartConfig,
