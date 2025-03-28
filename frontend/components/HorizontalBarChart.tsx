@@ -246,7 +246,7 @@ export default function HorizontalBarChart() {
               <div className="absolute inset-0 rounded-full bg-red-500"></div>
               <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
             </div>
-            Live Estimated Stream Cutoffs
+            Live - Estimated Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Current Contributions: {totalContributions}</p>

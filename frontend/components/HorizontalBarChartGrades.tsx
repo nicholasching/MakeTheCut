@@ -20,64 +20,34 @@ import {
 
 // Course grade data structure
 let courseData = [
-  { course: "Math 1ZA3 (Calc 1)", average: 0, submissions: 0 },
-  { course: "Math 1ZB3 (Calc 2)", average: 0, submissions: 0 },
-  { course: "Math 1ZC3 (Lin Alg)", average: 0, submissions: 0 },
-  { course: "Physics 1D03", average: 0, submissions: 0 },
-  { course: "Physics 1E03", average: 0, submissions: 0 },
-  { course: "Chemistry 1E03", average: 0, submissions: 0 },
-  { course: "Engineering 1P13", average: 0, submissions: 0 },
+  { course: "Math 1ZA3 (Calc 1)", average: 0 },
+  { course: "Math 1ZB3 (Calc 2)", average: 0 },
+  { course: "Math 1ZC3 (Lin Alg)", average: 0 },
+  { course: "Physics 1D03", average: 0 },
+  { course: "Physics 1E03", average: 0 },
+  { course: "Chemistry 1E03", average: 0 },
+  { course: "Engineering 1P13", average: 0 },
 ];
 
-async function initPage(router: any) {
+async function initPage() {
   try {
-    const loggedInUser = await account.get();
+    // Fetch course averages from the database
+    let document = await database.getDocument('MacStats', 'StatData', 'averages');
     
-    try {
-      // Fetch course averages from the database
-      let documents = await database.listDocuments('MacStats', 'CourseData');
-      
-      // Access documents and update averages
-      documents.documents.forEach(doc => {
-        if (doc.$id === 'math1za3') {
-          courseData[0].average = parseFloat(doc.courseAverage || "0");
-          courseData[0].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'math1zb3') {
-          courseData[1].average = parseFloat(doc.courseAverage || "0");
-          courseData[1].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'math1zc3') {
-          courseData[2].average = parseFloat(doc.courseAverage || "0");
-          courseData[2].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'phys1d03') {
-          courseData[3].average = parseFloat(doc.courseAverage || "0");
-          courseData[3].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'phys1e03') {
-          courseData[4].average = parseFloat(doc.courseAverage || "0");
-          courseData[4].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'chem1e03') {
-          courseData[5].average = parseFloat(doc.courseAverage || "0");
-          courseData[5].submissions = doc.submissionCount || 0;
-        }
-        if (doc.$id === 'eng1p13') {
-          courseData[6].average = parseFloat(doc.courseAverage || "0");
-          courseData[6].submissions = doc.submissionCount || 0;
-        }
-      });
-      
-      return 1;
-    }
-    catch (error) {
-      console.error("Error fetching course data:", error);
-      return 0;
-    }
+    // Access documents and update averages
+    courseData[0].average = parseFloat(document.math1za3avg || "0");
+    courseData[1].average = parseFloat(document.math1zb3avg || "0");
+    courseData[2].average = parseFloat(document.math1zc3avg || "0");
+    courseData[3].average = parseFloat(document.phys1d03avg || "0");
+    courseData[4].average = parseFloat(document.phys1e03avg || "0");
+    courseData[5].average = parseFloat(document.chem1e03avg || "0");
+    courseData[6].average = parseFloat(document.eng1p13avg || "0");
+    console.log("Course data fetched successfully:", courseData);
+    
+    return 1;
   }
   catch (error) {
-    router.push('/login');
+    console.error("Error fetching course data:", error);
     return 0;
   }
 }
@@ -89,7 +59,6 @@ const CustomTooltip = ({ active, payload }: any) => {
       <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-sm">
         <p className="mb-1"><strong>{payload[0].payload.course}</strong></p>
         <p className="text-red-400">Average Grade: {payload[0].value.toFixed(1)}/12</p>
-        <p className="text-white">Based on {payload[0].payload.submissions} submissions</p>
       </div>
     );
   }
@@ -138,17 +107,20 @@ const SpinningLoader = () => {
 
 export default function CourseGradeChart() {
   const [isMobile, setIsMobile] = useState(false);
+  const [totalContributions, setTotalContributions] = useState<number>(0);
   const [key, setKey] = useState(0);
-  const [totalSubmissions, setTotalSubmissions] = useState<number>(0);
-  const router = useRouter();
   
   useEffect(() => {
     const fetchData = async () => {
-      setKey(key + await initPage(router));
-      
-      // Calculate total submissions
-      const total = courseData.reduce((sum, course) => sum + course.submissions, 0);
-      setTotalSubmissions(total);
+      setKey(key + await initPage());
+
+      // Fetch contribution count
+      try {
+        const contributions = await database.getDocument('MacStats', 'StatData', 'averages');
+        setTotalContributions(contributions.streamCount);
+      } catch (error) {
+        console.error("Error fetching contribution count:", error);
+      }
     };
     
     fetchData();
@@ -208,10 +180,10 @@ export default function CourseGradeChart() {
               <div className="absolute inset-0 rounded-full bg-red-500"></div>
               <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
             </div>
-            Course Grade Averages
+            Live - Reported Course Grade Averages
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
-            <p>Total Submissions: {totalSubmissions}</p>
+            <p>Current Contributions: {totalContributions}</p>
           </CardDescription>
         </div>
       </CardHeader>
@@ -229,7 +201,7 @@ export default function CourseGradeChart() {
             >
               <CartesianGrid horizontal={false} stroke="#333" />
               <YAxis dataKey="course" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
-              <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'Grade Average (out of 12)', position: "outsideBottom", dy: 20, style: { fill: '#474747', textAnchor: 'middle' }}}/>
+              <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'Grade Point Average (out of 12)', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}/>
               <ChartTooltip
                 cursor={false}
                 content={<CustomTooltip />}
@@ -252,7 +224,7 @@ export default function CourseGradeChart() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="text-center">
-        <p className="text-tiny text-neutral-400 mx-auto">Data will become more accurate with more users</p>
+        <p className="text-tiny text-neutral-400 mx-auto">* Projections will improve with the number of contributions; Please share this site with other Engineering 1 students *</p>
       </CardFooter>
     </Card>
   );
