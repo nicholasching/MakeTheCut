@@ -22,7 +22,7 @@ export default function Home() {
       <GridBackground className="flex flex-1 p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
           <HomeButton />
           <LogoutButton />
-          <div className="flex flex-col w-full">
+          <div className="flex flex-col w-full gap-30">
             <HorizontalBarChart />
             <HorizontalBarChartGrades />
           </div>

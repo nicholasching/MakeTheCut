@@ -138,13 +138,13 @@ export default function CourseGradeChart() {
   
   // Red color gradient for bars
   const barColors = [
-    "#FF4040", // Light red
-    "#FF3030",
-    "#FF2020",
-    "#FF1010",
-    "#FF0000", // Pure red
-    "#EF0000",
-    "#DF0000" // Dark red
+    "#1D2435", // Light red
+    "#242D42",
+    "#2B364F",
+    "#323F5D",
+    "#39486A", // Pure red
+    "#405177",
+    "#475B85" // Dark red
   ];
   
   // Function to get bar color based on course
@@ -180,7 +180,7 @@ export default function CourseGradeChart() {
               <div className="absolute inset-0 rounded-full bg-red-500"></div>
               <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
             </div>
-            Live - Reported Course Grade Averages
+            Live Course Grade Averages
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Current Contributions: {totalContributions}</p>
@@ -206,7 +206,7 @@ export default function CourseGradeChart() {
                 cursor={false}
                 content={<CustomTooltip />}
               />
-              <Bar 
+                <Bar 
                 dataKey="average" 
                 radius={[0, 4, 4, 0]} 
                 isAnimationActive={true} 
@@ -214,7 +214,8 @@ export default function CourseGradeChart() {
                 fillOpacity={1}
                 name="Average"
                 stroke="none"
-              >
+                barSize={45}
+                >
                 {courseData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getBarFill(entry.course)} />
                 ))}
@@ -224,7 +225,7 @@ export default function CourseGradeChart() {
         </ChartContainer>
       </CardContent>
       <CardFooter className="text-center">
-        <p className="text-tiny text-neutral-400 mx-auto">* Projections will improve with the number of contributions; Please share this site with other Engineering 1 students *</p>
+        <p className="text-tiny text-neutral-600 mx-auto">Projections will improve with the number of contributions. Share this site with other Engineering 1 students</p>
       </CardFooter>
     </Card>
   );

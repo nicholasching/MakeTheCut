@@ -238,7 +238,7 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5 mb-20">
+    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
@@ -246,7 +246,7 @@ export default function HorizontalBarChart() {
               <div className="absolute inset-0 rounded-full bg-red-500"></div>
               <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
             </div>
-            Live - Estimated Stream Cutoffs
+            Live Estimated Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Current Contributions: {totalContributions}</p>
