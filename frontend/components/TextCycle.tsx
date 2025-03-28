@@ -101,7 +101,7 @@ export default function TextCycle({
         {words[currentIndex]}
         {/* Animated underline */}
         <span 
-          className={`absolute left-0 bottom-0 h-0.5 bg-red-500 transition-all duration-1000 ease-out origin-left ${
+          className={`absolute left-0 bottom-0 md:bottom-3 h-0.5 transform bg-red-500 transition-all duration-1000 ease-out -z-10 ${
             showUnderline ? 'w-full opacity-100' : 'w-0 opacity-0'
           }`}
         ></span>

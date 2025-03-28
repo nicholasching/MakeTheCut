@@ -138,13 +138,13 @@ export default function CourseGradeChart() {
   
   // Red color gradient for bars
   const barColors = [
-    "#1D2435", // Light red
-    "#242D42",
-    "#2B364F",
-    "#323F5D",
-    "#39486A", // Pure red
-    "#405177",
-    "#475B85" // Dark red
+    "#114D7E", // Light red
+    "#145890",
+    "#1663A2",
+    "#186EB4",
+    "#1B79C5", // Pure red
+    "#1D84D7",
+    "#288EE2" // Dark red
   ];
   
   // Function to get bar color based on course
@@ -214,7 +214,7 @@ export default function CourseGradeChart() {
                 fillOpacity={1}
                 name="Average"
                 stroke="none"
-                barSize={45}
+                barSize={50}
                 >
                 {courseData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={getBarFill(entry.course)} />
