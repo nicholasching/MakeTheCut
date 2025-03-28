@@ -8,7 +8,7 @@ interface LiveCounterProps {
 }
 
 export default function LiveCounter({ className = "" }: LiveCounterProps) {
-        const [totalContributions, setTotalContributions] = useState<number>(0);
+        const [totalContributions, setTotalContributions] = useState<string>("Loading...");
 
         useEffect(() => {
                 const getContributions = async () => {
