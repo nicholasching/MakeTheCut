@@ -12,6 +12,8 @@ import LogoutButton from "@/components/LogoutButton";
 
 import Footer from "@/components/Footer";
 
+import HorizontalBarChartGrades from "@/components/HorizontalBarChartGrades";
+
 import LiveCounter from "@/components/LiveCounter";
 
 export default function Home() {
@@ -20,7 +22,11 @@ export default function Home() {
       <GridBackground className="flex flex-1 p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
           <HomeButton />
           <LogoutButton />
-          <HorizontalBarChart />
+          <div className="flex flex-col w-full">
+            <HorizontalBarChart />
+            <HorizontalBarChartGrades />
+          </div>
+
       </GridBackground>
       <Footer />
     </div>
