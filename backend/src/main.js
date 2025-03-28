@@ -1,4 +1,4 @@
-import { Client, Databases, Users, ID } from 'node-appwrite';
+import { Client, Databases, Users, ID, Query } from 'node-appwrite';
 
 const totalChemSeats = 261/4
 const totalCivSeats = 374/4
@@ -85,8 +85,39 @@ export default async ({ req, res, log, error }) => {
   });
 };
 
+// Helper function to fetch all documents using pagination
+async function getAllDocuments(database, collectionId) {
+  const limit = 100; // Fetch more documents per request for efficiency
+  let allDocuments = [];
+  let lastId = null;
+  let hasMore = true;
+
+  while (hasMore) {
+    const queries = [Query.limit(limit)];
+    
+    // Add cursor for pagination if we have a lastId
+    if (lastId) {
+      queries.push(Query.cursorAfter(lastId));
+    }
+
+    const response = await database.listDocuments('MacStats', collectionId, queries);
+    
+    if (response.documents.length > 0) {
+      allDocuments = [...allDocuments, ...response.documents];
+      lastId = response.documents[response.documents.length - 1].$id;
+      
+      // Check if we got fewer documents than requested, meaning we reached the end
+      hasMore = response.documents.length === limit;
+    } else {
+      hasMore = false;
+    }
+  }
+
+  return allDocuments;
+}
+
 async function calculateAverages(database) {
-  const databaseResponse = await database.listDocuments('MacStats','UserData');
+  const documents = await getAllDocuments(database, 'UserData');
   
   let math1za3total = 0;
   let math1zb3total = 0;
@@ -104,8 +135,8 @@ async function calculateAverages(database) {
   let chem1e03count = 0;
   let eng1p13count = 0;
 
-  for (let i = 0; i < databaseResponse.documents.length; i++) {
-    const doc = databaseResponse.documents[i];
+  for (let i = 0; i < documents.length; i++) {
+    const doc = documents[i];
     
     if (doc.math1za3 > 0) {
       math1za3total += doc.math1za3;
@@ -200,14 +231,15 @@ async function calculateAverages(database) {
     phys1d03avg: phys1d03average,
     phys1e03avg: phys1e03average,
     chem1e03avg: chem1e03average,
-    eng1p13avg: eng1p13average
+    eng1p13avg: eng1p13average,
+    streamCount: documents.length
   };
 }
 
 async function calculateCutoffs(database) {
-  const databaseResponse = await database.listDocuments('MacStats','UserData');
+  const documents = await getAllDocuments(database, 'UserData');
   // Create a sortedDatabase array with freechoice users first, then sorted by GPA in descending order
-  const sortedDatabase = [...databaseResponse.documents].sort((a, b) => {
+  const sortedDatabase = [...documents].sort((a, b) => {
     // First sort by freechoice (true values come first)
     if (a.freechoice && !b.freechoice) return -1;
     if (!a.freechoice && b.freechoice) return 1;
@@ -322,6 +354,13 @@ async function calculateCutoffs(database) {
     }
     // Stream not filled at all
     else {
+      cutoffGPAs[stream] = 4;
+    }
+  });
+  
+  // Final check: ensure any stream with fewer filled seats than available seats has cutoff of 4
+  Object.keys(streamCounts).forEach(stream => {
+    if (streamCounts[stream] < actualSeats[stream]) {
       cutoffGPAs[stream] = 4;
     }
   });

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { account } from "../appwrite";
+import LogoutButton from "@/components/LogoutButton";
 
 
 export default function Home() {
@@ -66,21 +67,24 @@ export default function Home() {
                 }
 
                 return (
-                    <button 
-                        className={`p-1 w-40 rounded-sm transition-all ${
-                            isDisabled 
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
-                                : "bg-white text-black hover:scale-110 cursor-pointer"
-                        }`}
-                        disabled={isDisabled}
-                        onClick={resendVerifcation}
-                    >
-                        {buttonClicked 
-                            ? "Email Sent" 
-                            : countdown > 0 
-                                ? `Resend in ${countdown}s` 
-                                : "Resend Email"}
-                    </button>
+                    <>
+                        <button 
+                            className={`p-1 w-40 rounded-sm transition-all ${
+                                isDisabled 
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                                    : "bg-white text-black hover:scale-110 cursor-pointer"
+                            }`}
+                            disabled={isDisabled}
+                            onClick={resendVerifcation}
+                        >
+                            {buttonClicked 
+                                ? "Email Sent" 
+                                : countdown > 0 
+                                    ? `Resend in ${countdown}s` 
+                                    : "Resend Email"}
+                        </button>
+                        <LogoutButton />
+                    </>
                 );
             })()}
         </div>

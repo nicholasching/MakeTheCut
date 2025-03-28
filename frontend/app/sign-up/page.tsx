@@ -14,7 +14,6 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [gpa, setGPA] = useState("");
   const [error, setError] = useState("");
 
   const router = useRouter();
@@ -33,7 +32,7 @@ const RegisterPage = () => {
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
-    //router.push('/grades');
+    router.push('/grades');          // Comment out to enable verification
   };
 
   const register = async () => {
@@ -46,6 +45,9 @@ const RegisterPage = () => {
   
       await account.create(ID.unique(), email, password, name);
       await login(email, password);
+      
+      // Uncomment to enable verification
+      /*
       try{
         await account.createVerification(
           'https://www.makethecut.ca/verify'
@@ -55,6 +57,7 @@ const RegisterPage = () => {
         setError("Too many signups in the last hour. Please try again later.");
         return false;
       }
+      */
 
       
     } catch (error) {
@@ -68,17 +71,15 @@ const RegisterPage = () => {
     setLoggedInUser(null);
   };
 
-  // const newLog = async () => {
-  //   await addLog(gpa);
-  // }
-
   return (
     
     <GridBackground className="h-svh flex items-center justify-center">
       <HomeButton />
+      {/* // Delete quotes and comments to enable verification
       <div className="fixed top-0 left-0 w-full bg-neutral-950 py-1 overflow-hidden z-50">
         <MarqueeText />
       </div>
+       */}
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
         <h1 className="text-4xl mb-5 font-semibold">Sign Up</h1>
         <p className="mb-7 text-teenytiny text-red-800 font-semibold">Registration currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
