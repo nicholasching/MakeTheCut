@@ -9,7 +9,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --text-title: clamp(2.75rem, 5vw, 10rem);
-  --text-subtitle: clamp(1.15rem, 1.25vw, 5rem);
+  --text-subtitle: clamp(0.75rem, 1vw, 5rem);
   --text-subtext: clamp(0.6rem, 0.75vw, 5rem);
   --text-tiny: clamp(0.5rem, 0.75vw, 3rem);
   --text-teenytiny: clamp(0.45rem, 0.55vw, 3rem);
@@ -46,6 +46,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+}
+
+nextjs-portal {
+  display: none;
 }
 
 @keyframes marquee {

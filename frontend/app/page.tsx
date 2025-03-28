@@ -11,6 +11,8 @@ import Footer from "@/components/Footer";
 
 import ScrollButton from "@/components/ScrollButton";
 
+import LiveCounter from "@/components/LiveCounter";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -40,8 +42,7 @@ export default function Home() {
             <p className="text-subtext"> We analyze submitted GPA and stream preferences, factoring in <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="underline text-red-500">seat availability</a> to provide a realistic estimate of cutoff ranges. This approach gives students a clearer understanding of where they stand, helping them make more informed decisions. By combining intuitive design, real-time data storage, and simple yet effective data analysis, MakeTheCut removes the guesswork from stream selection at McMaster Engineering.</p>
           </div>
         </div>
-
-
+        <LiveCounter />
       </GridBackground>
       <Footer />
     </div>
