@@ -180,11 +180,20 @@ const SpinningLoader = () => {
 export default function HorizontalBarChart() {
   const [isMobile, setIsMobile] = useState(false);
   const [key, setKey] = useState(0);
+  const [totalContributions, setTotalContributions] = useState<number>(0);
   const router = useRouter();
   
   useEffect(() => {
     const fetchData = async () => {
       setKey(key + await initPage(router));
+      
+      // Fetch contribution count
+      try {
+        const contributions = await database.getDocument('MacStats', 'StatData', 'averages');
+        setTotalContributions(contributions.streamCount);
+      } catch (error) {
+        console.error("Error fetching contribution count:", error);
+      }
     };
     
     fetchData();
@@ -231,17 +240,17 @@ export default function HorizontalBarChart() {
     <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5 mb-20">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
-        <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-          <div className="relative w-3 h-3">
-            <div className="absolute inset-0 rounded-full bg-red-500"></div>
-            <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
-          </div>
-          Live Estimated Stream Cutoffs
-        </CardTitle>
-        <CardDescription className="text-teenytiny">Data will become more accurate with more users</CardDescription>
+          <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
+            <div className="relative w-3 h-3">
+              <div className="absolute inset-0 rounded-full bg-red-500"></div>
+              <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+            </div>
+            Live Estimated Stream Cutoffs
+          </CardTitle>
+          <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
+            <p>Current Contributions: {totalContributions}</p>
+          </CardDescription>
         </div>
-
-        
       </CardHeader>
       <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">

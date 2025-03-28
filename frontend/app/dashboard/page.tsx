@@ -12,6 +12,8 @@ import LogoutButton from "@/components/LogoutButton";
 
 import Footer from "@/components/Footer";
 
+import LiveCounter from "@/components/LiveCounter";
+
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
