@@ -61,39 +61,39 @@ async function initPage(router: any) {
       documents.documents.forEach(doc => {
         if (doc.$id === 'chem') {
           cutoffs.chem = parseFloat(doc.streamCutoff);
-          chartData[0].people = doc.firstChoiceCount || 0;
+          chartData[0].people = doc.streamCount || 0;
         }
         if (doc.$id === 'civ') {
           cutoffs.civil = parseFloat(doc.streamCutoff);
-          chartData[1].people = doc.firstChoiceCount || 0;
+          chartData[1].people = doc.streamCount || 0;
         }
         if (doc.$id === 'comp') {
           cutoffs.computer = parseFloat(doc.streamCutoff);
-          chartData[2].people = doc.firstChoiceCount || 0;
+          chartData[2].people = doc.streamCount || 0;
         }
         if (doc.$id === 'elec') {
           cutoffs.electrical = parseFloat(doc.streamCutoff);
-          chartData[3].people = doc.firstChoiceCount || 0;
+          chartData[3].people = doc.streamCount || 0;
         }
         if (doc.$id === 'engphys') {
           cutoffs.engphys = parseFloat(doc.streamCutoff);
-          chartData[4].people = doc.firstChoiceCount || 0;
+          chartData[4].people = doc.streamCount || 0;
         }
         if (doc.$id === 'mat') {
           cutoffs.materials = parseFloat(doc.streamCutoff);
-          chartData[5].people = doc.firstChoiceCount || 0;
+          chartData[5].people = doc.streamCount || 0;
         }
         if (doc.$id === 'mech') {
           cutoffs.mechanical = parseFloat(doc.streamCutoff);
-          chartData[6].people = doc.firstChoiceCount || 0;
+          chartData[6].people = doc.streamCount || 0;
         }
         if (doc.$id === 'tron') {
           cutoffs.mechatronics = parseFloat(doc.streamCutoff);
-          chartData[7].people = doc.firstChoiceCount || 0;
+          chartData[7].people = doc.streamCount || 0;
         }
         if (doc.$id === 'soft') {
           cutoffs.software = parseFloat(doc.streamCutoff);
-          chartData[8].people = doc.firstChoiceCount || 0;
+          chartData[8].people = doc.streamCount || 0;
         }
       });
       
