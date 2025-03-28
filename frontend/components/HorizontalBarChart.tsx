@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-
+import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
 import { account, database } from "../app/appwrite";
 import { CardDescription } from "@/components/ui/card";
@@ -28,16 +27,17 @@ var loggedInUser;
 var user;
 var userGPA = 4;
 
+// Update the chartData structure to include the number of people
 let chartData = [
-  { stream: "Chemical", GPA: cutoffs.chem },
-  { stream: "Civil", GPA: cutoffs.civil},
-  { stream: "Computer", GPA: cutoffs.computer },
-  { stream: "Electrical", GPA: cutoffs.electrical },
-  { stream: "Engineering Physics", GPA: cutoffs.engphys },
-  { stream: "Materials", GPA: cutoffs.materials },
-  { stream: "Mechanical", GPA: cutoffs.mechanical },
-  { stream: "Mechatronics", GPA: cutoffs.mechatronics },
-  { stream: "Software", GPA: cutoffs.software },
+  { stream: "Chemical", GPA: cutoffs.chem, people: 0 },
+  { stream: "Civil", GPA: cutoffs.civil, people: 0 },
+  { stream: "Computer", GPA: cutoffs.computer, people: 0 },
+  { stream: "Electrical", GPA: cutoffs.electrical, people: 0 },
+  { stream: "Engineering Physics", GPA: cutoffs.engphys, people: 0 },
+  { stream: "Materials", GPA: cutoffs.materials, people: 0 },
+  { stream: "Mechanical", GPA: cutoffs.mechanical, people: 0 },
+  { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: 0 },
+  { stream: "Software", GPA: cutoffs.software, people: 0 },
 ]
 
 async function initPage(router: any) {
@@ -57,29 +57,57 @@ async function initPage(router: any) {
       
       let documents = await database.listDocuments('MacStats', 'StatData');
       
-      // Access documents by their $id
+      // Access documents by their $id and update people count
       documents.documents.forEach(doc => {
-        if (doc.$id === 'chem') cutoffs.chem = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'civ') cutoffs.civil = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'comp') cutoffs.computer = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'elec') cutoffs.electrical = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'engphys') cutoffs.engphys = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'mat') cutoffs.materials = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'mech') cutoffs.mechanical = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'tron') cutoffs.mechatronics = parseFloat(doc.streamCutoff);
-        if (doc.$id === 'soft') cutoffs.software = parseFloat(doc.streamCutoff);
+        if (doc.$id === 'chem') {
+          cutoffs.chem = parseFloat(doc.streamCutoff);
+          chartData[0].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'civ') {
+          cutoffs.civil = parseFloat(doc.streamCutoff);
+          chartData[1].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'comp') {
+          cutoffs.computer = parseFloat(doc.streamCutoff);
+          chartData[2].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'elec') {
+          cutoffs.electrical = parseFloat(doc.streamCutoff);
+          chartData[3].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'engphys') {
+          cutoffs.engphys = parseFloat(doc.streamCutoff);
+          chartData[4].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'mat') {
+          cutoffs.materials = parseFloat(doc.streamCutoff);
+          chartData[5].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'mech') {
+          cutoffs.mechanical = parseFloat(doc.streamCutoff);
+          chartData[6].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'tron') {
+          cutoffs.mechatronics = parseFloat(doc.streamCutoff);
+          chartData[7].people = doc.firstChoiceCount || 0;
+        }
+        if (doc.$id === 'soft') {
+          cutoffs.software = parseFloat(doc.streamCutoff);
+          chartData[8].people = doc.firstChoiceCount || 0;
+        }
       });
       
+      // Update chart data with new GPA values
       chartData = [
-        { stream: "Chemical", GPA: cutoffs.chem },
-        { stream: "Civil", GPA: cutoffs.civil},
-        { stream: "Computer", GPA: cutoffs.computer },
-        { stream: "Electrical", GPA: cutoffs.electrical },
-        { stream: "Engineering Physics", GPA: cutoffs.engphys },
-        { stream: "Materials", GPA: cutoffs.materials },
-        { stream: "Mechanical", GPA: cutoffs.mechanical },
-        { stream: "Mechatronics", GPA: cutoffs.mechatronics },
-        { stream: "Software", GPA: cutoffs.software },
+        { stream: "Chemical", GPA: cutoffs.chem, people: chartData[0].people },
+        { stream: "Civil", GPA: cutoffs.civil, people: chartData[1].people },
+        { stream: "Computer", GPA: cutoffs.computer, people: chartData[2].people },
+        { stream: "Electrical", GPA: cutoffs.electrical, people: chartData[3].people },
+        { stream: "Engineering Physics", GPA: cutoffs.engphys, people: chartData[4].people },
+        { stream: "Materials", GPA: cutoffs.materials, people: chartData[5].people },
+        { stream: "Mechanical", GPA: cutoffs.mechanical, people: chartData[6].people },
+        { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: chartData[7].people },
+        { stream: "Software", GPA: cutoffs.software, people: chartData[8].people },
       ]
 
       return 1
@@ -95,6 +123,19 @@ async function initPage(router: any) {
   return 0
 }
 
+// Create a custom tooltip component
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-sm">
+        <p className="mb-1"><strong>{payload[0].payload.stream}</strong></p>
+        <p className="text-[#f4ab33]">GPA Cutoff: {payload[0].value.toFixed(2)}</p>
+        <p className="text-white">People Entering Stream: {payload[0].payload.people}</p>
+      </div>
+    );
+  }
+  return null;
+};
 
 const chartConfig = {
   GPA: {
@@ -218,13 +259,13 @@ export default function HorizontalBarChart() {
               <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
               <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#474747', textAnchor: 'middle' }}}/>
               <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
-              <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
-                You ✎
-              </Label>
+                <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
+                  You ✎
+                </Label>
               </ReferenceLine>
               <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
+                cursor={false}
+                content={<CustomTooltip />}
               />
               <Bar 
                 dataKey="GPA" 
