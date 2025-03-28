@@ -42,7 +42,7 @@ const LogoutButton = ({
                             </DialogTitle>
                             <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Grades</button></Link>
                             <Link href="/"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Home</button></Link>
-                            <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button>
+                            {/* <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button> */}
                         </DialogContent>
                     </Dialog>
                 </motion.div>
