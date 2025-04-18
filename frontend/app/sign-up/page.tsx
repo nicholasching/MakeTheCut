@@ -51,16 +51,7 @@ const RegisterPage = () => {
       await login(email, password);
       
       // Comment to disable verification
-      try{
-        await account.createVerification(
-          'https://www.makethecut.ca/verify'
-        )
-        router.push('/authenticate');
-      } catch (error){
-        setError("Too many signups in the last hour. Please try again later.");
-        return false;
-      }
-
+      router.push('/authenticate');
       
     } catch (error) {
       setError("Account already exists with this email");

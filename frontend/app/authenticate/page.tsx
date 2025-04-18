@@ -17,6 +17,16 @@ export default function Home() {
                 if (loggedInUser.emailVerification) {
                     router.push('/dashboard');
                 }
+                else {
+                    try{
+                        await account.createVerification(
+                            'https://www.makethecut.ca/verify'
+                        )
+                    }
+                    catch (error){
+                        setError("Too many signups in the last hour. Please try again later.");
+                    }
+                }
             }
             catch (error) {
                 router.push('/login');
@@ -34,7 +44,7 @@ export default function Home() {
                 </div>
             )}
             {(() => {
-                const [countdown, setCountdown] = useState(20);
+                const [countdown, setCountdown] = useState(60);
                 const [buttonClicked, setButtonClicked] = useState(false);
                 const [isDisabled, setIsDisabled] = useState(true);
 
