@@ -73,6 +73,17 @@ nextjs-portal {
   }
 }
 
+/* Temporary Styling for Announcement banner */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 12px #c2410c; } /* Use orange-700 */
+  50% { box-shadow: 0 0 35px #c2410c, 0 0 55px #c2410c; } /* Use orange-700 */
+}
+
+.animate-glow {
+  animation: glow 2.5s ease-in-out infinite; /* Slightly faster animation */
+}
+/* Temporary Styling for Announcement banner ends here */
+
 :root {
   --radius: 0.625rem;
   --background: oklch(0.145 0 0);
