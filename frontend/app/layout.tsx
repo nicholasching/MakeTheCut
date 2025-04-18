@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         {/* Apply gradient background instead of glow */}
         <div className="bg-gradient-to-r from-blue-800 via-orange-700 to-orange-900 text-primary-foreground text-center p-3 text-sm font-medium animate-glow">
-          Good News! MakeTheCut now works on McMaster Wifi.
+          Good News! MakeTheCut now works on McMaster Wifi. We are also now requiring email verification for all accounts.
         </div>
         {children}
         <Analytics />
