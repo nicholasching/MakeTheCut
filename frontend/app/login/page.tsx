@@ -59,7 +59,7 @@ const LoginPage = () => {
       <HomeButton />
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg text-center">
         <h1 className="text-4xl mb-5 font-semibold">Log In</h1>
-        <p className="mb-10 text-teenytiny text-blue-400 font-semibold">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
+        {/*<p className="mb-10 text-teenytiny text-blue-400 font-semibold">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>*/}
         <div className="mb-10 flex flex-col gap-5">
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300"  type="password" placeholder="Password" value={password} onClick={() => handleLogin(email, password)} onChange={(e) => setPassword(e.target.value)} />
