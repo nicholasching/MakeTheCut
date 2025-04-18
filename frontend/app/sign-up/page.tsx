@@ -42,6 +42,10 @@ const RegisterPage = () => {
         setError("Email must be under an @mcmaster.ca domain");
         return false;
       }
+      if (password.length < 8){
+        setError("Password must be at least 8 characters long");
+        return false;
+      }
   
       await account.create(ID.unique(), email, password, name);
       await login(email, password);
