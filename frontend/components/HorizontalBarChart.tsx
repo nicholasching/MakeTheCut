@@ -45,12 +45,10 @@ async function initPage(router: any) {
   try {
     loggedInUser = await account.get();
     
-    // Uncomment to enable verification
-    /* 
+    // Comment to disable verification
     if (!loggedInUser.emailVerification){
       router.push('/authenticate');
     }
-    */
 
     try{
       user = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);

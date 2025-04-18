@@ -32,7 +32,7 @@ const RegisterPage = () => {
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
-    router.push('/grades');          // Comment out to enable verification
+    //router.push('/grades');          // Comment out to enable verification
   };
 
   const register = async () => {
@@ -50,8 +50,7 @@ const RegisterPage = () => {
       await account.create(ID.unique(), email, password, name);
       await login(email, password);
       
-      // Uncomment to enable verification
-      /*
+      // Comment to disable verification
       try{
         await account.createVerification(
           'https://www.makethecut.ca/verify'
@@ -61,7 +60,6 @@ const RegisterPage = () => {
         setError("Too many signups in the last hour. Please try again later.");
         return false;
       }
-      */
 
       
     } catch (error) {
