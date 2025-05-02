@@ -188,7 +188,7 @@ export default function HorizontalBarChart() {
       
       // Fetch contribution count
       try {
-        const contributions = await database.getDocument('MacStats', 'StatData', 'averages');
+        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
         setTotalContributions(contributions.streamCount);
       } catch (error) {
         console.error("Error fetching contribution count:", error);

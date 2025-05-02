@@ -32,16 +32,33 @@ let courseData = [
 async function initPage() {
   try {
     // Fetch course averages from the database
-    let document = await database.getDocument('MacStats', 'StatData', 'averages');
-    
+    let documents = await database.listDocuments('MacStats', 'MarkData');
+
     // Access documents and update averages
-    courseData[0].average = parseFloat(document.math1za3avg || "0");
-    courseData[1].average = parseFloat(document.math1zb3avg || "0");
-    courseData[2].average = parseFloat(document.math1zc3avg || "0");
-    courseData[3].average = parseFloat(document.phys1d03avg || "0");
-    courseData[4].average = parseFloat(document.phys1e03avg || "0");
-    courseData[5].average = parseFloat(document.chem1e03avg || "0");
-    courseData[6].average = parseFloat(document.eng1p13avg || "0");
+    documents.documents.forEach(doc => {
+      if (doc.$id === 'math1za3') {
+        courseData[0].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'math1zb3') {
+        courseData[1].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'math1zc3') {
+        courseData[2].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'phys1d03') {
+        courseData[3].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'phys1e03') {
+        courseData[4].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'chem1e03') {
+        courseData[5].average = parseFloat(doc.average || "0");
+      }
+      if (doc.$id === 'eng1p13') {
+        courseData[6].average = parseFloat(doc.average || "0");
+      }
+    });
+
     console.log("Course data fetched successfully:", courseData);
     
     return 1;
@@ -116,7 +133,7 @@ export default function CourseGradeChart() {
 
       // Fetch contribution count
       try {
-        const contributions = await database.getDocument('MacStats', 'StatData', 'averages');
+        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
         setTotalContributions(contributions.streamCount);
       } catch (error) {
         console.error("Error fetching contribution count:", error);

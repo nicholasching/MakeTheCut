@@ -12,7 +12,7 @@ export default function LiveCounter({ className = "" }: LiveCounterProps) {
 
         useEffect(() => {
                 const getContributions = async () => {
-                        const contributions = await database.getDocument('MacStats', 'StatData', 'averages');
+                        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
                         setTotalContributions(contributions.streamCount);
                 }
                 getContributions();
