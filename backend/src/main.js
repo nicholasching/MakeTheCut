@@ -22,12 +22,22 @@ export default async ({ req, res, log, error }) => {
   const database = new Databases(client);
 
   try {
+    // Fetch all documents from the UserData collection
+    const documents = await getAllDocuments(database, 'UserData');
+
     // Recalculate averages and update the averages document
-    const averages = await calculateAverages(database);
-    await database.updateDocument('MacStats','StatData','averages',averages);
+    const distribution = await calculateDistribution(documents);
+    await database.updateDocument('MacStats','MarkData','math1za3',distribution.math1za3);
+    await database.updateDocument('MacStats','MarkData','math1zb3',distribution.math1zb3);
+    await database.updateDocument('MacStats','MarkData','math1zc3',distribution.math1zc3);
+    await database.updateDocument('MacStats','MarkData','phys1d03',distribution.phys1d03);
+    await database.updateDocument('MacStats','MarkData','phys1e03',distribution.phys1e03);
+    await database.updateDocument('MacStats','MarkData','chem1e03',distribution.chem1e03);
+    await database.updateDocument('MacStats','MarkData','eng1p13',distribution.eng1p13);
+    await database.updateDocument('MacStats','MarkData','total',distribution.total);
 
     // Recalculate cutoff estimation
-    const cutoffs = await calculateCutoffs(database);
+    const cutoffs = await calculateCutoffs(documents);
 
     const chemStats = {streamCount: cutoffs.chemCount, streamCutoff: cutoffs.chemCut};
     const civStats = {streamCount: cutoffs.civCount, streamCutoff: cutoffs.civCut};
@@ -48,6 +58,7 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','StatData','mech',mechStats);
     await database.updateDocument('MacStats','StatData','tron',tronStats);
     await database.updateDocument('MacStats','StatData','soft',softStats);
+    await database.updateDocument('MacStats','StatData','total',{streamCount: documents.length});
 
     /*
     // Logging
@@ -70,6 +81,8 @@ export default async ({ req, res, log, error }) => {
     error(err.message);
   }
 
+  /* Sample Routering Connection
+
   // The req object contains the request data
   if (req.path === "/ping") {
     // Use res object to respond with text(), json(), or binary()
@@ -77,12 +90,7 @@ export default async ({ req, res, log, error }) => {
     return res.text("Pong");
   }
 
-  return res.json({
-    motto: "Build like a team of hundreds_",
-    learn: "https://appwrite.io/docs",
-    connect: "https://appwrite.io/discord",
-    getInspired: "https://builtwith.appwrite.io",
-  });
+  */
 };
 
 // Helper function to fetch all documents using pagination
@@ -116,128 +124,81 @@ async function getAllDocuments(database, collectionId) {
   return allDocuments;
 }
 
-async function calculateAverages(database) {
-  const documents = await getAllDocuments(database, 'UserData');
-  
-  let math1za3total = 0;
-  let math1zb3total = 0;
-  let math1zc3total = 0;
-  let phys1d03total = 0;
-  let phys1e03total = 0;
-  let chem1e03total = 0;
-  let eng1p13total = 0;
-  
-  let math1za3count = 0;
-  let math1zb3count = 0;
-  let math1zc3count = 0;
-  let phys1d03count = 0;
-  let phys1e03count = 0;
-  let chem1e03count = 0;
-  let eng1p13count = 0;
+async function calculateDistribution(documents) {
+
+  let math1za3 = Array(12).fill(0);
+  let math1zb3 = Array(12).fill(0);
+  let math1zc3 = Array(12).fill(0);
+  let phys1d03 = Array(12).fill(0);
+  let phys1e03 = Array(12).fill(0);
+  let chem1e03 = Array(12).fill(0);
+  let eng1p13 = Array(12).fill(0);
+  let gpa = Array(12).fill(0);
 
   for (let i = 0; i < documents.length; i++) {
     const doc = documents[i];
     
     if (doc.math1za3 > 0) {
-      math1za3total += doc.math1za3;
-      math1za3count++;
+      math1za3[doc.math1za3 - 1]++;
     }
-    
-    if (doc.math1zb3 > 0) {
-      math1zb3total += doc.math1zb3;
-      math1zb3count++;
-    }
-    
-    if (doc.math1zc3 > 0) {
-      math1zc3total += doc.math1zc3;
-      math1zc3count++;
-    }
-    
-    if (doc.phys1d03 > 0) {
-      phys1d03total += doc.phys1d03;
-      phys1d03count++;
-    }
-    
-    if (doc.phys1e03 > 0) {
-      phys1e03total += doc.phys1e03;
-      phys1e03count++;
-    }
-    
-    if (doc.chem1e03 > 0) {
-      chem1e03total += doc.chem1e03;
-      chem1e03count++;
-    }
-    
-    if (doc.eng1p13 > 0) {
-      eng1p13total += doc.eng1p13;
-      eng1p13count++;
-    }
+
+    // Syntax [condition] && [action] is a shorthand for if (condition) { action; }
+    doc.math1za3 > 0 && math1za3[doc.math1za3 - 1]++;
+    doc.math1zb3 > 0 && math1zb3[doc.math1zb3 - 1]++;
+    doc.math1zc3 > 0 && math1zc3[doc.math1zc3 - 1]++;
+    doc.phys1d03 > 0 && phys1d03[doc.phys1d03 - 1]++;
+    doc.phys1e03 > 0 && phys1e03[doc.phys1e03 - 1]++;
+    doc.chem1e03 > 0 && chem1e03[doc.chem1e03 - 1]++;
+    doc.eng1p13 > 0 && eng1p13[doc.eng1p13 - 1]++;
+    doc.gpa > 0 && gpa[Math.round(doc.gpa - 1)]++;
   }
   
-  const math1za3average = math1za3count > 0 ? math1za3total / math1za3count : 0;
-  const math1zb3average = math1zb3count > 0 ? math1zb3total / math1zb3count : 0;
-  const math1zc3average = math1zc3count > 0 ? math1zc3total / math1zc3count : 0;
-  const phys1d03average = phys1d03count > 0 ? phys1d03total / phys1d03count : 0;
-  const phys1e03average = phys1e03count > 0 ? phys1e03total / phys1e03count : 0;
-  const chem1e03average = chem1e03count > 0 ? chem1e03total / chem1e03count : 0;
-  const eng1p13average = eng1p13count > 0 ? eng1p13total / eng1p13count : 0;
-  
-  // Calculate weighted GPA only using courses that have valid counts
-  let weightedTotal = 0;
-  let weightedCredits = 0;
-  
-  if (math1za3count > 0) {
-    weightedTotal += math1za3average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (math1zb3count > 0) {
-    weightedTotal += math1zb3average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (math1zc3count > 0) {
-    weightedTotal += math1zc3average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (phys1d03count > 0) {
-    weightedTotal += phys1d03average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (phys1e03count > 0) {
-    weightedTotal += phys1e03average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (chem1e03count > 0) {
-    weightedTotal += chem1e03average * 3;
-    weightedCredits += 3;
-  }
-  
-  if (eng1p13count > 0) {
-    weightedTotal += eng1p13average * 13;
-    weightedCredits += 13;
-  }
-  
-  const averagegpa = weightedCredits > 0 ? weightedTotal / weightedCredits : 0;
+  const math1za3avg= (math1za3[0] + math1za3[1] + math1za3[2] + math1za3[3] + math1za3[4] + math1za3[5] + math1za3[6] + math1za3[7] + math1za3[8] + math1za3[9] + math1za3[10] + math1za3[11] > 0) ? (math1za3[0] * 1 + math1za3[1] * 2 + math1za3[2] * 3 + math1za3[3] * 4 + math1za3[4] * 5 + math1za3[5] * 6 + math1za3[6] * 7 + math1za3[7] * 8 + math1za3[8] * 9 + math1za3[9] * 10 + math1za3[10] * 11 + math1za3[11] * 12) / (math1za3[0] + math1za3[1] + math1za3[2] + math1za3[3] + math1za3[4] + math1za3[5] + math1za3[6] + math1za3[7] + math1za3[8] + math1za3[9] + math1za3[10] + math1za3[11]) : 0; 
+  const math1zb3avg= (math1zb3[0] + math1zb3[1] + math1zb3[2] + math1zb3[3] + math1zb3[4] + math1zb3[5] + math1zb3[6] + math1zb3[7] + math1zb3[8] + math1zb3[9] + math1zb3[10] + math1zb3[11] > 0) ? (math1zb3[0] * 1 + math1zb3[1] * 2 + math1zb3[2] * 3 + math1zb3[3] * 4 + math1zb3[4] * 5 + math1zb3[5] * 6 + math1zb3[6] * 7 + math1zb3[7] * 8 + math1zb3[8] * 9 + math1zb3[9] * 10 + math1zb3[10] * 11 + math1zb3[11] * 12) / (math1zb3[0] + math1zb3[1] + math1zb3[2] + math1zb3[3] + math1zb3[4] + math1zb3[5] + math1zb3[6] + math1zb3[7] + math1zb3[8] + math1zb3[9] + math1zb3[10] + math1zb3[11]) : 0;
+  const math1zc3avg= (math1zc3[0] + math1zc3[1] + math1zc3[2] + math1zc3[3] + math1zc3[4] + math1zc3[5] + math1zc3[6] + math1zc3[7] + math1zc3[8] + math1zc3[9] + math1zc3[10] + math1zc3[11] > 0) ? (math1zc3[0] * 1 + math1zc3[1] * 2 + math1zc3[2] * 3 + math1zc3[3] * 4 + math1zc3[4] * 5 + math1zc3[5] * 6 + math1zc3[6] * 7 + math1zc3[7] * 8 + math1zc3[8] * 9 + math1zc3[9] * 10 + math1zc3[10] * 11 + math1zc3[11] * 12) / (math1zc3[0] + math1zc3[1] + math1zc3[2] + math1zc3[3] + math1zc3[4] + math1zc3[5] + math1zc3[6] + math1zc3[7] + math1zc3[8] + math1zc3[9] + math1zc3[10] + math1zc3[11]) : 0;
+  const phys1d03avg= (phys1d03[0] + phys1d03[1] + phys1d03[2] + phys1d03[3] + phys1d03[4] + phys1d03[5] + phys1d03[6] + phys1d03[7] + phys1d03[8] + phys1d03[9] + phys1d03[10] + phys1d03[11] > 0) ? (phys1d03[0] * 1 + phys1d03[1] * 2 + phys1d03[2] * 3 + phys1d03[3] * 4 + phys1d03[4] * 5 + phys1d03[5] * 6 + phys1d03[6] * 7 + phys1d03[7] * 8 + phys1d03[8] * 9 + phys1d03[9] * 10 + phys1d03[10] * 11 + phys1d03[11] * 12) / (phys1d03[0] + phys1d03[1] + phys1d03[2] + phys1d03[3] + phys1d03[4] + phys1d03[5] + phys1d03[6] + phys1d03[7] + phys1d03[8] + phys1d03[9] + phys1d03[10] + phys1d03[11]) : 0;
+  const phys1e03avg= (phys1e03[0] + phys1e03[1] + phys1e03[2] + phys1e03[3] + phys1e03[4] + phys1e03[5] + phys1e03[6] + phys1e03[7] + phys1e03[8] + phys1e03[9] + phys1e03[10] + phys1e03[11] > 0) ? (phys1e03[0] * 1 + phys1e03[1] * 2 + phys1e03[2] * 3 + phys1e03[3] * 4 + phys1e03[4] * 5 + phys1e03[5] * 6 + phys1e03[6] * 7 + phys1e03[7] * 8 + phys1e03[8] * 9 + phys1e03[9] * 10 + phys1e03[10] * 11 + phys1e03[11] * 12) / (phys1e03[0] + phys1e03[1] + phys1e03[2] + phys1e03[3] + phys1e03[4] + phys1e03[5] + phys1e03[6] + phys1e03[7] + phys1e03[8] + phys1e03[9] + phys1e03[10] + phys1e03[11]) : 0;
+  const chem1e03avg= (chem1e03[0] + chem1e03[1] + chem1e03[2] + chem1e03[3] + chem1e03[4] + chem1e03[5] + chem1e03[6] + chem1e03[7] + chem1e03[8] + chem1e03[9] + chem1e03[10] + chem1e03[11] > 0) ? (chem1e03[0] * 1 + chem1e03[1] * 2 + chem1e03[2] * 3 + chem1e03[3] * 4 + chem1e03[4] * 5 + chem1e03[5] * 6 + chem1e03[6] * 7 + chem1e03[7] * 8 + chem1e03[8] * 9 + chem1e03[9] * 10 + chem1e03[10] * 11 + chem1e03[11] * 12) / (chem1e03[0] + chem1e03[1] + chem1e03[2] + chem1e03[3] + chem1e03[4] + chem1e03[5] + chem1e03[6] + chem1e03[7] + chem1e03[8] + chem1e03[9] + chem1e03[10] + chem1e03[11]) : 0;
+  const eng1p13avg= (eng1p13[0] + eng1p13[1] + eng1p13[2] + eng1p13[3] + eng1p13[4] + eng1p13[5] + eng1p13[6] + eng1p13[7] + eng1p13[8] + eng1p13[9] + eng1p13[10] + eng1p13[11] > 0) ? (eng1p13[0] * 1 + eng1p13[1] * 2 + eng1p13[2] * 3 + eng1p13[3] * 4 + eng1p13[4] * 5 + eng1p13[5] * 6 + eng1p13[6] * 7 + eng1p13[7] * 8 + eng1p13[8] * 9 + eng1p13[9] * 10 + eng1p13[10] * 11 + eng1p13[11] * 12) / (eng1p13[0] + eng1p13[1] + eng1p13[2] + eng1p13[3] + eng1p13[4] + eng1p13[5] + eng1p13[6] + eng1p13[7] + eng1p13[8] + eng1p13[9] + eng1p13[10] + eng1p13[11]) : 0;
+  const gpaavg = (gpa[0] + gpa[1] + gpa[2] + gpa[3] + gpa[4] + gpa[5] + gpa[6] + gpa[7] + gpa[8] + gpa[9] + gpa[10] + gpa[11] > 0) ? (gpa[0] * 1 + gpa[1] * 2 + gpa[2] * 3 + gpa[3] * 4 + gpa[4] * 5 + gpa[5] * 6 + gpa[6] * 7 + gpa[7] * 8 + gpa[8] * 9 + gpa[9] * 10 + gpa[10] * 11 + gpa[11] * 12) / (gpa[0] + gpa[1] + gpa[2] + gpa[3] + gpa[4] + gpa[5] + gpa[6] + gpa[7] + gpa[8] + gpa[9] + gpa[10] + gpa[11]) : 0;
   
   return {
-    gpaavg: averagegpa,
-    math1za3avg: math1za3average,
-    math1zb3avg: math1zb3average,
-    math1zc3avg: math1zc3average,
-    phys1d03avg: phys1d03average,
-    phys1e03avg: phys1e03average,
-    chem1e03avg: chem1e03average,
-    eng1p13avg: eng1p13average,
-    streamCount: documents.length
+    math1za3: {
+      distribution: math1za3.join(','),
+      average: math1za3avg
+    },
+    math1zb3: {
+      distribution: math1zb3.join(','),
+      average: math1zb3avg
+    },
+    math1zc3: {
+      distribution: math1zc3.join(','),
+      average: math1zc3avg
+    },
+    phys1d03: {
+      distribution: phys1d03.join(','),
+      average: phys1d03avg
+    },
+    phys1e03: {
+      distribution: phys1e03.join(','),
+      average: phys1e03avg
+    },
+    chem1e03: {
+      distribution: chem1e03.join(','),
+      average: chem1e03avg
+    },
+    eng1p13: {
+      distribution: eng1p13.join(','),
+      average: eng1p13avg
+    },
+    total: {
+      distribution: gpa.join(','),
+      average: gpaavg
+    }
   };
 }
 
-async function calculateCutoffs(database) {
-  const documents = await getAllDocuments(database, 'UserData');
+async function calculateCutoffs(documents) {
   // Create a sortedDatabase array with freechoice users first, then sorted by GPA in descending order
   const sortedDatabase = [...documents].sort((a, b) => {
     // First sort by freechoice (true values come first)
