@@ -26,7 +26,6 @@ export default function Home() {
             <HorizontalBarChart />
             <HorizontalBarChartGrades />
           </div>
-
       </GridBackground>
       <Footer />
     </div>

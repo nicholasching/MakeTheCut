@@ -11,6 +11,8 @@ import LogoutButton from "@/components/LogoutButton";
 import { Checkbox } from "@/components/ui/checkbox";
 import {account, database, ID} from "../appwrite";
 
+import TextField from '@/components/TextField';
+
 export default function Home() {
     const router = useRouter();
     const [math1za3, setMath1za3] = useState<string>("");
@@ -264,20 +266,62 @@ export default function Home() {
                 Enter your GPA for each course (out of 12)<br/>and rank your preferred streams (1-3).
                 Input projected<br/>mark or leave fields blank for unknown grades.<br/><br/>Grades can be updated at any time.
             </h1>
-            <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center align-center gap-5 text-center  py-10 rounded-md">
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1za3" placeholder="Math 1ZA3 (Calc 1)" value={math1za3} onChange={handleInputChange} maxLength={2} />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zb3" placeholder="Math 1ZB3 (Calc 2)" value={math1zb3} onChange={handleInputChange} maxLength={2} />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="math1zc3" placeholder="Math 1ZC3 (Lin Alg)" value={math1zc3} onChange={handleInputChange} maxLength={2} />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1d03" placeholder="Physics 1D03" value={phys1d03} onChange={handleInputChange} maxLength={2} />
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="physics1e03" placeholder="Physics 1E03" value={phys1e03} onChange={handleInputChange} maxLength={2} />  
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="chemistry1e03" placeholder="Chemistry 1E03" value={chem1e03} onChange={handleInputChange} maxLength={2} />  
-                <input className="text-subtext border-2 border-transparent p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="engineering1p13" placeholder="Engineering 1P13" value={eng1p13} onChange={handleInputChange} maxLength={2} />
+            <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center align-center gap-5 text-center py-10 rounded-md">
+                <TextField 
+                    label="Math 1ZA3 (Calc 1)"
+                    id="math1za3"
+                    value={math1za3}
+                    onChange={(value) => setMath1za3(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Math 1ZB3 (Calc 2)"
+                    id="math1zb3"
+                    value={math1zb3}
+                    onChange={(value) => setMath1zb3(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Math 1ZC3 (Lin Alg)"
+                    id="math1zc3"
+                    value={math1zc3}
+                    onChange={(value) => setMath1zc3(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Physics 1D03"
+                    id="physics1d03"
+                    value={phys1d03}
+                    onChange={(value) => setPhysics1d03(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Physics 1E03"
+                    id="physics1e03"
+                    value={phys1e03}
+                    onChange={(value) => setPhysics1e03(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Chemistry 1E03"
+                    id="chemistry1e03"
+                    value={chem1e03}
+                    onChange={(value) => setChemistry1e03(value)}
+                    maxLength={2}
+                />
+                <TextField 
+                    label="Engineering 1P13"
+                    id="engineering1p13"
+                    value={eng1p13}
+                    onChange={(value) => setEngineering1p13(value)}
+                    maxLength={2}
+                />
                 <div>
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1 Grade" value={elective1Value} onChange={handleInputChange} maxLength={2}/>  
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-white transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1 Grade" value={elective1Value} onChange={handleInputChange} maxLength={2}/>  
                     <Combobox value={selectedElective1} onChange={handleElective1Change}placeholder="Select first elective"/>
                 </div>
                 <div>
-                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-red-500 transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2 Grade" value={elective2Value} onChange={handleInputChange} maxLength={2} />  
+                    <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-white transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2 Grade" value={elective2Value} onChange={handleInputChange} maxLength={2} />  
                     <Combobox value={selectedElective2} onChange={handleElective2Change}placeholder="Select second elective"/>
                 </div>
                 <ComboboxStreams value={stream1Choice} onChange={handleStream1Change}placeholder="First Stream Choice" />
