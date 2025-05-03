@@ -14,6 +14,8 @@ import Footer from "@/components/Footer";
 
 import HorizontalBarChartGrades from "@/components/HorizontalBarChartGrades";
 
+import GradeDistributionChart from "@/components/GradeDistributionChart";
+
 import LiveCounter from "@/components/LiveCounter";
 
 export default function Home() {
@@ -24,7 +26,7 @@ export default function Home() {
           <LogoutButton />
           <div className="flex flex-col w-full gap-30">
             <HorizontalBarChart />
-            <HorizontalBarChartGrades />
+            <GradeDistributionChart />
           </div>
       </GridBackground>
       <Footer />
