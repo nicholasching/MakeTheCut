@@ -2,6 +2,7 @@
 
 import { TrendingUp } from "lucide-react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   Card,
   CardContent,
@@ -68,6 +69,52 @@ export default function GradeDistributionChart() {
             {/* <p>Current Contributions: {totalContributions}</p> */}
           </CardDescription>
         </div>
+        <Tabs defaultValue="account" className="w-full text-center flex-row justify-center mt-5">
+            <TabsList className="bg-transparent text-neutral-500 flex flex-wrap gap-1 sm:gap-2 md:gap-3 lg:gap-4">
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="math1za3"
+                >
+                    Calc 1 / 1ZA3
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="math1zb3"
+                >
+                    Calc 2 / 1ZB3
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="math1zc3"
+                >
+                    Linear Algebra / 1ZC3
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="phys1d03"
+                >
+                    Physics / 1D03
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="phys1e03"
+                >
+                    Physics / 1E03
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="chem1d03"
+                >
+                    Chemistry / 1D03
+                </TabsTrigger>
+                <TabsTrigger 
+                    className="text-neutral-500 text-teenytiny hover:bg-neutral-700 data-[state=active]:bg-neutral-800 transition-all" 
+                    value="eng1p13"
+                >
+                    Engineer / 1P13
+                </TabsTrigger>
+            </TabsList>
+        </Tabs>
       </CardHeader>
       <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
         <ChartContainer config={chartConfig} className="h-full w-full">
