@@ -47,6 +47,12 @@ const LoginPage = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleLogin(email, password);
+    }
+  };
+
   if (loggedInUser) {
     if (typeof window !== 'undefined') {
       window.location.href = '/dashboard';
@@ -61,11 +67,11 @@ const LoginPage = () => {
         <h1 className="text-4xl mb-5 font-semibold">Log In</h1>
         {/*<p className="mb-10 text-teenytiny text-blue-400 font-semibold">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>*/}
         <div className="mb-10 flex flex-col gap-5">
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300"  type="password" placeholder="Password" value={password} onClick={() => handleLogin(email, password)} onChange={(e) => setPassword(e.target.value)} />
+          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} />
+          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300"  type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
         </div>
         {loginError && <p className="mb-3 text-red-500 text-tiny">{loginError}</p>}
-        <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10 mt-5" type="button" onClick={() => login(email, password)}>Login</button>
+        <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10 mt-5" type="button" onClick={() => handleLogin(email, password)}>Login</button>
         <div className="flex gap-2 justify-center">
           <p className="text-subtext">Don't have an account? </p>
           <Link className="text-blue-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/sign-up">
