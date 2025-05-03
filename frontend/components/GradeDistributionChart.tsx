@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/chart"
 import { account, database } from "../app/appwrite";
 import { useState, useEffect } from "react";
+import { createPrerenderSearchParamsForClientPage } from "next/dist/server/request/search-params"
 
 // Initial structure for chart data
 const initialChartData = [
@@ -42,8 +43,11 @@ async function fetchDistribution(course: string) {
 
     console.log(`Course data for ${course} fetched successfully!`);
 
+    let grades = document.distribution.split(",").map(Number);
+    grades.push(Number(document.average))
+
     // Parse and return the distribution array
-    return document.distribution.split(",").concat(document.average).map(Number);
+    return grades;
   }
   catch (error) {
     console.error(`Error fetching course data for ${course}:`, error);
@@ -153,6 +157,7 @@ export default function GradeDistributionChart() {
     setSelectedCourse(value);
     
     const distribution = await fetchDistribution(value);
+    console.log(distribution[12])
     setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
     
     if (distribution) {
@@ -314,9 +319,9 @@ export default function GradeDistributionChart() {
                     stroke="#737373"
                     label={{value: 'Grade', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}
                 />
-                <ReferenceLine x={courseAvg} stroke="white" strokeDasharray="4 4">
-                  <Label position="top" fill="white" fontSize={14} dy={-10} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
-                    Course Average: {courseAvg.toFixed(2)}
+                <ReferenceLine x={Math.round(courseAvg).toString()} stroke="white" strokeDasharray="4 4">
+                  <Label position="top" fill="white" fontSize={14} dy={-10} className="cursor-pointer">
+                    {"Course Average: "+ courseAvg.toFixed(2)}
                   </Label>
                 </ReferenceLine>
                 <YAxis
