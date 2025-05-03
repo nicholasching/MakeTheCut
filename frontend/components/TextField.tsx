@@ -1,5 +1,5 @@
 import React from 'react';
-import MuiTextField, { TextFieldProps as MuiTextFieldProps } from '@mui/material/TextField';
+import MuiTextField from '@mui/material/TextField';
 
 // Define the props for your custom TextField component
 // Include standard input attributes and the specific props needed
@@ -42,10 +42,6 @@ export default function TextField({
                 className={className || "bg-neutral-900 rounded-lg w-2/3"} // Use external className if provided, otherwise fallback to original internal one
                 size="medium"
                 type={type} // Pass type down
-                inputProps={{ // Pass maxLength and other input attributes here
-                    maxLength: maxLength,
-                    ...rest // Spread other standard input attributes
-                }}
                 sx={{ // Keep the original sx prop styling untouched
                     '& .MuiOutlinedInput-root': {
                         // Note: The 'color: white' here might target the wrong element for input text.
