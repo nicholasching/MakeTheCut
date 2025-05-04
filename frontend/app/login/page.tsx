@@ -55,7 +55,7 @@ const LoginPage = () => {
 
   if (loggedInUser) {
     if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard';
+      window.location.href = '/grades'; // TEMPORARY REDIRECT TO GRADES INSTEAD OF DASHBOARD PAGE (FOR NEXT 3 DAYS)
       return null;
     }
   }
