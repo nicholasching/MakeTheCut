@@ -34,7 +34,7 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','MarkData','phys1e03',distribution.phys1e03);
     await database.updateDocument('MacStats','MarkData','chem1e03',distribution.chem1e03);
     await database.updateDocument('MacStats','MarkData','eng1p13',distribution.eng1p13);
-    await database.updateDocument('MacStats','StatData','total',{streamCount: distribution.total});
+    await database.updateDocument('MacStats','MarkData','total',distribution.total);
 
     // Recalculate cutoff estimation
     const cutoffs = await calculateCutoffs(documents);
@@ -58,6 +58,7 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','StatData','mech',mechStats);
     await database.updateDocument('MacStats','StatData','tron',tronStats);
     await database.updateDocument('MacStats','StatData','soft',softStats);
+    await database.updateDocument('MacStats','StatData','total',{streamCount: documents.length});
 
     /*
     // Logging
