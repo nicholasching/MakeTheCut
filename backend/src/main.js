@@ -58,7 +58,6 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','StatData','mech',mechStats);
     await database.updateDocument('MacStats','StatData','tron',tronStats);
     await database.updateDocument('MacStats','StatData','soft',softStats);
-    await database.updateDocument('MacStats','StatData','total',{streamCount: documents.length});
 
     /*
     // Logging
