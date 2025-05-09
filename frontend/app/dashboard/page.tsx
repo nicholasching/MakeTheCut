@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 import HorizontalBarChart from "@/components/HorizontalBarChart";
 
@@ -19,8 +20,9 @@ import GradeDistributionChart from "@/components/GradeDistributionChart";
 import LiveCounter from "@/components/LiveCounter";
 
 export default function Home() {
+  const sectionRef = useSectionTracking<HTMLDivElement>("Dashboard")
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" ref={sectionRef}>
       <GridBackground className="flex flex-1 p-5 pt-30 lg:p-30 overflow-y-scroll md:overflow-hidden">
           <HomeButton />
           <LogoutButton />

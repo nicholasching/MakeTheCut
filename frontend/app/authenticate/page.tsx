@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { account } from "../appwrite";
 import LogoutButton from "@/components/LogoutButton";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 
 export default function Home() {
     const router = useRouter();
     const [error, setError] = useState("");
+    const sectionRef = useSectionTracking<HTMLDivElement>("Authenticate")
 
     useEffect(() => {
         async function initiatePage() {
@@ -36,7 +38,7 @@ export default function Home() {
       }, []);
 
     return (
-        <div className="flex flex-col h-svh items-center justify-center gap-5">
+        <div className="flex flex-col h-svh items-center justify-center gap-5" ref={sectionRef}>
             <h1 className="text-subtitle text-white">Please check your email for the verification link</h1>
             {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4">

@@ -8,6 +8,7 @@ import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import MarqueeText from "@/components/MarqueeText";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 const RegisterPage = () => {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
@@ -15,6 +16,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const sectionRef = useSectionTracking<HTMLDivElement>("SignUp")
 
   const router = useRouter();
   useEffect(() => {
@@ -66,7 +68,7 @@ const RegisterPage = () => {
 
   return (
     
-    <GridBackground className="h-svh flex items-center justify-center">
+    <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
       <HomeButton />
       {/* // Delete quotes and comments to enable verification
       <div className="fixed top-0 left-0 w-full bg-neutral-950 py-1 overflow-hidden z-50">

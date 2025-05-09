@@ -6,6 +6,7 @@ import { account } from "../appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Link from "next/link";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 // Create a client component that uses useSearchParams
 function VerifyContent() {
@@ -87,8 +88,9 @@ const LoadingFallback = () => (
 
 // Main page component that uses Suspense
 export default function VerifyPage() {
+  const sectionRef = useSectionTracking<HTMLDivElement>("Verify")
   return (
-    <GridBackground className="h-svh flex items-center justify-center">
+    <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
       <HomeButton />
       <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
         <h1 className="text-4xl mb-5 font-semibold">Email Verification</h1>

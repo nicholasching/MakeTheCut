@@ -6,11 +6,13 @@ import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import { useRouter } from "next/navigation";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 const LoginPage = () => {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const sectionRef = useSectionTracking<HTMLDivElement>("Login")
 
   const router = useRouter();
   useEffect(() => {
@@ -61,7 +63,7 @@ const LoginPage = () => {
   }
 
   return (
-    <GridBackground className="h-svh flex items-center justify-center">
+    <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
       <HomeButton />
       <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg text-center">
         <h1 className="text-4xl mb-5 font-semibold">Log In</h1>

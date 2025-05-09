@@ -12,9 +12,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {account, database, ID} from "../appwrite";
 
 import TextField from '@/components/TextField';
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 export default function Home() {
     const router = useRouter();
+    const sectionRef = useSectionTracking<HTMLDivElement>("Grades")
     const [math1za3, setMath1za3] = useState<string>("");
     const [math1zb3, setMath1zb3] = useState<string>("");
     const [math1zc3, setMath1zc3] = useState<string>("");
@@ -259,7 +261,7 @@ export default function Home() {
     };
 
     return (
-        <GridBackground className="pt-30 pb-20 overflow-y-scroll">
+        <GridBackground className="pt-30 pb-20 overflow-y-scroll" ref={sectionRef}>
             <HomeButton />
             <LogoutButton />
             <h1 className="text-center text-subtext text-neutral-400">

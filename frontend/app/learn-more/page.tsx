@@ -1,8 +1,10 @@
 import Image from "next/image";
+import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 export default function Home() {
+  const sectionRef = useSectionTracking<HTMLElement>("LearnMore")
   return (
-    <main className="mt-25 mx-100">
+    <main className="mt-25 mx-100" ref={sectionRef}>
         <h1 className="text-md leading-none mb-5 font-light">
             About MacStats
         </h1>
