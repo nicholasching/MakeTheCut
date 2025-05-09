@@ -15,6 +15,7 @@ function VerifyContent() {
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sectionRef = useSectionTracking<HTMLDivElement>("Verify")
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -45,37 +46,40 @@ function VerifyContent() {
   }, [searchParams]);
 
   return (
-    <>
-      {isVerifying && (
-        <div className="mb-5">
-          <p className="text-xl">Verifying your email...</p>
-        </div>
-      )}
+    <GridBackground className="pt-30 pb-20" ref={sectionRef}>
+      <HomeButton />
+      <div className="text-center">
+        {isVerifying && (
+          <div className="mb-5">
+            <p className="text-xl">Verifying your email...</p>
+          </div>
+        )}
 
-      {!isVerifying && verificationSuccess && (
-        <div className="mb-5">
-          <p className="text-xl text-green-500 mb-5">Your email has been successfully verified!</p>
-          <Link 
-            href="/login" 
-            className="bg-white text-black px-10 py-1 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
-          >
-            Login to your account
-          </Link>
-        </div>
-      )}
+        {!isVerifying && verificationSuccess && (
+          <div className="mb-5">
+            <p className="text-xl text-green-500 mb-5">Your email has been successfully verified!</p>
+            <Link 
+              href="/login" 
+              className="bg-white text-black px-10 py-1 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              Login to your account
+            </Link>
+          </div>
+        )}
 
-      {!isVerifying && error && (
-        <div className="mb-5">
-          <p className="text-xl text-red-500 mb-5">{error}</p>
-          <Link 
-            href="/login" 
-            className="bg-white text-black px-10 py-1 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
-          >
-            Return to login
-          </Link>
-        </div>
-      )}
-    </>
+        {!isVerifying && error && (
+          <div className="mb-5">
+            <p className="text-xl text-red-500 mb-5">{error}</p>
+            <Link 
+              href="/login" 
+              className="bg-white text-black px-10 py-1 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              Return to login
+            </Link>
+          </div>
+        )}
+      </div>
+    </GridBackground>
   );
 }
 
@@ -93,7 +97,6 @@ function VerifyLoading() {
 
 // Main page component that uses Suspense
 export default function VerifyPage() {
-  const sectionRef = useSectionTracking<HTMLDivElement>("Verify")
   return (
     <Suspense fallback={<VerifyLoading />}>
       <VerifyContent />
