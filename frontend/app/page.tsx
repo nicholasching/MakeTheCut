@@ -16,7 +16,6 @@ import ScrollButton from "@/components/ScrollButton";
 import LiveCounter from "@/components/LiveCounter";
 
 import { useSectionTracking } from "@/hooks/useSectionTracking"
-import { Suspense } from "react";
 
 function HomeContent() {
   const sectionRef = useSectionTracking("Home")
@@ -58,29 +57,7 @@ function HomeContent() {
   );
 }
 
-// Loading fallback component
-function HomeLoading() {
-  return (
-    <section>
-      <div className="flex flex-col min-h-screen">
-        <GridBackground className="flex-1 flex flex-col pt-50 md:p-24 lg:p-36 text-center md:text-left">
-          <div className="flex-1">
-            <h1 className="text-title leading-none mb-5 font-light w-full md:w-2/3">
-              Loading...
-            </h1>
-          </div>
-        </GridBackground>
-        <Footer />
-      </div>
-    </section>
-  );
-}
-
 export default function HomePage() {
-  return (
-    <Suspense fallback={<HomeLoading />}>
-      <HomeContent />
-    </Suspense>
-  );
+  return <HomeContent />;
 }
 

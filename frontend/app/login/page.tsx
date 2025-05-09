@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { account, ID } from "../appwrite";
 import { Models } from "appwrite";
 import Link from "next/link";
@@ -103,22 +103,6 @@ function LoginContent() {
   );
 }
 
-// Loading fallback component
-function LoginLoading() {
-  return (
-    <GridBackground className="h-svh flex items-center justify-center">
-      <HomeButton />
-      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
-        <h1 className="text-4xl mb-5 font-semibold">Loading...</h1>
-      </div>
-    </GridBackground>
-  );
-}
-
 export default function LoginPage() {
-  return (
-    <Suspense fallback={<LoginLoading />}>
-      <LoginContent />
-    </Suspense>
-  );
+  return <LoginContent />;
 }

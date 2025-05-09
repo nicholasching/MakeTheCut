@@ -372,9 +372,5 @@ function GradesLoading() {
 }
 
 export default function GradesPage() {
-    return (
-        <Suspense fallback={<GradesLoading />}>
-            <GradesContent />
-        </Suspense>
-    );
+    return <GradesContent />;
 }

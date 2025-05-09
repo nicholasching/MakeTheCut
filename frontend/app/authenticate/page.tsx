@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { account } from "../appwrite";
 import LogoutButton from "@/components/LogoutButton";
@@ -34,7 +34,7 @@ function AuthenticateContent() {
             }
         }
         initiatePage();
-      }, []);
+    }, []);
 
     return (
         <div className="flex flex-col h-svh items-center justify-center gap-5" ref={sectionRef}>
@@ -102,19 +102,6 @@ function AuthenticateContent() {
     );
 }
 
-// Loading fallback component
-function AuthenticateLoading() {
-    return (
-        <div className="flex flex-col h-svh items-center justify-center gap-5">
-            <h1 className="text-subtitle text-white">Loading...</h1>
-        </div>
-    );
-}
-
 export default function AuthenticatePage() {
-    return (
-        <Suspense fallback={<AuthenticateLoading />}>
-            <AuthenticateContent />
-        </Suspense>
-    );
+    return <AuthenticateContent />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAnalytics } from './useAnalytics';
 
 export const useSectionTracking = <T extends HTMLElement>(sectionName: string) => {
@@ -8,8 +8,15 @@ export const useSectionTracking = <T extends HTMLElement>(sectionName: string) =
   const { trackEvent } = useAnalytics();
   const hasTracked = useRef(false);
   const enterTime = useRef<number | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -57,7 +64,7 @@ export const useSectionTracking = <T extends HTMLElement>(sectionName: string) =
         });
       }
     };
-  }, [sectionName, trackEvent]);
+  }, [sectionName, trackEvent, isReady]);
 
   return sectionRef;
 }; 

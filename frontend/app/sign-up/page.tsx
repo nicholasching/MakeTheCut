@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { client, account, ID } from "../appwrite";
 import { Models } from "appwrite";
@@ -112,22 +112,6 @@ function SignUpContent() {
   );
 }
 
-// Loading fallback component
-function SignUpLoading() {
-  return (
-    <GridBackground className="h-svh flex items-center justify-center">
-      <HomeButton />
-      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
-        <h1 className="text-4xl mb-5 font-semibold">Loading...</h1>
-      </div>
-    </GridBackground>
-  );
-}
-
 export default function SignUpPage() {
-  return (
-    <Suspense fallback={<SignUpLoading />}>
-      <SignUpContent />
-    </Suspense>
-  );
+  return <SignUpContent />;
 }

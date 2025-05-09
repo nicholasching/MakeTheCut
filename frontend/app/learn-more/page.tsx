@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
-import { Suspense } from "react";
 
 function LearnMoreContent() {
   const sectionRef = useSectionTracking<HTMLElement>("LearnMore")
@@ -24,21 +23,6 @@ function LearnMoreContent() {
   );
 }
 
-// Loading fallback component
-function LearnMoreLoading() {
-  return (
-    <main className="mt-25 mx-100">
-      <h1 className="text-md leading-none mb-5 font-light">
-        Loading...
-      </h1>
-    </main>
-  );
-}
-
 export default function LearnMorePage() {
-  return (
-    <Suspense fallback={<LearnMoreLoading />}>
-      <LearnMoreContent />
-    </Suspense>
-  );
+  return <LearnMoreContent />;
 }

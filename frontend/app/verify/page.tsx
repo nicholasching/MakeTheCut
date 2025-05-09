@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { account } from "../appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Link from "next/link";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
-// Create a client component that uses useSearchParams
 function VerifyContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,9 +18,10 @@ function VerifyContent() {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        // Get userId and secret from URL parameters
-        const userId = searchParams.get('userId');
-        const secret = searchParams.get('secret');
+        // Get userId and secret from URL using window.location
+        const params = new URLSearchParams(window.location.search);
+        const userId = params.get('userId');
+        const secret = params.get('secret');
 
         if (!userId || !secret) {
           setError("Missing verification parameters");
@@ -43,7 +42,7 @@ function VerifyContent() {
     };
 
     verifyEmail();
-  }, [searchParams]);
+  }, []);
 
   return (
     <GridBackground className="pt-30 pb-20" ref={sectionRef}>
@@ -83,25 +82,8 @@ function VerifyContent() {
   );
 }
 
-// Loading fallback component
-function VerifyLoading() {
-  return (
-    <GridBackground className="pt-30 pb-20">
-      <HomeButton />
-      <div className="text-center text-subtext text-neutral-400">
-        Verifying your email...
-      </div>
-    </GridBackground>
-  );
-}
-
-// Main page component that uses Suspense
 export default function VerifyPage() {
-  return (
-    <Suspense fallback={<VerifyLoading />}>
-      <VerifyContent />
-    </Suspense>
-  );
+  return <VerifyContent />;
 }
 
 
