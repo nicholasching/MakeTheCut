@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useEffect } from "react";
+import { use, useState, useEffect, Suspense } from "react";
 import { addLog } from "../../actions/logActions";
 import { useRouter } from "next/navigation";
 import GridBackground from "@/components/GridBackground";
@@ -14,7 +14,7 @@ import {account, database, ID} from "../appwrite";
 import TextField from '@/components/TextField';
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
-export default function Home() {
+function GradesContent() {
     const router = useRouter();
     const sectionRef = useSectionTracking<HTMLDivElement>("Grades")
     const [math1za3, setMath1za3] = useState<string>("");
@@ -355,5 +355,26 @@ export default function Home() {
 
             </div>
         </GridBackground>
+    );
+}
+
+// Loading fallback component
+function GradesLoading() {
+    return (
+        <GridBackground className="pt-30 pb-20">
+            <HomeButton />
+            <LogoutButton />
+            <div className="text-center text-subtext text-neutral-400">
+                Loading grades form...
+            </div>
+        </GridBackground>
+    );
+}
+
+export default function GradesPage() {
+    return (
+        <Suspense fallback={<GradesLoading />}>
+            <GradesContent />
+        </Suspense>
     );
 }

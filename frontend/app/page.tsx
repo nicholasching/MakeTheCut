@@ -16,8 +16,9 @@ import ScrollButton from "@/components/ScrollButton";
 import LiveCounter from "@/components/LiveCounter";
 
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { Suspense } from "react";
 
-export default function Home() {
+function HomeContent() {
   const sectionRef = useSectionTracking("Home")
 
   return (
@@ -49,12 +50,37 @@ export default function Home() {
               <p className="text-subtext"> We analyze submitted GPA and stream preferences, factoring in <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="underline text-red-500">seat availability</a> to provide a realistic estimate of cutoff ranges. This approach gives students a clearer understanding of where they stand, helping them make more informed decisions. By combining intuitive design, real-time data storage, and simple yet effective data analysis, MakeTheCut removes the guesswork from stream selection at McMaster Engineering.</p>
             </div>
           </div>
-          {/* Add mt-8 when adding the announcement banner */}
           <LiveCounter className="" />
         </GridBackground>
         <Footer />
       </div>
     </section>
+  );
+}
+
+// Loading fallback component
+function HomeLoading() {
+  return (
+    <section>
+      <div className="flex flex-col min-h-screen">
+        <GridBackground className="flex-1 flex flex-col pt-50 md:p-24 lg:p-36 text-center md:text-left">
+          <div className="flex-1">
+            <h1 className="text-title leading-none mb-5 font-light w-full md:w-2/3">
+              Loading...
+            </h1>
+          </div>
+        </GridBackground>
+        <Footer />
+      </div>
+    </section>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<HomeLoading />}>
+      <HomeContent />
+    </Suspense>
   );
 }
 

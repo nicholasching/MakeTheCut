@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { Suspense } from "react";
 
 import HorizontalBarChart from "@/components/HorizontalBarChart";
 
@@ -19,7 +20,7 @@ import GradeDistributionChart from "@/components/GradeDistributionChart";
 
 import LiveCounter from "@/components/LiveCounter";
 
-export default function Home() {
+function DashboardContent() {
   const sectionRef = useSectionTracking<HTMLDivElement>("Dashboard")
   return (
     <div className="flex flex-col min-h-screen" ref={sectionRef}>
@@ -33,5 +34,29 @@ export default function Home() {
       </GridBackground>
       <Footer />
     </div>
+  );
+}
+
+// Loading fallback component
+function DashboardLoading() {
+  return (
+    <div className="flex flex-col min-h-screen">
+      <GridBackground className="flex flex-1 p-5 pt-30 lg:p-30">
+        <HomeButton />
+        <LogoutButton />
+        <div className="flex flex-col w-full gap-30">
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      </GridBackground>
+      <Footer />
+    </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

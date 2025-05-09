@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { Suspense } from "react";
 
-export default function Home() {
+function LearnMoreContent() {
   const sectionRef = useSectionTracking<HTMLElement>("LearnMore")
   return (
     <main className="mt-25 mx-100" ref={sectionRef}>
@@ -18,5 +21,24 @@ export default function Home() {
             This project is completely anonymous and community-driven. The more students contribute, the more accurate the insights will be. Whether you're trying to gauge your chances or just curious about the trends, this tool aims to be a valuable resource for stream selection.
         </p>
     </main>
+  );
+}
+
+// Loading fallback component
+function LearnMoreLoading() {
+  return (
+    <main className="mt-25 mx-100">
+      <h1 className="text-md leading-none mb-5 font-light">
+        Loading...
+      </h1>
+    </main>
+  );
+}
+
+export default function LearnMorePage() {
+  return (
+    <Suspense fallback={<LearnMoreLoading />}>
+      <LearnMoreContent />
+    </Suspense>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { account, ID } from "../appwrite";
 import { Models } from "appwrite";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import HomeButton from "@/components/HomeButton";
 import { useRouter } from "next/navigation";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
-const LoginPage = () => {
+function LoginContent() {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -65,24 +65,60 @@ const LoginPage = () => {
   return (
     <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
       <HomeButton />
-      <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg text-center">
-        <h1 className="text-4xl mb-5 font-semibold">Log In</h1>
+      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
+        <h1 className="text-4xl mb-5 font-semibold">Login</h1>
         {/*<p className="mb-10 text-teenytiny text-blue-400 font-semibold">Login currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>*/}
-        <div className="mb-10 flex flex-col gap-5">
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} />
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300"  type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={handleKeyDown} />
-        </div>
-        {loginError && <p className="mb-3 text-red-500 text-tiny">{loginError}</p>}
-        <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10 mt-5" type="button" onClick={() => handleLogin(email, password)}>Login</button>
-        <div className="flex gap-2 justify-center">
-          <p className="text-subtext">Don't have an account? </p>
-          <Link className="text-blue-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/sign-up">
-              Sign Up
-          </Link>
-        </div>
+        {loginError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4">
+            {loginError}
+          </div>
+        )}
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full p-2 mb-4 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full p-2 mb-4 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
+        />
+        <button
+          onClick={() => handleLogin(email, password)}
+          className="bg-white text-black w-full p-2 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+        >
+          Login
+        </button>
+        <Link href="/sign-up" className="mt-4 text-neutral-400 hover:text-white transition-colors duration-300">
+          Don't have an account? Sign up
+        </Link>
       </div>
     </GridBackground>
   );
-};
+}
 
-export default LoginPage;
+// Loading fallback component
+function LoginLoading() {
+  return (
+    <GridBackground className="h-svh flex items-center justify-center">
+      <HomeButton />
+      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
+        <h1 className="text-4xl mb-5 font-semibold">Loading...</h1>
+      </div>
+    </GridBackground>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <LoginContent />
+    </Suspense>
+  );
+}

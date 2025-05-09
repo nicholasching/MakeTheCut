@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { client, account, ID } from "../appwrite";
 import { Models } from "appwrite";
@@ -10,7 +10,7 @@ import HomeButton from "@/components/HomeButton";
 import MarqueeText from "@/components/MarqueeText";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
-const RegisterPage = () => {
+function SignUpContent() {
   const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,65 +37,93 @@ const RegisterPage = () => {
     //router.push('/grades');          // Comment out to enable verification
   };
 
-  const register = async () => {
+  const handleSignUp = async () => {
     try {
-      setError(""); // Clear any existing errors
-      if (!email.includes("@mcmaster.ca")){
-        setError("Email must be under an @mcmaster.ca domain");
-        return false;
-      }
-      if (password.length < 8){
-        setError("Password must be at least 8 characters long");
-        return false;
-      }
-  
       await account.create(ID.unique(), email, password, name);
       await login(email, password);
-      
-      // Comment to disable verification
       router.push('/authenticate');
-      
     } catch (error) {
-      setError("Account already exists with this email");
-      return false;
+      setError("Email already exists or invalid input");
     }
   };
 
-  const logout = async () => {
-    await account.deleteSession("current");
-    setLoggedInUser(null);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSignUp();
+    }
   };
 
+  if (loggedInUser) {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/authenticate';
+      return null;
+    }
+  }
+
   return (
-    
     <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
       <HomeButton />
-      {/* // Delete quotes and comments to enable verification
-      <div className="fixed top-0 left-0 w-full bg-neutral-950 py-1 overflow-hidden z-50">
-        <MarqueeText />
-      </div>
-       */}
-      <div className="w-full md:w-1/2 lg:w-1/4 p-10 py-30 mx-auto rounded-lg flex flex-col justify-center align-center text-center">
+      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
         <h1 className="text-4xl mb-5 font-semibold">Sign Up</h1>
-        <p className="mb-7 text-teenytiny text-blue-400 font-semibold">Registration currently does not work on school Wi-Fi.<br />We are working on fixing this. Please use another network.</p>
-        
-        <div className="mb-10 flex flex-col gap-5">
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="email" placeholder="macid@mcmaster.ca" value={email} onChange={(e) => setEmail(e.target.value)}/>
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}/>
-          <input className="text-subtext border-2 border-gray-200 p-2 rounded-sm  outline-none bg-neutral-900 w-2/3 mx-auto transition-all duration-300" type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)}/>
-        </div>
-
-        {error && <p className="mb-3 text-red-500 text-tiny">{error}</p>}
-        <button className="bg-white text-black px-10 py-1 rounded-sm w-32 hover:scale-105 transition-all duration-300 cursor-pointer mx-auto mb-10" type="button" onClick={register}>Create</button>
-        <div className="flex gap-2 justify-center">
-          <p className="text-subtext">Already have an account?</p>
-          <Link className="text-blue-500 text-subtext underline hover:scale-105 cursor-pointer hover:text-white transition-all" type="button" href="/login">
-            Log In 
-          </Link>
-        </div>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md mb-4">
+            {error}
+          </div>
+        )}
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full p-2 mb-4 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full p-2 mb-4 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="w-full p-2 mb-4 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
+        />
+        <button
+          onClick={handleSignUp}
+          className="bg-white text-black w-full p-2 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+        >
+          Sign Up
+        </button>
+        <Link href="/login" className="mt-4 text-neutral-400 hover:text-white transition-colors duration-300">
+          Already have an account? Login
+        </Link>
       </div>
     </GridBackground>
   );
-};
+}
 
-export default RegisterPage;
+// Loading fallback component
+function SignUpLoading() {
+  return (
+    <GridBackground className="h-svh flex items-center justify-center">
+      <HomeButton />
+      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
+        <h1 className="text-4xl mb-5 font-semibold">Loading...</h1>
+      </div>
+    </GridBackground>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpLoading />}>
+      <SignUpContent />
+    </Suspense>
+  );
+}
