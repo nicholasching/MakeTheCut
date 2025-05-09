@@ -39,6 +39,10 @@ function SignUpContent() {
 
   const handleSignUp = async () => {
     try {
+      if (!email.endsWith('@mcmaster.ca')) {
+        setError("Please use your McMaster email address (@mcmaster.ca)");
+        return;
+      }
       await account.create(ID.unique(), email, password, name);
       await login(email, password);
       router.push('/authenticate');
