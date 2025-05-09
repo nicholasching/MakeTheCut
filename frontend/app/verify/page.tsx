@@ -79,26 +79,25 @@ function VerifyContent() {
   );
 }
 
-// Create a loading fallback component
-const LoadingFallback = () => (
-  <div className="mb-5">
-    <p className="text-xl">Loading verification process...</p>
-  </div>
-);
+// Loading fallback component
+function VerifyLoading() {
+  return (
+    <GridBackground className="pt-30 pb-20">
+      <HomeButton />
+      <div className="text-center text-subtext text-neutral-400">
+        Verifying your email...
+      </div>
+    </GridBackground>
+  );
+}
 
 // Main page component that uses Suspense
 export default function VerifyPage() {
   const sectionRef = useSectionTracking<HTMLDivElement>("Verify")
   return (
-    <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>
-      <HomeButton />
-      <div className="w-full md:w-1/2 lg:w-1/3 p-10 mx-auto rounded-lg flex flex-col justify-center items-center text-center">
-        <h1 className="text-4xl mb-5 font-semibold">Email Verification</h1>
-        <Suspense fallback={<LoadingFallback />}>
-          <VerifyContent />
-        </Suspense>
-      </div>
-    </GridBackground>
+    <Suspense fallback={<VerifyLoading />}>
+      <VerifyContent />
+    </Suspense>
   );
 }
 

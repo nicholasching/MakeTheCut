@@ -15,7 +15,7 @@ export const useAnalytics = () => {
       if (analyticsInstance) {
         logEvent(analyticsInstance, 'page_view', {
           page_path: pathname,
-          page_search: searchParams.toString(),
+          page_search: searchParams?.toString() || '',
         });
       }
     };
