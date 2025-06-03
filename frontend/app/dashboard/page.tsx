@@ -1,15 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
-import HorizontalBarChart from "@/components/HorizontalBarChart";
+import LockedHorizontalBarChart from "@/components/LockedHorizontalBarChart";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
-import HorizontalBarChartGrades from "@/components/HorizontalBarChartGrades";
 import GradeDistributionChart from "@/components/GradeDistributionChart";
-import LiveCounter from "@/components/LiveCounter";
+import StreamChoiceGraph from "@/components/StreamChoiceGraph";
+import { ST } from "next/dist/shared/lib/utils";
 
 function DashboardContent() {
   const sectionRef = useSectionTracking<HTMLDivElement>("Dashboard")
@@ -19,7 +18,8 @@ function DashboardContent() {
           <HomeButton />
           <LogoutButton />
           <div className="flex flex-col w-full gap-30">
-            <HorizontalBarChart />
+            <LockedHorizontalBarChart />
+            <StreamChoiceGraph />
             <GradeDistributionChart />
           </div>
       </GridBackground>
