@@ -183,34 +183,21 @@ export default function StreamChoiceGraph() {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px] px-2">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               key={key}
               accessibilityLayer
               data={chartData}
-              layout="horizontal" // Changed to horizontal for vertical bars
+              layout="vertical" // Use "vertical" for horizontal bars
               margin={{
-                top: 30, right: 30, left: 30, bottom: 20,
+                top: 20, right: 40, left: 20, bottom: 20,
               }}
+              barCategoryGap="20%"
             >
-              <CartesianGrid vertical={false} stroke="#333" />
+              <CartesianGrid horizontal={false} stroke="#333" />
               <XAxis
-                dataKey="stream"
-                type="category"
-                tickLine={false}
-                axisLine={false}
-                className="text-[0.55rem] md:text-[0.7rem]"
-                stroke="#737373"
-                label={{
-                  value: "Streams",
-                  position: "outsideBottom",
-                  dy: 20,
-                  style: { fill: "#737373", textAnchor: "middle" },
-                }}
-              />
-              <YAxis
                 type="number"
                 tickLine={false}
                 axisLine={true}
@@ -218,11 +205,20 @@ export default function StreamChoiceGraph() {
                 stroke="#737373"
                 label={{
                   value: "Number of Students",
-                  position: "insideLeft",
-                  angle: -90,
-                  dx: -10,
+                  position: "insideBottom",
+                  dy: 20,
                   style: { fill: "#737373", textAnchor: "middle" },
                 }}
+              />
+              <YAxis
+                dataKey="stream"
+                type="category"
+                tickLine={false}
+                axisLine={false}
+                className="text-[0.55rem] md:text-[0.7rem]"
+                stroke="#737373"
+                width={80} // Increased width for labels
+                dx={-5}
               />
               <ChartTooltip
                 cursor={false}
@@ -230,7 +226,7 @@ export default function StreamChoiceGraph() {
               />
               <Bar
                 dataKey="firstChoice"
-                radius={[4, 4, 0, 0]}
+                radius={[0, 4, 4, 0]}
                 isAnimationActive={true}
                 fill={chartConfig.firstChoice.color}
                 name={chartConfig.firstChoice.label}
@@ -238,7 +234,7 @@ export default function StreamChoiceGraph() {
               />
               <Bar
                 dataKey="secondChoice"
-                radius={[4, 4, 0, 0]}
+                radius={[0, 4, 4, 0]}
                 isAnimationActive={true}
                 fill={chartConfig.secondChoice.color}
                 name={chartConfig.secondChoice.label}
@@ -246,7 +242,7 @@ export default function StreamChoiceGraph() {
               />
               <Bar
                 dataKey="thirdChoice"
-                radius={[4, 4, 0, 0]}
+                radius={[0, 4, 4, 0]}
                 isAnimationActive={true}
                 fill={chartConfig.thirdChoice.color}
                 name={chartConfig.thirdChoice.label}
