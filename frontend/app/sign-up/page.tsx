@@ -18,6 +18,7 @@ function SignUpContent() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
+  const [isSigningUp, setIsSigningUp] = useState(false);
   
   // Graduated Engineering 1 fields
   const [isGraduated, setIsGraduated] = useState(false);
@@ -32,9 +33,9 @@ function SignUpContent() {
     async function initiatePage() {
         try {
             let loggedInUser = await account.get();
-            setTimeout(() => {
+            if (!isSigningUp) {
               router.push('/dashboard');
-            }, 500);
+            }
         }
         catch (error) {
         }
@@ -58,31 +59,39 @@ function SignUpContent() {
 
   const handleSignUp = async () => {
     try {
+      setIsSigningUp(true);
+      setError("");
+      
       if (!email.endsWith('@mcmaster.ca')) {
         setError("Please use your McMaster email address (@mcmaster.ca)");
-        //return;
+        setIsSigningUp(false);
+        return;
       }
 
       // Additional validation for graduated students
       if (isGraduated) {
         if (!gpa) {
           setError("Please enter your GPA");
+          setIsSigningUp(false);
           return;
         }
         
         const gpaValue = parseFloat(gpa);
         if (isNaN(gpaValue) || gpaValue < 1 || gpaValue > 12) {
           setError("GPA must be between 1 and 12");
+          setIsSigningUp(false);
           return;
         }
 
         if (!streamIn) {
           setError("Please select the stream you were admitted to");
+          setIsSigningUp(false);
           return;
         }
 
         if (streamOut && streamIn === streamOut) {
           setError("The stream you were rejected from cannot be the same as the stream you were admitted to");
+          setIsSigningUp(false);
           return;
         }
       }
@@ -137,14 +146,17 @@ function SignUpContent() {
         } catch (dbError) {
           console.error("Error creating graduated user documents:", dbError);
           setError("Failed to set up graduated user profile. Please try again.");
+          setIsSigningUp(false);
           return;
         }
       } else {
         // Regular user flow
         router.push('/authenticate');
       }
+      setIsSigningUp(false);
     } catch (error) {
       setError("Email already exists or invalid input");
+      setIsSigningUp(false);
     }
   };
 
@@ -154,12 +166,6 @@ function SignUpContent() {
     }
   };
 
-  if (loggedInUser) {
-    if (typeof window !== 'undefined') {
-      window.location.href = isGraduated ? '/dashboard' : '/authenticate';
-      return null;
-    }
-  }
 
   return (
     <GridBackground className="h-svh flex items-center justify-center overflow-y-auto" ref={sectionRef}>
@@ -245,10 +251,13 @@ function SignUpContent() {
 
         <button
           onClick={handleSignUp}
-          className="bg-white text-black w-full p-2 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer"
+          className="bg-white text-black w-full p-2 rounded-sm hover:scale-105 transition-all duration-300 cursor-pointer mb-2"
         >
           Sign Up
         </button>
+        <p className="text-xs text-neutral-400 text-center">
+          📧 We'll send a verification email to confirm your account
+        </p>
         <Link href="/login" className="mt-4 text-neutral-400 hover:text-white transition-colors duration-300">
           Already have an account? Login
         </Link>
