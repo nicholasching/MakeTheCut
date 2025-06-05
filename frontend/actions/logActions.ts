@@ -16,6 +16,11 @@ export interface GradesInput {
   freechoice: boolean;
 }
 
+// Add interface for streams-only input
+export interface StreamsInput {
+  streams: string;
+}
+
 export async function addLog(gradesInput: GradesInput) {
     let loggedInUser = await account.get();
     
@@ -68,6 +73,43 @@ export async function addLog(gradesInput: GradesInput) {
     }
 }
 
+export async function addStreamChoices(streamsInput: StreamsInput) {
+    let loggedInUser = await account.get();
+    
+    const streamData = {
+        streams: streamsInput.streams || "null",
+        // Set default values for other fields to maintain database consistency
+        gpa: 0,
+        math1za3: 0,
+        math1zb3: 0,
+        math1zc3: 0,
+        phys1d03: 0,
+        phys1e03: 0,
+        chem1e03: 0,
+        eng1p13: 0,
+        elec1: "null",
+        elec2: "null",
+        freechoice: false
+    };
+
+    console.log("Submitting stream choices:", streamData);
+
+    try {
+        const response = await database.updateDocument(
+            'MacStats',
+            'UserData',
+            loggedInUser.$id,
+            streamData
+        );
+    } catch (error) {
+        const response = await database.createDocument(
+            'MacStats',
+            'UserData',
+            loggedInUser.$id,
+            streamData
+        );
+    }
+}
 
   function calculateAverages(grades: GradesInput): number {
   

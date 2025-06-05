@@ -57,7 +57,7 @@ function LoginContent() {
 
   if (loggedInUser) {
     if (typeof window !== 'undefined') {
-      window.location.href = '/grades'; // TEMPORARY REDIRECT TO GRADES INSTEAD OF DASHBOARD PAGE (FOR NEXT 3 DAYS)
+      window.location.href = '/dashboard'; // TEMPORARY REDIRECT TO GRADES INSTEAD OF DASHBOARD PAGE (FOR NEXT 3 DAYS)
       return null;
     }
   }

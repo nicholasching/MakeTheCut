@@ -1,26 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { addStreamChoices } from "../../actions/logActions";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import ComboboxStreams from "@/components/ComboboxStream";
 import LogoutButton from "@/components/LogoutButton";
-import { Checkbox } from "@/components/ui/checkbox";
+import { account, database } from "../appwrite";
 
 export default function StreamSelectionPage() {
   const router = useRouter();
   const [stream1Choice, setStream1Choice] = useState<string>("");
   const [stream2Choice, setStream2Choice] = useState<string>("");
   const [stream3Choice, setStream3Choice] = useState<string>("");
-  const [freechoice, setFreeChoice] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string>("Submit");
+
+  useEffect(() => {
+    async function initiatePage() {
+      try {
+        let loggedInUser = await account.get();
+        
+        // Comment to disable verification
+        if (!loggedInUser.emailVerification) {
+          router.push('/authenticate');
+        }
+
+        try {
+          const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
+          setStatus("Update");
+          if (pastData.streams && pastData.streams !== "null") {
+            const streamChoices = pastData.streams.split(',');
+            setStream1Choice(streamChoices[0] || "");
+            setStream2Choice(streamChoices[1] || "");
+            setStream3Choice(streamChoices[2] || "");
+          }
+        } catch (error) {
+          console.error("No previous data:", error);
+        }
+      } catch (error) {
+        router.push('/login');
+      }
+    }
+    initiatePage();
+  }, []);
 
   const handleStream1Change = (value: string) => setStream1Choice(value);
   const handleStream2Change = (value: string) => setStream2Choice(value);
   const handleStream3Change = (value: string) => setStream3Choice(value);
-  const handleFreeChoiceChange = (checked: boolean | string) => setFreeChoice(checked === true);
 
   const handleSubmit = async () => {
     try {
@@ -46,9 +75,10 @@ export default function StreamSelectionPage() {
       }
 
       const streams = `${stream1Choice},${stream2Choice},${stream3Choice}`;
-      const streamData = { streams, freechoice };
+      const streamData = { streams };
 
       console.log("Submitting stream choices:", streamData);
+      await addStreamChoices(streamData);
       router.push("/dashboard");
     } catch (err) {
       console.error("Error submitting stream choices:", err);
@@ -82,12 +112,6 @@ export default function StreamSelectionPage() {
           onChange={handleStream3Change}
           placeholder="Third Stream Choice"
         />
-        <div className="flex gap-2 mx-auto">
-          <Checkbox checked={freechoice} onCheckedChange={handleFreeChoiceChange} />
-          <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            I have free choice
-          </label>
-        </div>
         <div className="flex flex-col gap-3 justify-center items-center">
           {error && <p className="text-red-500 mt-2 text-xs">{error}</p>}
           <button
@@ -95,8 +119,16 @@ export default function StreamSelectionPage() {
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Submitting..." : "Submit"}
+            {isSubmitting ? "Submitting..." : status}
           </button>
+          {status === "Update" && (
+            <button 
+              className="text-subtext text-neutral-400 rounded-sm border-none cursor-pointer hover:scale-105 transition-all"
+              onClick={() => router.push('/dashboard')}
+            >
+              Discard Changes
+            </button>
+          )}
         </div>
       </div>
     </GridBackground>
