@@ -32,7 +32,9 @@ function SignUpContent() {
     async function initiatePage() {
         try {
             let loggedInUser = await account.get();
-            router.push('/dashboard');
+            setTimeout(() => {
+              router.push('/dashboard');
+            }, 500);
         }
         catch (error) {
         }
