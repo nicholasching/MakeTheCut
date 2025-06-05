@@ -28,6 +28,17 @@ export default function StreamSelectionPage() {
           router.push('/authenticate');
         }
 
+        // Check if user document exists in UserData24 (graduated users)
+        try {
+          await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
+          // User is graduated, redirect to dashboard
+          router.push('/dashboard');
+          return;
+        } catch (error) {
+          // User document doesn't exist in UserData24, continue with normal flow
+          console.log("User not found in UserData24, proceeding with streams page");
+        }
+
         try {
           const pastData = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
           setStatus("Update");
