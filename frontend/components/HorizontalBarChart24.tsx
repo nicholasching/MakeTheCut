@@ -29,17 +29,17 @@ var user;
 var userGPA = 4;
 var showUserLine = true;
 
-// Update the chartData structure to include the number of people
+// Update the chartData structure to include the number of people and reported cutoffs
 let chartData = [
-  { stream: "Chemical", GPA: cutoffs.chem, people: 0 },
-  { stream: "Civil", GPA: cutoffs.civil, people: 0 },
-  { stream: "Computer", GPA: cutoffs.computer, people: 0 },
-  { stream: "Electrical", GPA: cutoffs.electrical, people: 0 },
-  { stream: "Engineering Physics", GPA: cutoffs.engphys, people: 0 },
-  { stream: "Materials", GPA: cutoffs.materials, people: 0 },
-  { stream: "Mechanical", GPA: cutoffs.mechanical, people: 0 },
-  { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: 0 },
-  { stream: "Software", GPA: cutoffs.software, people: 0 },
+  { stream: "Chemical", GPA: cutoffs.chem, reportCutoff: 4, people: 0 },
+  { stream: "Civil", GPA: cutoffs.civil, reportCutoff: 4, people: 0 },
+  { stream: "Computer", GPA: cutoffs.computer, reportCutoff: 4, people: 0 },
+  { stream: "Electrical", GPA: cutoffs.electrical, reportCutoff: 4, people: 0 },
+  { stream: "Engineering Physics", GPA: cutoffs.engphys, reportCutoff: 4, people: 0 },
+  { stream: "Materials", GPA: cutoffs.materials, reportCutoff: 4, people: 0 },
+  { stream: "Mechanical", GPA: cutoffs.mechanical, reportCutoff: 4, people: 0 },
+  { stream: "Mechatronics", GPA: cutoffs.mechatronics, reportCutoff: 4, people: 0 },
+  { stream: "Software", GPA: cutoffs.software, reportCutoff: 4, people: 0 },
 ]
 
 async function initPage(router: any) {
@@ -55,57 +55,66 @@ async function initPage(router: any) {
     }
     let documents = await database.listDocuments('MacStats', 'StatData24');
       
-    // Access documents by their $id and update people count
+    // Access documents by their $id and update people count and reported cutoffs
     documents.documents.forEach(doc => {
       if (doc.$id === 'chem') {
         cutoffs.chem = parseFloat(doc.streamCutoff);
         chartData[0].people = doc.streamCount || 0;
+        chartData[0].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'civ') {
         cutoffs.civil = parseFloat(doc.streamCutoff);
         chartData[1].people = doc.streamCount || 0;
+        chartData[1].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'comp') {
         cutoffs.computer = parseFloat(doc.streamCutoff);
         chartData[2].people = doc.streamCount || 0;
+        chartData[2].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'elec') {
         cutoffs.electrical = parseFloat(doc.streamCutoff);
         chartData[3].people = doc.streamCount || 0;
+        chartData[3].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'engphys') {
         cutoffs.engphys = parseFloat(doc.streamCutoff);
         chartData[4].people = doc.streamCount || 0;
+        chartData[4].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'mat') {
         cutoffs.materials = parseFloat(doc.streamCutoff);
         chartData[5].people = doc.streamCount || 0;
+        chartData[5].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'mech') {
         cutoffs.mechanical = parseFloat(doc.streamCutoff);
         chartData[6].people = doc.streamCount || 0;
+        chartData[6].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'tron') {
         cutoffs.mechatronics = parseFloat(doc.streamCutoff);
         chartData[7].people = doc.streamCount || 0;
+        chartData[7].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
       if (doc.$id === 'soft') {
         cutoffs.software = parseFloat(doc.streamCutoff);
         chartData[8].people = doc.streamCount || 0;
+        chartData[8].reportCutoff = parseFloat(doc.reportCutoff) || 4;
       }
     });
     
-    // Update chart data with new GPA values
+    // Update chart data with new GPA values and reported cutoffs
     chartData = [
-      { stream: "Chemical", GPA: cutoffs.chem, people: chartData[0].people },
-      { stream: "Civil", GPA: cutoffs.civil, people: chartData[1].people },
-      { stream: "Computer", GPA: cutoffs.computer, people: chartData[2].people },
-      { stream: "Electrical", GPA: cutoffs.electrical, people: chartData[3].people },
-      { stream: "Engineering Physics", GPA: cutoffs.engphys, people: chartData[4].people },
-      { stream: "Materials", GPA: cutoffs.materials, people: chartData[5].people },
-      { stream: "Mechanical", GPA: cutoffs.mechanical, people: chartData[6].people },
-      { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: chartData[7].people },
-      { stream: "Software", GPA: cutoffs.software, people: chartData[8].people },
+      { stream: "Chemical", GPA: cutoffs.chem, reportCutoff: chartData[0].reportCutoff, people: chartData[0].people },
+      { stream: "Civil", GPA: cutoffs.civil, reportCutoff: chartData[1].reportCutoff, people: chartData[1].people },
+      { stream: "Computer", GPA: cutoffs.computer, reportCutoff: chartData[2].reportCutoff, people: chartData[2].people },
+      { stream: "Electrical", GPA: cutoffs.electrical, reportCutoff: chartData[3].reportCutoff, people: chartData[3].people },
+      { stream: "Engineering Physics", GPA: cutoffs.engphys, reportCutoff: chartData[4].reportCutoff, people: chartData[4].people },
+      { stream: "Materials", GPA: cutoffs.materials, reportCutoff: chartData[5].reportCutoff, people: chartData[5].people },
+      { stream: "Mechanical", GPA: cutoffs.mechanical, reportCutoff: chartData[6].reportCutoff, people: chartData[6].people },
+      { stream: "Mechatronics", GPA: cutoffs.mechatronics, reportCutoff: chartData[7].reportCutoff, people: chartData[7].people },
+      { stream: "Software", GPA: cutoffs.software, reportCutoff: chartData[8].reportCutoff, people: chartData[8].people },
     ]
 
     return 1
@@ -120,11 +129,13 @@ async function initPage(router: any) {
 // Create a custom tooltip component
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
+    const data = payload[0].payload;
     return (
       <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-sm">
-        <p className="mb-1"><strong>{payload[0].payload.stream}</strong></p>
-        <p className="text-[#f4ab33]">GPA Cutoff: {payload[0].value.toFixed(2)}</p>
-        <p className="text-white">People Entering Stream: {payload[0].payload.people}</p>
+        <p className="mb-1"><strong>{data.stream}</strong></p>
+        <p className="text-[#f4ab33]">Estimated Cutoff: {data.GPA.toFixed(2)}</p>
+        <p className="text-[#22c55e]">Reported Cutoff: {data.reportCutoff.toFixed(2)}</p>
+        <p className="text-white">People Entering Stream: {data.people}</p>
       </div>
     );
   }
@@ -133,8 +144,12 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 const chartConfig = {
   GPA: {
-    label: "GPA Cutoff",
+    label: "Estimated Cutoff",
     color: "#ffffff",
+  },
+  reportCutoff: {
+    label: "Actual Reported Cutoff",
+    color: "#22c55e",
   },
 } satisfies ChartConfig
 
@@ -277,7 +292,7 @@ export default function HorizontalBarChart() {
                 isAnimationActive={true} 
                 fill="#f4ab33"
                 fillOpacity={1}
-                name="GPA"
+                name="Estimated Cutoff"
                 stroke="none"
                 onClick={undefined}
               >
@@ -285,6 +300,16 @@ export default function HorizontalBarChart() {
                   <Cell key={`cell-${index}`} fill={getBarFill(entry.stream)} />
                 ))}
               </Bar>
+              <Bar 
+                dataKey="reportCutoff" 
+                radius={[0, 4, 4, 0]} 
+                isAnimationActive={true} 
+                fill="#22c55e"
+                fillOpacity={1}
+                name="Actual Reported Cutoff"
+                stroke="none"
+                onClick={undefined}
+              />
             </BarChart>
           </ResponsiveContainer>
         </ChartContainer>

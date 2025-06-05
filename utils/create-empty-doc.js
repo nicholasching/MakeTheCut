@@ -4,7 +4,7 @@ import { Client, Databases, Users, Query } from 'node-appwrite';
 const client = new Client()
     .setEndpoint('https://nyc.cloud.appwrite.io/v1')
     .setProject('makethecut')
-    .setKey('standard_70a88c567a0a4d842c29e4ec3b325ab1ac96447cc5061ed347245d0eea76521fae32241685aec55ea3d836de053298db44d248b6373ab4b4f76bd87fd7dae1a68dbb9efae3bb5e9f56454391e4633fe60a0c9c58fb85fe088f1edb6e5ec9e71a878c2eaebd3499b7aea1a3dbb50ec12a53ad22952116548a3631ec2b528154f4'); // Replace with your actual API key
+    .setKey('api_key_here'); // Replace with your actual API key
 
 const databases = new Databases(client);
 const users = new Users(client);
