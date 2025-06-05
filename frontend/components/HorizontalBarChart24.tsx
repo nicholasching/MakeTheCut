@@ -232,12 +232,12 @@ export default function HorizontalBarChart() {
   // Show loading animation when key is 0
   if (key === 0) {
     return (
-      <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
-        <CardHeader className="text-neutral-500">
+      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4 relative overflow-hidden">
+        <CardHeader className="text-neutral-500 pb-2">
           <CardTitle className="text-subtitle ">Loading Stream Data...</CardTitle>
 
         </CardHeader>
-        <CardContent className="h-[500px] md:h-[600px] flex items-center justify-center">
+        <CardContent className="h-[500px] md:h-[600px] px-2 flex items-center justify-center">
           <div className="relative w-full h-full">
             <div className="absolute inset-0 flex items-center justify-center">
               <SpinningLoader />
@@ -249,8 +249,8 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
-      <CardHeader className="text-neutral-500">
+    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+      <CardHeader className="text-neutral-500 pb-2">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
             2024/2025 Estimated Stream Cutoffs
@@ -260,7 +260,7 @@ export default function HorizontalBarChart() {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px] px-2">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 

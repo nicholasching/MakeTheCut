@@ -153,8 +153,8 @@ export default function StreamChoiceGraph() {
 
   if (isLoading) {
     return (
-      <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
-        <CardHeader className="text-neutral-500">
+      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+        <CardHeader className="text-neutral-500 pb-2">
           <div className="flex flex-col justify-center items-center">
             <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
               <div className="relative w-3 h-3">
@@ -168,7 +168,7 @@ export default function StreamChoiceGraph() {
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7 flex items-center justify-center">
+        <CardContent className="h-[500px] md:h-[600px] px-2 flex items-center justify-center">
           <div className="text-neutral-400">Loading...</div>
         </CardContent>
       </Card>
@@ -176,8 +176,8 @@ export default function StreamChoiceGraph() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
-      <CardHeader className="text-neutral-500">
+    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+      <CardHeader className="text-neutral-500 pb-2">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
             <div className="relative w-3 h-3">
@@ -191,7 +191,7 @@ export default function StreamChoiceGraph() {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px] px-2">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
