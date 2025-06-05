@@ -58,7 +58,7 @@ async function initPage(router: any) {
     catch (error) {
       showUserLine = false;
     }
-    let documents = await database.listDocuments('MacStats', 'StatData');
+    let documents = await database.listDocuments('MacStats', 'StatData24');
       
     // Access documents by their $id and update people count
     documents.documents.forEach(doc => {
