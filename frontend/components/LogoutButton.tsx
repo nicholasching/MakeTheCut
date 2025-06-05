@@ -24,6 +24,15 @@ const LogoutButton = ({
                 try {
                     await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
                     setuserGraduated(true);
+                    try {
+                        await database.getDocument('MacStats', 'StreamData24', loggedInUser.$id);
+                    } catch (error) {
+                        console.log("User document doesn't exist in 2024 StreamData collection");
+                        if (window.location.pathname === '/dashboard') {
+                            router.push('/stream');
+                            console.log("Redirecting to stream page");
+                        }
+                    }
                 } catch (error) {
                     // User document doesn't exist in 2024 UserData collection
                     setuserGraduated(false);
@@ -74,14 +83,17 @@ const LogoutButton = ({
                             {!userGraduated ? (
                                 <Link href="/streams"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream</button></Link>
                             ) : (
-                                <div className="bg-[#e64640] text-white py-2 rounded-sm w-full block text-center">
-                                    <div>
-                                        <span className="text-white font-bold">Grades Locked</span>
+                                <>
+                                    <div className="bg-[#e64640] text-white py-2 rounded-sm w-full block text-center">
+                                        <div>
+                                            <span className="text-white font-bold">Grades Locked</span>
+                                        </div>
+                                        <div>
+                                            Congratulations, you are no longer in Eng 1!
+                                        </div>
                                     </div>
-                                    <div>
-                                        Congratulations, you are no longer in Eng 1!
-                                    </div>
-                                </div>
+                                    <Link href="/stream"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream Admission</button></Link>
+                                </>
                             )}
                             <Link href="/"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Home</button></Link>
                             <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button>

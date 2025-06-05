@@ -21,6 +21,12 @@ export interface StreamsInput {
   streams: string;
 }
 
+// Add interface for stream admission data
+export interface StreamAdmissionInput {
+  streamIn: string;
+  streamOut?: string;
+}
+
 export async function addLog(gradesInput: GradesInput) {
     let loggedInUser = await account.get();
     
@@ -107,6 +113,33 @@ export async function addStreamChoices(streamsInput: StreamsInput) {
             'UserData',
             loggedInUser.$id,
             streamData
+        );
+    }
+}
+
+export async function addStreamAdmission(streamAdmissionInput: StreamAdmissionInput) {
+    let loggedInUser = await account.get();
+    
+    const streamAdmissionData = {
+        streamIn: streamAdmissionInput.streamIn || "null",
+        streamOut: streamAdmissionInput.streamOut || "null"
+    };
+
+    console.log("Submitting stream admission data:", streamAdmissionData);
+
+    try {
+        const response = await database.updateDocument(
+            'MacStats',
+            'StreamData24',
+            loggedInUser.$id,
+            streamAdmissionData
+        );
+    } catch (error) {
+        const response = await database.createDocument(
+            'MacStats',
+            'StreamData24',
+            loggedInUser.$id,
+            streamAdmissionData
         );
     }
 }

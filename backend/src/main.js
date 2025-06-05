@@ -49,6 +49,10 @@ export default async ({ req, res, log, error }) => {
     const tronStats = {streamCount: cutoffs.tronCount, streamCutoff: cutoffs.tronCut};
     const softStats = {streamCount: cutoffs.softCount, streamCutoff: cutoffs.softCut};
 
+    // Count documents with null streams to exclude from total
+    const nullStreamsCount = documents.filter(doc => !doc.streams || doc.streams === "null" || doc.streams.trim() === "").length;
+    const validStreamsCount = documents.length - nullStreamsCount;
+
     await database.updateDocument('MacStats','StatData','chem',chemStats);
     await database.updateDocument('MacStats','StatData','civ',civStats);
     await database.updateDocument('MacStats','StatData','comp',compStats);
@@ -58,7 +62,7 @@ export default async ({ req, res, log, error }) => {
     await database.updateDocument('MacStats','StatData','mech',mechStats);
     await database.updateDocument('MacStats','StatData','tron',tronStats);
     await database.updateDocument('MacStats','StatData','soft',softStats);
-    await database.updateDocument('MacStats','StatData','total',{streamCount: documents.length});
+    await database.updateDocument('MacStats','StatData','total',{streamCount: validStreamsCount});
 
     /*
     // Logging
