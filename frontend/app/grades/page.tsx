@@ -43,6 +43,11 @@ function GradesContent() {
 
     useEffect(() => {
         async function initiatePage() {
+
+            // THIS PAGE IS TEMPORARILY DISABLED AS GRADE INGEST IS NOT YET OPEN, DELETE TO ENABLE
+            router.push('/dashboard');
+            return;
+
             try {
                 let loggedInUser = await account.get();
                 
