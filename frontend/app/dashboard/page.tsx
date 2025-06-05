@@ -13,7 +13,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 function StatisticsDropdown() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="w-full bg-neutral-800 border border-neutral-700 rounded-lg overflow-hidden">
