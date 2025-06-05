@@ -67,10 +67,17 @@ async function fetchStreamChoiceData() {
     
     // Create a copy of initial data to update
     const updatedChartData = [...initialChartData];
+    let totalSubmissions = 0;
     
     // Update chart data with fetched choice counts
     documents.documents.forEach(doc => {
       let streamIndex = -1;
+      
+      // Check if this is the total document to get submission count
+      if (doc.$id === 'total') {
+        totalSubmissions = doc.streamCount || 0;
+        return;
+      }
       
       // Map document IDs to chart data indices
       switch (doc.$id) {
@@ -115,15 +122,16 @@ async function fetchStreamChoiceData() {
     });
     
     console.log("Stream choice data fetched successfully:", updatedChartData);
-    return updatedChartData;
+    return { chartData: updatedChartData, totalSubmissions };
   } catch (error) {
     console.error("Error fetching stream choice data:", error);
-    return initialChartData;
+    return { chartData: initialChartData, totalSubmissions: 0 };
   }
 }
 
 export default function StreamChoiceGraph() {
   const [chartData, setChartData] = useState(initialChartData);
+  const [totalSubmissions, setTotalSubmissions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [key, setKey] = useState(0);
 
@@ -133,7 +141,8 @@ export default function StreamChoiceGraph() {
       
       // Fetch stream choice data
       const data = await fetchStreamChoiceData();
-      setChartData(data);
+      setChartData(data.chartData);
+      setTotalSubmissions(data.totalSubmissions);
       setKey(prev => prev + 1); // Force re-render
       
       setIsLoading(false);
@@ -178,7 +187,7 @@ export default function StreamChoiceGraph() {
             Live 2025/2026 Stream Choice Distribution
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
-            <p>Distribution of First, Second, and Third Choices</p>
+            <p>Total Contributions: {totalSubmissions}</p>
           </CardDescription>
         </div>
       </CardHeader>

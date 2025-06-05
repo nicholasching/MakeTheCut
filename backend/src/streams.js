@@ -64,6 +64,11 @@ export default async ({ req, res, log, error }) => {
       thirdChoice: choiceCounts.soft.thirdChoice
     });
 
+    // Update the total document with the total number of submissions
+    await database.updateDocument('MacStats','StatData','total', {
+      streamCount: documents.length
+    });
+
   } catch(err) {
     error(err.message);
   }
