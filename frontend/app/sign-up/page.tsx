@@ -25,6 +25,7 @@ function SignUpContent() {
   const [gpa, setGpa] = useState("");
   const [streamIn, setStreamIn] = useState("");
   const [streamOut, setStreamOut] = useState("");
+  const [hasFreeChoice, setHasFreeChoice] = useState(false);
   
   const sectionRef = useSectionTracking<HTMLDivElement>("SignUp")
 
@@ -116,7 +117,7 @@ function SignUpContent() {
             elec1: "null",
             elec2: "null",
             streams: "null",
-            freechoice: false
+            freechoice: hasFreeChoice
           };
 
           await database.createDocument(
@@ -227,16 +228,18 @@ function SignUpContent() {
               />
             </div>
             
-            <div className="flex flex-col gap-2">
-              <label className="text-neutral-300 text-sm font-medium text-center">
-                Were you rejected from any stream? (optional)
-              </label>
-              <ComboboxStreams
-                value={streamOut}
-                onChange={setStreamOut}
-                placeholder="Select rejected stream"
-              />
-            </div>
+            {!hasFreeChoice && (
+              <div className="flex flex-col gap-2">
+                <label className="text-neutral-300 text-sm font-medium text-center">
+                  Were you rejected from any stream? (optional)
+                </label>
+                <ComboboxStreams
+                  value={streamOut}
+                  onChange={setStreamOut}
+                  placeholder="Select rejected stream"
+                />
+              </div>
+            )}
 
             <input
               type="text"
@@ -246,6 +249,21 @@ function SignUpContent() {
               onKeyDown={handleKeyDown}
               className="w-full p-2 rounded-md bg-neutral-900 border-2 border-transparent focus:border-white transition-all duration-300"
             />
+            <div className="flex gap-2 items-center justify-center">
+              <Checkbox
+                checked={hasFreeChoice}
+                onCheckedChange={(checked) => {
+                  const isChecked = checked === true;
+                  setHasFreeChoice(isChecked);
+                  if (isChecked) {
+                    setStreamOut("");
+                  }
+                }}
+              />
+              <label className="text-sm font-medium leading-none text-neutral-300">
+                I had free choice
+              </label>
+            </div>
           </div>
         )}
 
