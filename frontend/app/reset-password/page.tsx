@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { account } from "../appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -10,7 +10,6 @@ import { useSectionTracking } from "@/hooks/useSectionTracking";
 
 function ResetPasswordContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [userId, setUserId] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [password, setPassword] = useState("");
@@ -21,9 +20,10 @@ function ResetPasswordContent() {
   const sectionRef = useSectionTracking<HTMLDivElement>("ResetPassword");
 
   useEffect(() => {
-    // Get the userId and secret from URL parameters
-    const userIdParam = searchParams.get('userId');
-    const secretParam = searchParams.get('secret');
+    // Get userId and secret from URL using window.location (same approach as verify page)
+    const params = new URLSearchParams(window.location.search);
+    const userIdParam = params.get('userId');
+    const secretParam = params.get('secret');
     
     if (userIdParam && secretParam) {
       setUserId(userIdParam);
@@ -31,7 +31,7 @@ function ResetPasswordContent() {
     } else {
       setError("Invalid reset link. Please request a new password reset.");
     }
-  }, [searchParams]);
+  }, []);
 
   const handleResetPassword = async () => {
     if (!password || !confirmPassword) {
