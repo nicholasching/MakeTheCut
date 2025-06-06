@@ -156,6 +156,7 @@ function MethodologyDropdown() {
                   <li>Collect student reports of acceptances and rejections by stream</li>
                   <li>Set cutoff as the higher of: lowest accepted GPA or highest rejected GPA</li>
                   <li>Filter outliers: remove data points with inconsistencies, those where the (highest rejected GPA - lowest accepted GPA) &gt; 0.5/12 GPA</li>
+                  <li>Average the lowest accepted GPA and highest rejected GPA to get the reported cutoff</li>
                 </ul>
                 <p className="text-xs text-green-200/80 italic">
                   * Updates live as students share their results.
