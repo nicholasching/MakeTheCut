@@ -135,7 +135,6 @@ const CustomTooltip = ({ active, payload }: any) => {
         <p className="mb-1"><strong>{data.stream}</strong></p>
         <p className="text-[#f4ab33]">Estimated Cutoff: {data.GPA.toFixed(2)}</p>
         <p className="text-[#22c55e]">Reported Cutoff: {data.reportCutoff.toFixed(2)}</p>
-        <p className="text-white">People Entering Stream: {data.people}</p>
       </div>
     );
   }
