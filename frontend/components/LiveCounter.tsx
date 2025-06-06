@@ -14,7 +14,7 @@ export default function LiveCounter({ className = "" }: LiveCounterProps) {
                 const getContributions = async () => {
                         const total = await database.getDocument('MacStats', 'StatData', 'total');
                         const total24 = await database.getDocument('MacStats', 'StatData24', 'total');
-                        const contributions = total.streamCount + total24.streamCount;
+                        const contributions = total.streamCount + total24.streamCount + total24.reportCutoff;
                         setTotalContributions(contributions);
                 }
                 getContributions();

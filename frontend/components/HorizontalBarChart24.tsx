@@ -189,6 +189,7 @@ export default function HorizontalBarChart() {
   const [isMobile, setIsMobile] = useState(false);
   const [key, setKey] = useState(0);
   const [totalContributions, setTotalContributions] = useState<number>(0);
+  const [totalReportedCutoffs, setTotalReportedCutoffs] = useState<number>(0);
   const [shouldShowUserLine, setShouldShowUserLine] = useState(true);
   const router = useRouter();
   
@@ -202,6 +203,7 @@ export default function HorizontalBarChart() {
       try {
         const contributions = await database.getDocument('MacStats', 'StatData24', 'total');
         setTotalContributions(contributions.streamCount);
+        setTotalReportedCutoffs(contributions.reportCutoff);
       } catch (error) {
         console.error("Error fetching contribution count:", error);
       }
@@ -255,7 +257,7 @@ export default function HorizontalBarChart() {
             2024/2025 Estimated Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
-            <p>Total Contributions: {totalContributions}</p>
+            <p>Total Estimated Cutoff Contributions: {totalContributions} | Total Reported Cutoffs Contributions: {totalReportedCutoffs}</p>
           </CardDescription>
         </div>
       </CardHeader>
