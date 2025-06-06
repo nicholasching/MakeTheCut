@@ -254,7 +254,7 @@ export default function HorizontalBarChart() {
       <CardHeader className="text-neutral-500 pb-2">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-            2024/2025 Estimated Stream Cutoffs
+            2024/2025 Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Total Estimated Cutoff Contributions: {totalContributions} | Total Reported Cutoffs Contributions: {totalReportedCutoffs}</p>
