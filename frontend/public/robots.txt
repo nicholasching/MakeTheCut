@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Allow crawling of all content
+Disallow: /api/
+
+# Sitemap location (you may want to create this later)
+Sitemap: https://www.makethecut.ca/sitemap.xml 
