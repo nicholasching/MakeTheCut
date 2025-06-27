@@ -14,7 +14,7 @@ export default function LiveCounter({ className = "" }: LiveCounterProps) {
                 const getContributions = async () => {
                         const total = await database.getDocument('MacStats', 'StatData', 'total');
                         const total24 = await database.getDocument('MacStats', 'StatData24', 'total');
-                        const contributions = total.streamCount + total24.streamCount + total24.reportCutoff;
+                        const contributions = total.streamCount * 4 + total24.streamCount * 10 + total24.reportCutoff;
                         setTotalContributions(contributions);
                 }
                 getContributions();
@@ -26,7 +26,7 @@ export default function LiveCounter({ className = "" }: LiveCounterProps) {
                                                 <div className="absolute inset-0 rounded-full bg-red-500"></div>
                                                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
                                 </div>
-                                <p className="text-white text-subtitle">Lifetime Contributions: {totalContributions}</p>
+                                <p className="text-white text-subtitle">Lifetime Data Points: {totalContributions}</p>
                 </div>
         );
 }
