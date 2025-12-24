@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Express } from "express";
 import setupEnv from './secrets.js'
 import path from 'node:path';
 import fs from 'node:fs';
@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 await setupEnv();
 
-const app = express();
+const app: Express = express();
 
 /**========================================================================
  *                           Middleware

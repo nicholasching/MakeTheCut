@@ -6,7 +6,7 @@
 
 ## Running the backend
 1. `infisical login` (if you haven't already done so)
-2. `infisical run -- npm start`
+2. `infisical run -- npm run dev`
 
 ## Deploying in prod
 1. `npm run build`
