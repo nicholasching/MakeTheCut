@@ -1,5 +1,5 @@
 import { InfisicalSDK } from '@infisical/sdk';
-import logger from './pino.js';
+import logger from './logger.js';
 
 export default async function validateAndLoadEnv() {
     /**

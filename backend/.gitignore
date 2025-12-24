@@ -4,7 +4,9 @@
 /build
 
 # dependencies
-/node_modules
+/node_modules/
+/.pnpm/
+.pnpm
 /.pnp
 .pnp.*
 .yarn/*

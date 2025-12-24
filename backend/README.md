@@ -20,4 +20,4 @@
 `docker compose up -d --build backend`
 
 ### Pino Logging
-The pino logger is default exported from `pino.ts` located in `src`
+The pino logger is default exported from `logger.ts` located in `src`

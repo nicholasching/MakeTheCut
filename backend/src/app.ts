@@ -1,9 +1,9 @@
 import express, { type Application } from "express";
-import setupEnv from './secrets.js'
+import setupEnv from './config/secrets.js'
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
-import logger from './pino.js';
+import logger from './config/logger.js';
 import { pinoHttp } from 'pino-http';
 
 await setupEnv();
