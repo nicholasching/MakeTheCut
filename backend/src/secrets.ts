@@ -3,9 +3,9 @@ import logger from './pino.js';
 
 export default async function validateAndLoadEnv() {
     /**
-     * In prod we should directly grab variables
+     * we should directly grab variables
      */
-    if (process.env.NODE_ENV != 'dev') {
+    // if (process.env.NODE_ENV != 'dev') {
         const client = new InfisicalSDK({
             //   siteUrl: "your-infisical-instance.com" // Optional, defaults to https://app.infisical.com
         });
@@ -16,13 +16,13 @@ export default async function validateAndLoadEnv() {
             clientSecret: process.env.INFISICAL_SECRET,
         });
 
-        const allSecrets = await client.secrets().listSecrets({
-            environment: process.env.NODE_ENV, // staging, dev, prod, or custom environment slugs
-            projectId: "02379918-e5ad-4477-b182-a2e2fe0ed838" // this will never change
-        });
+        // const allSecrets = await client.secrets().listSecrets({
+        //     environment: process.env.NODE_ENV, // staging, dev, prod, or custom environment slugs
+        //     projectId: "02379918-e5ad-4477-b182-a2e2fe0ed838" // this will never change
+        // });
 
-        logger.info("Fetched secrets directly (prod)")
-    } else {
-        logger.info("Fetched secrets (dev)")
-    }
+        logger.info("Infisical: Fetched secrets")
+    // } else {
+    //     logger.info("Fetched secrets (dev)")
+    // }
 }
