@@ -5,7 +5,7 @@ import type { Request, Response, NextFunction } from "express"
 
 const router = Router()
 
-router.use((req, res, next) => {
+router.use((req: Request, res: Response, next: NextFunction) => {
     req.headers['x-forwarded-proto'] = req.headers['x-forwarded-proto'] || 'http'
     next()
 })
@@ -15,7 +15,7 @@ router.use((req, res, next) => {
 // - GET  /auth/callback/google for Google OAuth callback
 // - POST /auth/signout to logout
 
-router.use("/*", 
+router.use("/", 
     ExpressAuth({
         providers: [
         Google({

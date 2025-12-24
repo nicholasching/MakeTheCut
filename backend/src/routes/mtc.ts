@@ -3,7 +3,7 @@ import { authSession } from "../middleware/auth.js"
 
 const router = Router()
 
-router.use("/*", authSession)
+router.use("/", authSession)
 
 
 export default router
