@@ -3,6 +3,8 @@ import setupEnv from './secrets.js'
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
+import logger from './pino.js';
+import { pinoHttp } from 'pino-http';
 
 await setupEnv();
 
@@ -12,6 +14,10 @@ const app: Application = express();
  *                           Middleware
  *========================================================================**/
 app.use(express.json());
+// pino logging
+app.use(pinoHttp({
+    logger
+}));
 
 
 /**========================================================================
@@ -38,7 +44,7 @@ async function loadRoutes() {
 
             if (routeModule.default) {
                 app.use(routePath, routeModule.default);
-                console.log(`✅ Mounted: ${routePath}`);
+                logger.info(`Mounted: ${routePath}`);
             }
         }
     }
