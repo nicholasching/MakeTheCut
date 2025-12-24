@@ -19,11 +19,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@infisical/sdk": "^4.0.6",
-    "dotenv": "^17.2.3",
     "pino": "^10.1.0",
     "@auth/core": "^0.41.1",
     "@auth/express": "^0.12.1",
+    "@infisical/sdk": "^4.0.6",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1"
   }
 }
