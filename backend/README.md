@@ -11,3 +11,6 @@
 ## Deploying in prod
 1. `npm run build`
 2. Ensure `.env` exists in the root directory according to `env.d.ts` so infisical can pick it up and get secrets
+
+### Pino Logging
+The pino logger is default exported from `pino.ts` located in `src`

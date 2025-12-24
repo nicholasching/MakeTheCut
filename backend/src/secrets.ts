@@ -1,7 +1,5 @@
-import { InfisicalSDK } from '@infisical/sdk'
-import dotenv from 'dotenv'
-import fs from 'fs';
-import path from 'path';
+import { InfisicalSDK } from '@infisical/sdk';
+import logger from './pino.js';
 
 export default async function validateAndLoadEnv() {
     /**
@@ -23,8 +21,8 @@ export default async function validateAndLoadEnv() {
             projectId: "02379918-e5ad-4477-b182-a2e2fe0ed838" // this will never change
         });
 
-        console.log("PROD: Fetched secrets", allSecrets)
+        logger.info("Fetched secrets directly (prod)")
     } else {
-        console.log("DEVEL: Skipped secrets, in development env.")
+        logger.info("Fetched secrets (dev)")
     }
 }
