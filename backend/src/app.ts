@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import express, { type Application } from "express";
 import setupEnv from './secrets.js'
 import path from 'node:path';
 import fs from 'node:fs';
@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 
 await setupEnv();
 
-const app: Express = express();
+const app: Application = express();
 
 /**========================================================================
  *                           Middleware
@@ -44,9 +44,8 @@ async function loadRoutes() {
     }
 }
 
+// Load routes and listen on 0.0.0.0 (should be run under docker in prod)
 await loadRoutes();
-
-
-app.listen(process.env.PORT);
+app.listen(process.env.PORT || 3000);
 
 export { app }
