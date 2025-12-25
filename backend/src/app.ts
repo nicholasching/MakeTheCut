@@ -23,6 +23,7 @@ if (process.env.NODE_ENV === 'dev') {
             // Allow localhost and file:// origins for testing
             const allowedOrigins = [
                 'http://localhost:3000',
+                'http://localhost:8080', // Test bench server
             ];
 
             if (allowedOrigins.includes(origin) || origin.startsWith('file://')) {
