@@ -6,7 +6,8 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import logger from './config/logger.js';
 import { pinoHttp } from 'pino-http';
 
-await setupEnv();
+// disabled because we are doing it in compose now
+// await setupEnv();
 
 const app: Application = express();
 
@@ -52,6 +53,7 @@ async function loadRoutes() {
 
 // Load routes and listen on 0.0.0.0 (should be run under docker in prod)
 await loadRoutes();
-app.listen(process.env.PORT || 3000);
+// hard coded because docker :)
+app.listen(3000);
 
 export { app }

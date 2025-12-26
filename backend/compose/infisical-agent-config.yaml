@@ -1,0 +1,22 @@
+infisical:
+  address: "https://app.infisical.com"
+auth:
+  type: "universal-auth"
+  config:
+    # Use absolute paths or ensure the agent is run from the directory containing these files
+    client-id: "/etc/infisical/.machine_id"
+    client-secret: "/etc/infisical/.machine_secret"
+    access-token-path: "/tmp/infisical-session-token"
+sinks:
+  - type: "file"
+    config:
+      path: "/tmp/secrets/infisical-session-token"
+
+templates:
+  - source-path: "/etc/infisical/secrets_template"
+    destination-path: "/tmp/secrets/.env"
+    config:
+      polling-interval: 60s
+      execute:
+        timeout: 30
+        command: echo "Fetched Secrets"
