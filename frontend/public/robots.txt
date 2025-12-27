@@ -1,4 +1,4 @@
-User-agent: *
+UserCollection-agent: *
 Allow: /
 
 # Allow crawling of all content
