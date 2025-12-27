@@ -1,4 +1,4 @@
-import express, { type Application } from "express";
+import express, {type Application, Router} from "express";
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -41,7 +41,7 @@ async function loadRoutes() {
             const routePath = fileName === 'index' ? '/' : `/${fileName}`;
 
             if (routeModule.default) {
-                app.use(routePath, routeModule.default);
+                app.use(routePath, routeModule.default as Router);
                 logger.info(`Mounted: ${routePath}`);
             }
         }
