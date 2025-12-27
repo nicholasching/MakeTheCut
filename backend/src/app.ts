@@ -3,8 +3,11 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
 import logger from './config/logger.js';
+import connectDatabase from "./config/db.js";
 import { pinoHttp } from 'pino-http';
 
+// Most important is we have a db connection available before we do anything
+connectDatabase();
 
 const app: Application = express();
 
