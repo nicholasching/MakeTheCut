@@ -20,6 +20,14 @@ RUN npm run build
 # Stage 2: Production Runner
 FROM node:25-alpine AS runner
 
+## First we install infisical for secrets
+# 1. Install dependencies
+USER root
+RUN apk add --no-cache curl bash sudo \
+    && curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' \
+    | distro=alpine version=3.19 bash \
+    && apk add infisical
+
 WORKDIR /app
 
 ENV NODE_ENV=prod
