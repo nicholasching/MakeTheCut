@@ -1,3 +1,6 @@
-import mongoose from "mongoose";
-
-mongoose.connect(`mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@db:27017/`)
+// import mongoose from "mongoose";
+//
+//
+// export default async function awaitDb() {
+//     await mongoose.connect(process.env.ME_CONFIG_MONGODB_URL);
+// }

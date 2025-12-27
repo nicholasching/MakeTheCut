@@ -3,7 +3,7 @@ import { ExpressAuth } from "@auth/express"
 import Google from "@auth/express/providers/google"
 import type { Request, Response, NextFunction } from "express"
 
-const router = Router()
+const router: Router = Router()
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     req.headers['x-forwarded-proto'] = req.headers['x-forwarded-proto'] || 'http'

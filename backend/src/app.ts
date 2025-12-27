@@ -1,13 +1,10 @@
 import express, { type Application } from "express";
-import setupEnv from './config/secrets.js'
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
 import logger from './config/logger.js';
 import { pinoHttp } from 'pino-http';
 
-// disabled because we are doing it in compose now
-// await setupEnv();
 
 const app: Application = express();
 

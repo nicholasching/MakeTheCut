@@ -31,10 +31,12 @@ RUN if [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install --prod --
     else npm install --only=production; \
     fi
 
+
 # Copy built assets from builder
 COPY --from=builder /app/build ./build
+COPY --from=builder /app/docker-entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 # Basic user security
 USER node
-
-CMD ["node", "build/app.js"]
+ENTRYPOINT ["./entrypoint.sh"]
