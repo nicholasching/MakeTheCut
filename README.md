@@ -1,4 +1,5 @@
+# MTx Monorepo
 
-
-https://github.com/user-attachments/assets/0d13e615-b816-4c2d-91a0-e4354bda79d3
-
+## Setup
+1. You need pnpm and turbo `npm i -g pnpm turbo`
+2. Install packages (just need to install workspace level) `pnpm i`
