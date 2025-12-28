@@ -1,0 +1,9 @@
+{
+    "name": "@makethecut/shared",
+    "version": "1.0.0",
+    "main": "index.ts",
+    "types": "index.ts",
+    "scripts": {
+        "build": "echo 'No build needed for TS only package'"
+    }
+}

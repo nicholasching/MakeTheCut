@@ -1,6 +1,7 @@
 import express, { type Application, Router } from "express";
 import path from 'node:path';
 import fs from 'node:fs';
+import cors from 'cors'
 import { fileURLToPath, pathToFileURL } from 'url';
 import logger from './config/logger.js';
 import connectDatabase from "./config/db.js";

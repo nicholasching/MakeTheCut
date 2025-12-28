@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ..
-      dockerfile: Dockerfile # Ensure this is updated with the Infisical entrypoint
+      context: ../..
+      dockerfile: backend/Dockerfile
     restart: always
     environment:
       - NODE_ENV=${NODE_ENV}
