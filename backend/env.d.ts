@@ -1,12 +1,11 @@
+type EnvConfig = {
+  NODE_ENV: 'dev' | 'prod' | 'test';
+};
+
 declare global {
   namespace NodeJS {
-    interface ProcessEnv {
-      INFISICAL_MACHINE_IDENTITY: string;
-      INFISICAL_SECRET: string;
-      NODE_ENV: 'dev' | 'prod' | 'test';
-      MONGO_INITDB_ROOT_USERNAME: string;
-      MONGO_INITDB_ROOT_PASSWORD: string;
-      PORT?: string;
+    interface ProcessEnv extends Required<EnvConfig> {
+      [key: string]: string;
     }
   }
 }
