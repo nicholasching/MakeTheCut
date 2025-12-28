@@ -24,7 +24,7 @@ export class MarkDataSchema {
     public marks?: MarkSchema[];
 }
 
-export const MarkDataCollection = getModelForClass(MarkDataSchema, {
+export const MarkData = getModelForClass(MarkDataSchema, {
     options: {
         customName: "mark_data",
     }

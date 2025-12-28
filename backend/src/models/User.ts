@@ -3,7 +3,7 @@ import {getModelForClass, prop} from "@typegoose/typegoose";
 
 export class UserCollectionSchema {
     @prop({ required: true })
-    public uuid!: string;
+    public _id!: string;
     @prop()
     public entryYear?: number;
     @prop()
@@ -11,7 +11,7 @@ export class UserCollectionSchema {
     // TODO: add stream and mark data
 }
 
-export const UserCollection = getModelForClass(UserCollectionSchema, {
+export const User = getModelForClass(UserCollectionSchema, {
     options: {
         customName: 'users'
     }
