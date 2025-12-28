@@ -1,5 +1,5 @@
-import {account, database, ID} from "../app/appwrite";
-import {Log} from "../../types";
+import { account, database, ID } from "../app/appwrite";
+import { Log } from "@makethecut/shared";
 
 // Add interface for grades input
 export interface GradesInput {
@@ -28,124 +28,124 @@ export interface StreamAdmissionInput {
 }
 
 export async function addLog(gradesInput: GradesInput) {
-    let loggedInUser = await account.get();
-    
-    const averageGPA = calculateAverages(gradesInput).toFixed(2);
-    
-    console.log("Calculated GPA:", averageGPA);
+  let loggedInUser = await account.get();
 
-    let elective1 = gradesInput.elec1;
-    let elective2 = gradesInput.elec2;
+  const averageGPA = calculateAverages(gradesInput).toFixed(2);
 
-    if (gradesInput.elec1 == "," || gradesInput.elec1.split(',')[0] == "" || gradesInput.elec1.split(',')[1] == "") {
-      elective1 = "null";
-    }
-    if (gradesInput.elec2 == "," || gradesInput.elec2.split(',')[0] == "" || gradesInput.elec2.split(',')[1] == "") {
-      elective2 = "null";
-    }
+  console.log("Calculated GPA:", averageGPA);
 
-    const newLog = {
-        gpa: parseFloat(averageGPA),
-        math1za3: parseFloat(gradesInput.math1za3) || 0,
-        math1zb3: parseFloat(gradesInput.math1zb3) || 0,
-        math1zc3: parseFloat(gradesInput.math1zc3) || 0,
-        phys1d03: parseFloat(gradesInput.phys1d03) || 0,
-        phys1e03: parseFloat(gradesInput.phys1e03) || 0,
-        chem1e03: parseFloat(gradesInput.chem1e03) || 0,
-        eng1p13: parseFloat(gradesInput.eng1p13) || 0,
-        elec1: elective1 || "null",
-        elec2: elective2 || "null",
-        streams: gradesInput.streams || "null",
-        freechoice: gradesInput.freechoice || false
-    };
+  let elective1 = gradesInput.elec1;
+  let elective2 = gradesInput.elec2;
 
-    console.log(newLog);
+  if (gradesInput.elec1 == "," || gradesInput.elec1.split(',')[0] == "" || gradesInput.elec1.split(',')[1] == "") {
+    elective1 = "null";
+  }
+  if (gradesInput.elec2 == "," || gradesInput.elec2.split(',')[0] == "" || gradesInput.elec2.split(',')[1] == "") {
+    elective2 = "null";
+  }
 
-    try{
-      const response = await database.updateDocument(
-        'MacStats',
-        'UserData',
-        loggedInUser.$id,
-        newLog
-      )
-    }
-    catch (error) {
-      const response = await database.createDocument(
-        'MacStats',
-        'UserData',
-        loggedInUser.$id,
-        newLog
-      );
-    }
+  const newLog = {
+    gpa: parseFloat(averageGPA),
+    math1za3: parseFloat(gradesInput.math1za3) || 0,
+    math1zb3: parseFloat(gradesInput.math1zb3) || 0,
+    math1zc3: parseFloat(gradesInput.math1zc3) || 0,
+    phys1d03: parseFloat(gradesInput.phys1d03) || 0,
+    phys1e03: parseFloat(gradesInput.phys1e03) || 0,
+    chem1e03: parseFloat(gradesInput.chem1e03) || 0,
+    eng1p13: parseFloat(gradesInput.eng1p13) || 0,
+    elec1: elective1 || "null",
+    elec2: elective2 || "null",
+    streams: gradesInput.streams || "null",
+    freechoice: gradesInput.freechoice || false
+  };
+
+  console.log(newLog);
+
+  try {
+    const response = await database.updateDocument(
+      'MacStats',
+      'UserData',
+      loggedInUser.$id,
+      newLog
+    )
+  }
+  catch (error) {
+    const response = await database.createDocument(
+      'MacStats',
+      'UserData',
+      loggedInUser.$id,
+      newLog
+    );
+  }
 }
 
 export async function addStreamChoices(streamsInput: StreamsInput) {
-    let loggedInUser = await account.get();
-    
-    const streamData = {
-        streams: streamsInput.streams || "null",
-        // Set default values for other fields to maintain database consistency
-        gpa: 0,
-        math1za3: 0,
-        math1zb3: 0,
-        math1zc3: 0,
-        phys1d03: 0,
-        phys1e03: 0,
-        chem1e03: 0,
-        eng1p13: 0,
-        elec1: "null",
-        elec2: "null",
-        freechoice: false
-    };
+  let loggedInUser = await account.get();
 
-    console.log("Submitting stream choices:", streamData);
+  const streamData = {
+    streams: streamsInput.streams || "null",
+    // Set default values for other fields to maintain database consistency
+    gpa: 0,
+    math1za3: 0,
+    math1zb3: 0,
+    math1zc3: 0,
+    phys1d03: 0,
+    phys1e03: 0,
+    chem1e03: 0,
+    eng1p13: 0,
+    elec1: "null",
+    elec2: "null",
+    freechoice: false
+  };
 
-    try {
-        const response = await database.updateDocument(
-            'MacStats',
-            'UserData',
-            loggedInUser.$id,
-            streamData
-        );
-    } catch (error) {
-        const response = await database.createDocument(
-            'MacStats',
-            'UserData',
-            loggedInUser.$id,
-            streamData
-        );
-    }
+  console.log("Submitting stream choices:", streamData);
+
+  try {
+    const response = await database.updateDocument(
+      'MacStats',
+      'UserData',
+      loggedInUser.$id,
+      streamData
+    );
+  } catch (error) {
+    const response = await database.createDocument(
+      'MacStats',
+      'UserData',
+      loggedInUser.$id,
+      streamData
+    );
+  }
 }
 
 export async function addStreamAdmission(streamAdmissionInput: StreamAdmissionInput) {
-    let loggedInUser = await account.get();
-    
-    const streamAdmissionData = {
-        streamIn: streamAdmissionInput.streamIn || "null",
-        streamOut: streamAdmissionInput.streamOut || "null"
-    };
+  let loggedInUser = await account.get();
 
-    console.log("Submitting stream admission data:", streamAdmissionData);
+  const streamAdmissionData = {
+    streamIn: streamAdmissionInput.streamIn || "null",
+    streamOut: streamAdmissionInput.streamOut || "null"
+  };
 
-    try {
-        const response = await database.updateDocument(
-            'MacStats',
-            'StreamData24',
-            loggedInUser.$id,
-            streamAdmissionData
-        );
-    } catch (error) {
-        const response = await database.createDocument(
-            'MacStats',
-            'StreamData24',
-            loggedInUser.$id,
-            streamAdmissionData
-        );
-    }
+  console.log("Submitting stream admission data:", streamAdmissionData);
+
+  try {
+    const response = await database.updateDocument(
+      'MacStats',
+      'StreamData24',
+      loggedInUser.$id,
+      streamAdmissionData
+    );
+  } catch (error) {
+    const response = await database.createDocument(
+      'MacStats',
+      'StreamData24',
+      loggedInUser.$id,
+      streamAdmissionData
+    );
+  }
 }
 
-  function calculateAverages(grades: GradesInput): number {
-  
+function calculateAverages(grades: GradesInput): number {
+
   let totalGrade = 0;
   let totalUnits = 0;
 
