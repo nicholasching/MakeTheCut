@@ -161,11 +161,7 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
-  shared:
-    devDependencies:
-      typescript:
-        specifier: ^5.9.3
-        version: 5.9.3
+  shared: {}
 
 packages:
 
