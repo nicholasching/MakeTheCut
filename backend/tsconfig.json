@@ -1,6 +1,10 @@
 {
   "include": [
-    "**/*"
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "build"
   ],
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
@@ -15,10 +19,7 @@
     "lib": [
       "esnext"
     ],
-    "types": [
-      "node"
-    ],
-    // and npm install -D @types/node
+    // "types": ["node"], // Removed to allow all @types packages to be loaded
     // Other Outputs
     "sourceMap": true,
     "declaration": true,

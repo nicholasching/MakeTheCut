@@ -1,6 +1,5 @@
-import { Router } from "express"
+import { Router, type Request, type Response } from "express"
 import { authSession } from "../middleware/auth.js"
-import type { Request, Response } from "express"
 import type { DataSummaryResponse } from "@makethecut/shared"
 
 const router: Router = Router()
@@ -19,7 +18,7 @@ router.get("/", authSession, (req: Request, res: Response) => {
 
 router.get('/data-summary', (req: Request, res: Response<DataSummaryResponse>) => {
     res.json({
-        totalPoints: 0,
+        totalPoints: 1
     })
 })
 
