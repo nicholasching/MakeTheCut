@@ -1,4 +1,4 @@
-import express, {type Application, Router} from "express";
+import express, { type Application, Router } from "express";
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -11,9 +11,15 @@ connectDatabase();
 
 const app: Application = express();
 
+import cors from 'cors';
+
 /**========================================================================
  *                           Middleware
  *========================================================================**/
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*', // Default to * for dev convenience if var not set
+    credentials: true
+}));
 app.use(express.json());
 // pino logging
 app.use(pinoHttp({
