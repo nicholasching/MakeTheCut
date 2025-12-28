@@ -56,25 +56,36 @@ const __dirname = path.dirname(__filename);
 async function loadRoutes() {
     const routesPath = path.join(__dirname, 'routes');
 
-    // 1. Read all files in the routes directory
-    const files = fs.readdirSync(routesPath);
+    // Recursively scan a directory and load all route files
+    async function scanDirectory(dirPath: string, baseRoute: string = '') {
+        const entries = fs.readdirSync(dirPath, { withFileTypes: true });
 
-    for (const file of files) {
-        if ((file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts')) {
-            const fullPath = pathToFileURL(path.join(routesPath, file)).href;
-            const routeModule = await import(fullPath);
+        for (const entry of entries) {
+            const fullPath = path.join(dirPath, entry.name);
 
-            const fileName = file.split('.')[0];
+            if (entry.isDirectory()) {
+                // Recurse into subdirectory with the directory name added to the route
+                await scanDirectory(fullPath, `${baseRoute}/${entry.name}`);
+            } else if ((entry.name.endsWith('.ts') || entry.name.endsWith('.js')) && !entry.name.endsWith('.d.ts')) {
+                const fileUrl = pathToFileURL(fullPath).href;
+                const routeModule = await import(fileUrl);
 
-            // If the file is 'index', mount to '/', otherwise mount to '/filename'
-            const routePath = fileName === 'index' ? '/' : `/${fileName}`;
+                const fileName = entry.name.split('.')[0];
 
-            if (routeModule.default) {
-                app.use(routePath, routeModule.default as Router);
-                logger.info(`Mounted: ${routePath}`);
+                // If the file is 'index', use the base route, otherwise append the filename
+                const routePath = fileName === 'index'
+                    ? (baseRoute || '/')
+                    : `${baseRoute}/${fileName}`;
+
+                if (routeModule.default) {
+                    app.use(routePath, routeModule.default as Router);
+                    logger.info(`Mounted: ${routePath}`);
+                }
             }
         }
     }
+
+    await scanDirectory(routesPath);
 }
 
 // Load routes and listen on 0.0.0.0 (should be run under docker in prod)

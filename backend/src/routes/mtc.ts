@@ -1,6 +1,8 @@
 import { Router, type Request, type Response } from "express"
 import { authSession } from "../middleware/auth.js"
 import type { DataSummaryResponse } from "@makethecut/shared"
+import {MarkData} from "../models/MarkData.js";
+import {User} from "../models/User.js";
 
 const router: Router = Router()
 
@@ -16,9 +18,15 @@ router.get("/", authSession, (req: Request, res: Response) => {
 })
 
 
-router.get('/data-summary', (req: Request, res: Response<DataSummaryResponse>) => {
+router.get('/data-summary', async (req: Request, res: Response<DataSummaryResponse>) => {
+    // TODO: make this actually do something meaningful (should pull from MarkData)
+    const count = await User.aggregate([
+        {
+            $count: "count"
+        }
+    ]);
     res.json({
-        totalPoints: 1
+        totalPoints: count[0].count
     })
 })
 
