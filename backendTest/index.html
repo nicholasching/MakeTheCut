@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Route Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .config {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .config-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .config-group label {
+            font-weight: 600;
+            min-width: 120px;
+        }
+
+        .config-group input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .config-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .routes {
+            padding: 20px;
+        }
+
+        .route-section {
+            margin-bottom: 30px;
+        }
+
+        .route-section h2 {
+            color: #495057;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .route-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .route-btn {
+            padding: 15px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .route-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .route-btn:active {
+            transform: translateY(0);
+        }
+
+        .route-btn.get {
+            background: #28a745;
+        }
+
+        .route-btn.get:hover {
+            background: #218838;
+        }
+
+        .route-btn.post {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .route-btn.post:hover {
+            background: #e0a800;
+        }
+
+        .route-btn.delete {
+            background: #dc3545;
+        }
+
+        .route-btn.delete:hover {
+            background: #c82333;
+        }
+
+        .response-area {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .response-area h3 {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+
+        .response-box {
+            background: #212529;
+            color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+
+        .status.info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .method-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .method-badge.get {
+            background: #28a745;
+            color: white;
+        }
+
+        .method-badge.post {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .method-badge.delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        #htmlPopupButton button {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        #htmlPopupButton button:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Backend Route Tester</h1>
+            <p>Test your backend API endpoints</p>
+        </div>
+
+        <div id="fileProtocolWarning" style="display: none; background: #dc3545; color: white; padding: 15px; margin: 20px; border-radius: 8px; text-align: center;">
+            <strong>⚠️ WARNING:</strong> You're opening this file directly (file://). Cookies won't work properly!<br>
+            Please use the test server instead: <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">node server.js</code> then open <code style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">http://localhost:8080</code>
+        </div>
+        <div class="config">
+            <div class="config-group">
+                <label>Backend URL:</label>
+                <input type="text" id="backendUrl" value="http://localhost:3000" placeholder="http://localhost:3000">
+            </div>
+        </div>
+
+        <div class="routes">
+            <div class="route-section">
+                <h2>Public Routes (Index)</h2>
+                <div class="route-buttons">
+                    <button class="route-btn get" onclick="testRoute('GET', '/')">
+                        <span class="method-badge get">GET</span> Root (/)
+                    </button>
+                    <button class="route-btn get" onclick="testRoute('GET', '/user')">
+                        <span class="method-badge get">GET</span> User (/user)
+                    </button>
+                </div>
+            </div>
+
+            <div class="route-section">
+                <h2>Auth Routes</h2>
+                <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #ffc107;">
+                    <strong>ℹ️ Note:</strong> Auth.js uses CSRF tokens for security. OAuth flows require browser redirects.
+                </div>
+                <div class="route-buttons">
+                    <button class="route-btn get" onclick="testAuthSignin('google')">
+                        <span class="method-badge get">GET</span> Sign In with Google (/auth/signin/google)
+                    </button>
+                    <button class="route-btn get" onclick="testRoute('GET', '/auth/csrf')">
+                        <span class="method-badge get">GET</span> Get CSRF Token (/auth/csrf)
+                    </button>
+                    <button class="route-btn post" onclick="testAuthSigninWithCSRF()">
+                        <span class="method-badge post">POST</span> Sign In (with CSRF) (/auth/signin)
+                    </button>
+                    <button class="route-btn get" onclick="testRoute('GET', '/auth/callback/google')">
+                        <span class="method-badge get">GET</span> Google Callback (/auth/callback/google)
+                    </button>
+                    <button class="route-btn post" onclick="testAuthSignout()">
+                        <span class="method-badge post">POST</span> Sign Out (/auth/signout)
+                    </button>
+                    <button class="route-btn get" onclick="testRoute('GET', '/auth/session')">
+                        <span class="method-badge get">GET</span> Get Session (/auth/session)
+                    </button>
+                </div>
+            </div>
+
+            <div class="route-section">
+                <h2>Protected Routes (MTC)</h2>
+                <div class="route-buttons">
+                    <button class="route-btn get" onclick="testRoute('GET', '/mtc')">
+                        <span class="method-badge get">GET</span> MTC Root (/mtc)
+                    </button>
+                    <button class="route-btn get" onclick="testRoute('GET', '/mtc/test')">
+                        <span class="method-badge get">GET</span> MTC Test (/mtc/test)
+                    </button>
+                </div>
+            </div>
+
+            <div class="route-section">
+                <h2>Custom Route</h2>
+                <div class="config-group" style="margin-top: 15px;">
+                    <label>Method:</label>
+                    <select id="customMethod" style="padding: 10px; border: 2px solid #dee2e6; border-radius: 6px; font-size: 14px;">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                        <option value="PATCH">PATCH</option>
+                    </select>
+                </div>
+                <div class="config-group">
+                    <label>Path:</label>
+                    <input type="text" id="customPath" placeholder="/api/endpoint" style="flex: 1;">
+                    <button class="route-btn get" onclick="testCustomRoute()" style="margin-left: 10px; padding: 10px 20px;">
+                        Test Custom Route
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="response-area">
+            <h3>Response</h3>
+            <div id="htmlPopupButton" style="display: none; margin-bottom: 10px;">
+                <button onclick="openHtmlPopup()">
+                    📄 Open HTML Response in Popup
+                </button>
+            </div>
+            <div id="responseBox" class="response-box">Click a route button to test an endpoint...</div>
+        </div>
+    </div>
+
+    <script>
+        const responseBox = document.getElementById('responseBox');
+        const backendUrlInput = document.getElementById('backendUrl');
+        const htmlPopupButton = document.getElementById('htmlPopupButton');
+        let lastHtmlContent = null;
+
+        // Store HTML content for popup
+        function storeHtmlContent(htmlContent) {
+            lastHtmlContent = htmlContent;
+            htmlPopupButton.style.display = 'block';
+        }
+
+        function clearHtmlContent() {
+            lastHtmlContent = null;
+            htmlPopupButton.style.display = 'none';
+        }
+
+        function openHtmlPopup() {
+            if (!lastHtmlContent) return;
+            
+            // Create a new window and write the HTML content
+            const popup = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+            if (popup) {
+                popup.document.write(lastHtmlContent);
+                popup.document.close();
+            } else {
+                alert('Popup blocked! Please allow popups for this site.');
+            }
+        }
+
+        function isHtmlContent(content, contentType) {
+            // Check content-type header
+            if (contentType && contentType.includes('text/html')) {
+                return true;
+            }
+            // Check if content starts with HTML tags (only safe on strings)
+            if (typeof content !== 'string') return false;
+            const trimmed = content.trim();
+            return trimmed.startsWith('<!DOCTYPE html') || trimmed.startsWith('<html');
+        }
+
+        function formatResponse(method, url, status, statusText, headers, data, error, contentType) {
+            const timestamp = new Date().toLocaleString();
+            let response = `[${timestamp}] ${method} ${url}\n`;
+            response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            
+            if (error) {
+                response += `❌ ERROR: ${error}\n\n`;
+            } else {
+                response += `Status: ${status} ${statusText}\n\n`;
+                
+                if (headers) {
+                    response += `Headers:\n`;
+                    Object.entries(headers).forEach(([key, value]) => {
+                        response += `  ${key}: ${value}\n`;
+                    });
+                    response += `\n`;
+                }
+                
+                if (data !== undefined && data !== null && data !== '') {
+                    // Check if it's HTML content
+                    if (isHtmlContent(data, contentType)) {
+                        response += `Body: [HTML Content - Click "Open HTML Response in Popup" button above to view]\n\n`;
+                        response += `Preview (first 500 chars):\n${typeof data === 'string' ? data.substring(0, 500) : data}\n...`;
+                        // Store HTML for popup
+                        storeHtmlContent(typeof data === 'string' ? data : String(data));
+                    } else {
+                        response += `Body:\n`;
+                        try {
+                            response += JSON.stringify(data, null, 2);
+                        } catch (e) {
+                            response += data;
+                        }
+                        clearHtmlContent();
+                    }
+                } else {
+                    clearHtmlContent();
+                }
+            }
+            
+            return response;
+        }
+
+        function updateResponse(content, isError = false) {
+            responseBox.textContent = content;
+            responseBox.style.color = isError ? '#ff6b6b' : '#f8f9fa';
+        }
+
+        async function testRoute(method, path) {
+            const backendUrl = backendUrlInput.value.trim() || 'http://localhost:3000';
+            const url = `${backendUrl}${path}`;
+            
+            // Clear previous HTML popup button
+            clearHtmlContent();
+            updateResponse(`⏳ Loading... ${method} ${url}`);
+            
+            try {
+                const options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // Include cookies for auth
+                };
+
+                const response = await fetch(url, options);
+                
+                let data;
+                const contentType = response.headers.get('content-type') || '';
+                
+                // Always get text first to check if it's HTML
+                const textData = await response.text();
+                
+                // Try to parse as JSON if content-type suggests it
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = JSON.parse(textData);
+                    } catch (e) {
+                        // If JSON parsing fails, use text
+                        data = textData;
+                    }
+                } else {
+                    data = textData;
+                }
+
+                const headers = {};
+                response.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+
+                const formatted = formatResponse(
+                    method,
+                    url,
+                    response.status,
+                    response.statusText,
+                    headers,
+                    data,
+                    null,
+                    contentType
+                );
+
+                updateResponse(formatted, !response.ok);
+            } catch (error) {
+                const formatted = formatResponse(
+                    method,
+                    url,
+                    null,
+                    null,
+                    null,
+                    null,
+                    error.message
+                );
+                updateResponse(formatted, true);
+            }
+        }
+
+        // Auth.js specific functions
+        async function testAuthSignin(provider) {
+            const backendUrl = backendUrlInput.value.trim() || 'http://localhost:3000';
+            // Explicitly set callbackUrl to home page to avoid redirect loops
+            const callbackUrl = encodeURIComponent(`${backendUrl}/`);
+            const url = `${backendUrl}/auth/signin/${provider}?callbackUrl=${callbackUrl}`;
+            
+            updateResponse(`🔗 OAuth Flow Initiated\n\nURL: ${url}\n\n⚠️  OAuth requires browser redirects.\nOpening in new tab...\n\nNote: After authentication, Google will redirect back to your callback URL.`);
+            
+            // Open OAuth flow in new window/tab
+            window.open(url, '_blank', 'width=600,height=700');
+        }
+
+        async function testAuthSigninWithCSRF() {
+            const backendUrl = backendUrlInput.value.trim() || 'http://localhost:3000';
+            
+            // Clear previous HTML popup button
+            clearHtmlContent();
+            updateResponse(`⏳ Fetching CSRF token first...`);
+            
+            try {
+                // Step 1: Get CSRF token
+                const csrfResponse = await fetch(`${backendUrl}/auth/csrf`, {
+                    credentials: 'include'
+                });
+                
+                if (!csrfResponse.ok) {
+                    throw new Error(`Failed to get CSRF token: ${csrfResponse.status} ${csrfResponse.statusText}`);
+                }
+                
+                const csrfData = await csrfResponse.json();
+                const csrfToken = csrfData.csrfToken;
+                
+                updateResponse(`✅ CSRF Token received: ${csrfToken.substring(0, 20)}...\n\n⏳ Now attempting signin...`);
+                
+                // Step 2: Use CSRF token in signin request
+                // Note: For OAuth providers, you typically need to redirect to /auth/signin/provider
+                // This POST endpoint is for credential-based auth
+                const signinResponse = await fetch(`${backendUrl}/auth/signin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    credentials: 'include',
+                    body: new URLSearchParams({
+                        csrfToken: csrfToken,
+                        callbackUrl: `${backendUrl}/`, // Redirect to root after login
+                        json: 'true'
+                    })
+                });
+                
+                let data;
+                const contentType = signinResponse.headers.get('content-type') || '';
+                
+                // Always get text first to check if it's HTML
+                const textData = await signinResponse.text();
+                
+                // Try to parse as JSON if content-type suggests it
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = JSON.parse(textData);
+                    } catch (e) {
+                        data = textData;
+                    }
+                } else {
+                    data = textData;
+                }
+
+                const headers = {};
+                signinResponse.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+
+                const formatted = formatResponse(
+                    'POST',
+                    `${backendUrl}/auth/signin`,
+                    signinResponse.status,
+                    signinResponse.statusText,
+                    headers,
+                    data,
+                    null,
+                    contentType
+                );
+
+                updateResponse(formatted, !signinResponse.ok);
+            } catch (error) {
+                const formatted = formatResponse(
+                    'POST',
+                    `${backendUrl}/auth/signin`,
+                    null,
+                    null,
+                    null,
+                    null,
+                    error.message
+                );
+                updateResponse(formatted, true);
+            }
+        }
+
+        async function testAuthSignout() {
+            const backendUrl = backendUrlInput.value.trim() || 'http://localhost:3000';
+            
+            // Clear previous HTML popup button
+            clearHtmlContent();
+            updateResponse(`⏳ Fetching CSRF token for signout...`);
+            
+            try {
+                // Step 1: Get CSRF token
+                const csrfResponse = await fetch(`${backendUrl}/auth/csrf`, {
+                    credentials: 'include'
+                });
+                
+                if (!csrfResponse.ok) {
+                    throw new Error(`Failed to get CSRF token: ${csrfResponse.status} ${csrfResponse.statusText}`);
+                }
+                
+                const csrfData = await csrfResponse.json();
+                const csrfToken = csrfData.csrfToken;
+                
+                updateResponse(`✅ CSRF Token received\n\n⏳ Now attempting signout...`);
+                
+                // Step 2: Use CSRF token in signout request
+                const signoutResponse = await fetch(`${backendUrl}/auth/signout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    credentials: 'include',
+                    body: new URLSearchParams({
+                        csrfToken: csrfToken,
+                        callbackUrl: backendUrl,
+                        json: 'true'
+                    })
+                });
+                
+                let data;
+                const contentType = signoutResponse.headers.get('content-type') || '';
+                
+                // Always get text first to check if it's HTML
+                const textData = await signoutResponse.text();
+                
+                // Try to parse as JSON if content-type suggests it
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = JSON.parse(textData);
+                    } catch (e) {
+                        data = textData;
+                    }
+                } else {
+                    data = textData;
+                }
+
+                const headers = {};
+                signoutResponse.headers.forEach((value, key) => {
+                    headers[key] = value;
+                });
+
+                const formatted = formatResponse(
+                    'POST',
+                    `${backendUrl}/auth/signout`,
+                    signoutResponse.status,
+                    signoutResponse.statusText,
+                    headers,
+                    data,
+                    null,
+                    contentType
+                );
+
+                updateResponse(formatted, !signoutResponse.ok);
+            } catch (error) {
+                const formatted = formatResponse(
+                    'POST',
+                    `${backendUrl}/auth/signout`,
+                    null,
+                    null,
+                    null,
+                    null,
+                    error.message
+                );
+                updateResponse(formatted, true);
+            }
+        }
+
+        function testCustomRoute() {
+            const method = document.getElementById('customMethod').value;
+            const path = document.getElementById('customPath').value.trim();
+            
+            if (!path) {
+                updateResponse('❌ ERROR: Please enter a path', true);
+                return;
+            }
+            
+            if (!path.startsWith('/')) {
+                updateResponse('❌ ERROR: Path must start with /', true);
+                return;
+            }
+            
+            testRoute(method, path);
+        }
+
+        // Allow Enter key to trigger custom route test
+        document.getElementById('customPath').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                testCustomRoute();
+            }
+        });
+
+        // Detect if opened from file:// protocol and show warning
+        if (window.location.protocol === 'file:') {
+            document.getElementById('fileProtocolWarning').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
+

@@ -1,4 +1,5 @@
 import express, {type Application, Router} from "express";
+import cors from "cors";
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -14,6 +15,31 @@ const app: Application = express();
 /**========================================================================
  *                           Middleware
  *========================================================================**/
+// CORS configuration - allow requests from test bench and frontend
+
+if (process.env.NODE_ENV === 'dev') {
+    app.use(cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps, Postman, or file:// URLs)
+            if (!origin) return callback(null, true);
+
+            // Allow localhost and file:// origins for testing
+            const allowedOrigins = [
+                'http://localhost:3000',
+                'http://localhost:8080', // Test bench server
+            ];
+
+            if (allowedOrigins.includes(origin) || origin.startsWith('file://')) {
+                callback(null, true);
+            } else {
+                callback(null, true); // Allow all origins for development/testing
+            }
+        },
+        credentials: true, // Allow cookies and authentication headers
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    }));
+}
 app.use(express.json());
 // pino logging
 app.use(pinoHttp({
