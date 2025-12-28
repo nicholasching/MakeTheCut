@@ -5,3 +5,16 @@ node_modules
 build
 dist
 .env
+.turbo
+.next
+*.log
+
+# Other Apps
+frontend/
+backendTest/
+utils/
+
+# Tooling
+.turbo/
+.next/
+node_modules/

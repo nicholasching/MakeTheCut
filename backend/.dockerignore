@@ -3,3 +3,9 @@ node_modules
 npm-debug.log
 dist
 build
+.idea
+.vscode
+.env
+.turbo
+.next
+*.log

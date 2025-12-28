@@ -1,35 +1,33 @@
+# Stage 0: Prune
+FROM node:22-alpine AS pruner
+WORKDIR /app
+RUN npm install -g turbo
+COPY . .
+# Generates a pruned version of the monorepo in /app/out
+RUN turbo prune backend --docker
+
 # Stage 1: Build
 FROM node:22-alpine AS builder
-
 WORKDIR /app
 RUN npm install -g pnpm
 
-# Copy root config
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
-
-# Copy package definitions
-COPY backend/package.json ./backend/
-COPY frontend/package.json ./frontend/
-COPY shared/package.json ./shared/
-
-# Install dependencies (all)
+# 1. Install dependencies based on the pruned lockfile
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY backend ./backend
-COPY shared ./shared
+# 2. Build the project
+COPY --from=pruner /app/out/full/ .
+RUN pnpm turbo build --filter=backend
 
-# Build backend
-# We ensure the shared package is built if needed (it's TS only so maybe not, but good practice)
-RUN pnpm --filter backend build
-
-# Use pnpm deploy to create a production-ready isolated package
+# 3. Create a production-ready isolated folder
+# This replaces your manual 'pnpm deploy' from the old version
 RUN pnpm --filter backend --prod deploy --legacy /prod/backend
 
 # Stage 2: Production Runner
 FROM node:22-alpine AS runner
 
-# Install Infisical (Copied from original Dockerfile)
+# Install Infisical
 USER root
 RUN apk add --no-cache curl bash sudo \
     && curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' \
@@ -39,12 +37,12 @@ RUN apk add --no-cache curl bash sudo \
 WORKDIR /app
 ENV NODE_ENV=prod
 
-# Copy the deployed application from builder
+# Copy the isolated production dependencies/package from the deploy step
 COPY --from=builder /prod/backend ./
 
-# Copy build artifacts (if pnpm deploy didn't include them - usually it includes files in 'files' or what's present?)
-# pnpm deploy copies package.json and installs deps. It does NOT run build scripts usually.
-# So we usually need to copy the 'dist' or 'build' folder ourselves.
+# Copy the build artifacts specifically
+# In a turbo prune, the source is at /app/apps/backend/build (or /app/backend/build depending on your root)
+# Based on your previous COPY, we target the backend folder's build output:
 COPY --from=builder /app/backend/build ./build
 COPY --from=builder /app/backend/docker-entrypoint.sh ./entrypoint.sh
 
