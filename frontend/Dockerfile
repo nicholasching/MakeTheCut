@@ -5,8 +5,8 @@ WORKDIR /app
 # Install sharp dependencies for Alpine
 RUN apk add --no-cache libc6-compat
 
-# Copy shared package first (for the file: reference)
-COPY shared ./shared
+# Copy shared package first
+COPY packages/shared ./packages/shared
 
 # Copy frontend files
 COPY frontend/package.json frontend/package-lock.json ./

@@ -2,6 +2,7 @@ packages:
   - 'backend'
   - 'frontend'
   - 'packages/*'
+  - 'apps/*'
 
 onlyBuiltDependencies:
   - '@firebase/util'
