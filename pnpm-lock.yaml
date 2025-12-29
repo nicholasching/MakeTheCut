@@ -56,7 +56,7 @@ importers:
     devDependencies:
       '@makethecut/shared':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../packages/shared
       '@types/cors':
         specifier: ^2.8.19
         version: 2.8.19
@@ -143,8 +143,8 @@ importers:
         version: 1.4.0
     devDependencies:
       '@makethecut/shared':
-        specifier: file:../shared
-        version: link:../shared
+        specifier: workspace:*
+        version: link:../packages/shared
       '@tailwindcss/postcss':
         specifier: ^4.0.15
         version: 4.1.18
@@ -164,7 +164,7 @@ importers:
         specifier: 5.8.2
         version: 5.8.2
 
-  shared: {}
+  packages/shared: {}
 
 packages:
 

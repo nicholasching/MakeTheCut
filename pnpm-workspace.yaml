@@ -1,7 +1,7 @@
 packages:
   - 'backend'
   - 'frontend'
-  - 'shared'
+  - 'packages/*'
 
 onlyBuiltDependencies:
   - '@firebase/util'
