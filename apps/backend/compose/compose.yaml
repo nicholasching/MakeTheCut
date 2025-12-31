@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ../..
-      dockerfile: backend/Dockerfile
+      context: ../
+      dockerfile: ./Dockerfile
     restart: always
     environment:
       - NODE_ENV=${NODE_ENV}
@@ -17,7 +17,7 @@ services:
   db:
     build:
       context: mongo
-      dockerfile: mongo.Dockerfile # The custom Mongo image we built
+      dockerfile: mongo/mongo.Dockerfile # The custom Mongo image we built
     restart: always
     environment:
       - INFISICAL_CLIENT_ID=${INFISICAL_CLIENT_ID}
@@ -31,7 +31,7 @@ services:
 #    image: mongo-express # If you can't edit this, it still needs a way to get secrets
     build:
       context: mongo
-      dockerfile: mongo-express.Dockerfile
+      dockerfile: mongo/mongo-express.Dockerfile
     restart: always
     environment:
       - INFISICAL_CLIENT_ID=${INFISICAL_CLIENT_ID}
