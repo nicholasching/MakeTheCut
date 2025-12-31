@@ -10,7 +10,7 @@ dist
 *.log
 
 # Other Apps
-backendTest/
+apps/backendTest/
 utils/
 
 # Tooling

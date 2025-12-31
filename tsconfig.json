@@ -2,10 +2,10 @@
     "files": [],
     "references": [
         {
-            "path": "./backend"
+            "path": "./apps/backend"
         },
         {
-            "path": "./frontend"
+            "path": "./apps/mtc-frontend"
         },
         {
             "path": "./shared"

@@ -8,7 +8,7 @@
             <option value="backend" />
           </list>
         </option>
-        <option name="sourceFilePath" value="backend/compose/compose.yaml" />
+        <option name="sourceFilePath" value="apps/backend/compose/compose.yaml" />
         <option name="upNoDeps" value="true" />
       </settings>
     </deployment>
