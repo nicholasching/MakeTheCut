@@ -13,9 +13,10 @@ RUN curl -1sLf \
     && sudo apk add infisical
 
 # 3. Copy and fix permissions for the entrypoint
-# Note: Ensure the filename matches what you have on your disk
+# Fix line endings (CRLF -> LF) for Windows users
 COPY mongo-express-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/mongo-express-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/mongo-express-entrypoint.sh && \
+    chmod +x /usr/local/bin/mongo-express-entrypoint.sh
 
 # Switch back to the non-root user for security
 USER node

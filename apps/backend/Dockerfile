@@ -40,11 +40,10 @@ ENV NODE_ENV=prod
 # Copy the isolated production dependencies/package from the deploy step
 COPY --from=builder /prod/backend ./
 
-# Copy the build artifacts specifically
-# In a turbo prune, the source is at /app/apps/backend/build (or /app/backend/build depending on your root)
-# Based on your previous COPY, we target the backend folder's build output:
-COPY --from=builder /app/backend/build ./build
-COPY --from=builder /app/backend/docker-entrypoint.sh ./entrypoint.sh
+# Copy the build artifacts and entrypoint script
+# After turbo prune, the structure maintains the monorepo layout at /app/apps/backend/
+COPY --from=builder /app/apps/backend/build ./build
+COPY --from=builder /app/apps/backend/docker-entrypoint.sh ./entrypoint.sh
 
 # Fix line endings (CRLF -> LF) for Windows users
 RUN sed -i 's/\r$//' ./entrypoint.sh && chmod +x entrypoint.sh

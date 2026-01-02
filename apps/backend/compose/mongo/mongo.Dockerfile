@@ -8,7 +8,9 @@ RUN curl -1sLf 'https://artifacts-cli.infisical.com/setup.deb.sh' | sudo -E bash
 
 # 3. Setup our custom entrypoint script
 COPY mongo-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/mongo-entrypoint.sh
+# Fix line endings (CRLF -> LF) for Windows users and set permissions
+RUN sed -i 's/\r$//' /usr/local/bin/mongo-entrypoint.sh && \
+    chmod +x /usr/local/bin/mongo-entrypoint.sh
 
 # 4. Define the entrypoint and default command
 ENTRYPOINT ["/usr/local/bin/mongo-entrypoint.sh"]

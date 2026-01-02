@@ -2,11 +2,19 @@
 set -e
 
 # 1. Log in to Infisical
+if [ -z "$INFISICAL_CLIENT_ID" ] || [ -z "$INFISICAL_CLIENT_SECRET" ]; then
+    echo "ERROR: INFISICAL_CLIENT_ID and INFISICAL_CLIENT_SECRET must be set"
+    exit 1
+fi
+
 export INFISICAL_TOKEN=$(infisical login \
     --method=universal-auth \
     --client-id="${INFISICAL_CLIENT_ID}" \
     --client-secret="${INFISICAL_CLIENT_SECRET}" \
-    --silent --plain)
+    --silent --plain) || {
+    echo "ERROR: Failed to authenticate with Infisical. Check your credentials."
+    exit 1
+}
 
 # 3. Start mongo-express
 # We use 'tini' because the base image uses it to manage the Node.js process
