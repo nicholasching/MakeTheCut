@@ -19,7 +19,10 @@ export class MarkDataSchema {
     // This will be the person's generated uuidv4
     @prop({ required: true })
     public _id!: string;
-
+    @prop()
+    public entryYear?: number;
+    @prop()
+    public freeChoice?: boolean;
     @prop({ type: () => [MarkSchema], default: [] })
     public marks?: MarkSchema[];
 }
