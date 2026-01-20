@@ -202,14 +202,14 @@ async function calculateDistribution(documents) {
 
 async function calculateCutoffs(documents) {
   // Create a sortedDatabase array with freechoice users first, then sorted by GPA in descending order
-  const sortedDatabase = [...documents].sort((a, b) => {
-    // First sort by freechoice (true values come first)
-    if (a.freechoice && !b.freechoice) return -1;
-    if (!a.freechoice && b.freechoice) return 1;
-    
-    // If freechoice status is the same, sort by GPA in descending order
-    return b.gpa - a.gpa;
-  });
+  // Remove documents where gpa is 0, then sort (freechoice first, then descending GPA)
+  const sortedDatabase = [...documents]
+    .filter(doc => doc.gpa !== 0)
+    .sort((a, b) => {
+      if (a.freechoice && !b.freechoice) return -1;
+      if (!a.freechoice && b.freechoice) return 1;
+      return b.gpa - a.gpa;
+    });
 
   const totalSeats = totalChemSeats + totalCivSeats + totalCompSeats + totalElecSeats + totalEngPhysSeats + totalMatSeats + totalMechSeats + totalTronSeats + totalSoftSeats;
   const allocations = {chem: totalChemSeats/totalSeats, civ: totalCivSeats/totalSeats, comp: totalCompSeats/totalSeats, elec: totalElecSeats/totalSeats, engphys: totalEngPhysSeats/totalSeats, mat: totalMatSeats/totalSeats, mech: totalMechSeats/totalSeats, tron: totalTronSeats/totalSeats, soft: totalSoftSeats/totalSeats};
