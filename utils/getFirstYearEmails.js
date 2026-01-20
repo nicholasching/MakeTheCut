@@ -6,7 +6,7 @@ import { join } from 'path';
 const client = new Client()
     .setEndpoint('https://nyc.cloud.appwrite.io/v1')
     .setProject('makethecut')
-    .setKey('api_key_here'); // Replace with your actual API key
+    .setKey('API_KEY_HERE'); // Replace with your actual API key
 
 const databases = new Databases(client);
 const users = new Users(client);
@@ -137,9 +137,7 @@ async function getAllUsers() {
 async function exportEmailsToCSV(emails, filename = 'first-year-emails.csv') {
     try {
         // Create CSV content with header
-        const csvHeader = 'email\n';
-        const csvRows = emails.map(email => `"${email}"`).join('\n');
-        const csvContent = csvHeader + csvRows;
+        const csvContent  = emails.join('\n');
 
         // Write to file
         const filePath = join(process.cwd(), filename);
