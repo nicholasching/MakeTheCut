@@ -1,4 +1,6 @@
 import { Client, Databases, Users, Query } from 'node-appwrite';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 
 // Initialize Appwrite client
 const client = new Client()
@@ -131,12 +133,39 @@ async function getAllUsers() {
     return allUsers;
 }
 
+// Helper function to export emails to CSV
+async function exportEmailsToCSV(emails, filename = 'first-year-emails.csv') {
+    try {
+        // Create CSV content with header
+        const csvHeader = 'email\n';
+        const csvRows = emails.map(email => `"${email}"`).join('\n');
+        const csvContent = csvHeader + csvRows;
+
+        // Write to file
+        const filePath = join(process.cwd(), filename);
+        await writeFile(filePath, csvContent, 'utf-8');
+        
+        console.log(`\n💾 Exported ${emails.length} emails to: ${filePath}`);
+        return filePath;
+    } catch (error) {
+        console.error('❌ Error exporting to CSV:', error.message);
+        throw error;
+    }
+}
+
 // Run the script
 getFirstYearEmails()
-    .then(emails => {
+    .then(async emails => {
         console.log('\n📧 First Year User Emails:');
         console.log(emails);
         console.log(`\n✅ Total: ${emails.length} emails`);
+        
+        // Export to CSV
+        if (emails.length > 0) {
+            await exportEmailsToCSV(emails);
+        } else {
+            console.log('⚠️  No emails to export.');
+        }
     })
     .catch(error => {
         console.error('💥 Error:', error.message);
