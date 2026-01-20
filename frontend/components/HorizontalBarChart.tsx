@@ -53,74 +53,73 @@ async function initPage(router: any) {
       if (userGPA == 0) {
         throw new Error("No user GPA found.");
       }
-      
-      let documents = await database.listDocuments('MacStats', 'StatData');
-      
-      // Access documents by their $id and update people count
-      documents.documents.forEach(doc => {
-        if (doc.$id === 'chem') {
-          cutoffs.chem = parseFloat(doc.streamCutoff) || 4;
-          chartData[0].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'civ') {
-          cutoffs.civil = parseFloat(doc.streamCutoff) || 4;
-          chartData[1].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'comp') {
-          cutoffs.computer = parseFloat(doc.streamCutoff) || 4;
-          chartData[2].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'elec') {
-          cutoffs.electrical = parseFloat(doc.streamCutoff) || 4;
-          chartData[3].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'engphys') {
-          cutoffs.engphys = parseFloat(doc.streamCutoff) || 4;
-          chartData[4].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'mat') {
-          cutoffs.materials = parseFloat(doc.streamCutoff) || 4;
-          chartData[5].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'mech') {
-          cutoffs.mechanical = parseFloat(doc.streamCutoff) || 4;
-          chartData[6].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'tron') {
-          cutoffs.mechatronics = parseFloat(doc.streamCutoff) || 4;
-          chartData[7].people = doc.streamCount || 0;
-        }
-        if (doc.$id === 'soft') {
-          cutoffs.software = parseFloat(doc.streamCutoff) || 4;
-          chartData[8].people = doc.streamCount || 0;
-        }
-      });
-      
-      // Update chart data with new GPA values
-      chartData = [
-        { stream: "Chemical", GPA: cutoffs.chem, people: chartData[0].people },
-        { stream: "Civil", GPA: cutoffs.civil, people: chartData[1].people },
-        { stream: "Computer", GPA: cutoffs.computer, people: chartData[2].people },
-        { stream: "Electrical", GPA: cutoffs.electrical, people: chartData[3].people },
-        { stream: "Engineering Physics", GPA: cutoffs.engphys, people: chartData[4].people },
-        { stream: "Materials", GPA: cutoffs.materials, people: chartData[5].people },
-        { stream: "Mechanical", GPA: cutoffs.mechanical, people: chartData[6].people },
-        { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: chartData[7].people },
-        { stream: "Software", GPA: cutoffs.software, people: chartData[8].people },
-      ]
-
-      return 1
     }
     catch (error) {
       showUserLine = false;
       try {
         await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
-        return 1;
       }
       catch (error) {
         router.push('/grades');
       }
     }
+
+    let documents = await database.listDocuments('MacStats', 'StatData');
+      
+    // Access documents by their $id and update people count
+    documents.documents.forEach(doc => {
+      if (doc.$id === 'chem') {
+        cutoffs.chem = parseFloat(doc.streamCutoff) || 4;
+        chartData[0].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'civ') {
+        cutoffs.civil = parseFloat(doc.streamCutoff) || 4;
+        chartData[1].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'comp') {
+        cutoffs.computer = parseFloat(doc.streamCutoff) || 4;
+        chartData[2].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'elec') {
+        cutoffs.electrical = parseFloat(doc.streamCutoff) || 4;
+        chartData[3].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'engphys') {
+        cutoffs.engphys = parseFloat(doc.streamCutoff) || 4;
+        chartData[4].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'mat') {
+        cutoffs.materials = parseFloat(doc.streamCutoff) || 4;
+        chartData[5].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'mech') {
+        cutoffs.mechanical = parseFloat(doc.streamCutoff) || 4;
+        chartData[6].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'tron') {
+        cutoffs.mechatronics = parseFloat(doc.streamCutoff) || 4;
+        chartData[7].people = doc.streamCount || 0;
+      }
+      if (doc.$id === 'soft') {
+        cutoffs.software = parseFloat(doc.streamCutoff) || 4;
+        chartData[8].people = doc.streamCount || 0;
+      }
+    });
+    
+    // Update chart data with new GPA values
+    chartData = [
+      { stream: "Chemical", GPA: cutoffs.chem, people: chartData[0].people },
+      { stream: "Civil", GPA: cutoffs.civil, people: chartData[1].people },
+      { stream: "Computer", GPA: cutoffs.computer, people: chartData[2].people },
+      { stream: "Electrical", GPA: cutoffs.electrical, people: chartData[3].people },
+      { stream: "Engineering Physics", GPA: cutoffs.engphys, people: chartData[4].people },
+      { stream: "Materials", GPA: cutoffs.materials, people: chartData[5].people },
+      { stream: "Mechanical", GPA: cutoffs.mechanical, people: chartData[6].people },
+      { stream: "Mechatronics", GPA: cutoffs.mechatronics, people: chartData[7].people },
+      { stream: "Software", GPA: cutoffs.software, people: chartData[8].people },
+    ]
+
+    return 1
   }
   catch (error) {
     router.push('/login');
