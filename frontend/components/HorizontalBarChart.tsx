@@ -256,7 +256,8 @@ export default function HorizontalBarChart() {
             Live 2025/2026 Estimated Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
-            <p>Current Contributions: {totalContributions}</p>
+            {totalContributions < 100 && <p>Note: Initial results may swing significantly as data rolls in. For any specific stream, the numbers will become statistically significant once we surpass 100 responses.</p>}
+            <p>Current Contributions: {totalContributions}</p> 
           </CardDescription>
         </div>
       </CardHeader>
