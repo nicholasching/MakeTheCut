@@ -157,11 +157,7 @@ export default function StreamChoiceGraph() {
         <CardHeader className="text-neutral-500 pb-2">
           <div className="flex flex-col justify-center items-center">
             <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-              <div className="relative w-3 h-3">
-                <div className="absolute inset-0 rounded-full bg-blue-500"></div>
-                <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
-              </div>
-              Live 2025/2026Stream Choice Distribution
+              Live 2025/2026 Stream Choice Distribution
             </CardTitle>
             <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
               <p>Loading choice distribution data...</p>
@@ -180,10 +176,6 @@ export default function StreamChoiceGraph() {
       <CardHeader className="text-neutral-500 pb-2">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-            <div className="relative w-3 h-3">
-              <div className="absolute inset-0 rounded-full bg-blue-500"></div>
-              <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
-            </div>
             Live 2025/2026 Stream Choice Distribution
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">

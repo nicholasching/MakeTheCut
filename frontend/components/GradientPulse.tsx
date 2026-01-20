@@ -57,6 +57,7 @@ const GradientPulse: React.FC<GradientPulseProps> = ({ className = '' }) => {
       animate-[pulse_7s_ease-in-out_infinite]
       opacity-25 
       rounded-full
+      z-[-1]
       ${className}
       `}
     />

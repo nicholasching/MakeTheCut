@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import HorizontalBarChart from "@/components/HorizontalBarChart";
+import StreamChoiceGraph from "@/components/StreamChoiceGraph";
+import GradeDistributionChart from "@/components/GradeDistributionChart";
 import HorizontalBarChart24 from "@/components/HorizontalBarChart24";
 import StreamChoiceGraph24 from "@/components/StreamChoiceGraph24";
 import GradeDistributionChart24 from "@/components/GradeDistributionChart24";
@@ -10,7 +13,6 @@ import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
-import StreamChoiceGraph from "@/components/StreamChoiceGraph";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { account } from "../appwrite";
 
@@ -32,12 +34,12 @@ function WelcomeSection({ userName }: { userName: string | null }) {
   const firstName = userName?.split(' ')[0] || "User";
 
   return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-indigo-900/20 border border-purple-500/30 rounded-2xl p-8 mb-8">
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 animate-pulse"></div>
+    <div className="relative overflow-hidden bg-gradient-to-br from-red-900/20 via-orange-900/20 to-orange-900/20 border border-red-500/30 rounded-2xl p-8 mb-8">
+      <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 animate-pulse"></div>
       <div className="relative z-10">
         <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-8 h-8 text-purple-400 animate-bounce" />
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
+          <Sparkles className="w-8 h-8 text-red-500 animate-bounce" />
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-500 via-orange-600 to-orange-400 bg-clip-text text-transparent">
             {getTimeOfDayGreeting()}, {firstName}!
           </h1>
         </div>
@@ -254,12 +256,17 @@ function DashboardContent() {
           <div className="flex flex-col gap-8">
             <div className="transform transition-all duration-500 hover:scale-[1.005]">
               <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 backdrop-blur-sm border border-neutral-600/30 rounded-2xl p-1 shadow-2xl">
-                <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-xl p-6">
+                <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-xl p-6 space-y-6">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                  <div className="relative mt-1 w-4 h-4">
+                    <div className="absolute inset-0 rounded-full bg-red-500"></div>
+                    <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
+                  </div>
                     <h2 className="text-2xl font-bold text-white">Current Year Stream Preferences</h2>
                   </div>
+                  <HorizontalBarChart />
                   <StreamChoiceGraph />
+                  <GradeDistributionChart />
                 </div>
               </div>
             </div>

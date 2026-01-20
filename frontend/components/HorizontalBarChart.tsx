@@ -27,6 +27,7 @@ let cutoffs = {chem: 4, civil: 4, computer: 4, electrical: 4, engphys: 4, materi
 var loggedInUser;
 var user;
 var userGPA = 4;
+var showUserLine = true;
 
 // Update the chartData structure to include the number of people
 let chartData = [
@@ -45,48 +46,52 @@ async function initPage(router: any) {
   try {
     loggedInUser = await account.get();
 
-    try{
+    try {
       user = await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
       userGPA = user.gpa;
+
+      if (userGPA == 0) {
+        throw new Error("No user GPA found.");
+      }
       
       let documents = await database.listDocuments('MacStats', 'StatData');
       
       // Access documents by their $id and update people count
       documents.documents.forEach(doc => {
         if (doc.$id === 'chem') {
-          cutoffs.chem = parseFloat(doc.streamCutoff);
+          cutoffs.chem = parseFloat(doc.streamCutoff) || 4;
           chartData[0].people = doc.streamCount || 0;
         }
         if (doc.$id === 'civ') {
-          cutoffs.civil = parseFloat(doc.streamCutoff);
+          cutoffs.civil = parseFloat(doc.streamCutoff) || 4;
           chartData[1].people = doc.streamCount || 0;
         }
         if (doc.$id === 'comp') {
-          cutoffs.computer = parseFloat(doc.streamCutoff);
+          cutoffs.computer = parseFloat(doc.streamCutoff) || 4;
           chartData[2].people = doc.streamCount || 0;
         }
         if (doc.$id === 'elec') {
-          cutoffs.electrical = parseFloat(doc.streamCutoff);
+          cutoffs.electrical = parseFloat(doc.streamCutoff) || 4;
           chartData[3].people = doc.streamCount || 0;
         }
         if (doc.$id === 'engphys') {
-          cutoffs.engphys = parseFloat(doc.streamCutoff);
+          cutoffs.engphys = parseFloat(doc.streamCutoff) || 4;
           chartData[4].people = doc.streamCount || 0;
         }
         if (doc.$id === 'mat') {
-          cutoffs.materials = parseFloat(doc.streamCutoff);
+          cutoffs.materials = parseFloat(doc.streamCutoff) || 4;
           chartData[5].people = doc.streamCount || 0;
         }
         if (doc.$id === 'mech') {
-          cutoffs.mechanical = parseFloat(doc.streamCutoff);
+          cutoffs.mechanical = parseFloat(doc.streamCutoff) || 4;
           chartData[6].people = doc.streamCount || 0;
         }
         if (doc.$id === 'tron') {
-          cutoffs.mechatronics = parseFloat(doc.streamCutoff);
+          cutoffs.mechatronics = parseFloat(doc.streamCutoff) || 4;
           chartData[7].people = doc.streamCount || 0;
         }
         if (doc.$id === 'soft') {
-          cutoffs.software = parseFloat(doc.streamCutoff);
+          cutoffs.software = parseFloat(doc.streamCutoff) || 4;
           chartData[8].people = doc.streamCount || 0;
         }
       });
@@ -107,7 +112,14 @@ async function initPage(router: any) {
       return 1
     }
     catch (error) {
-      router.push('/grades');
+      showUserLine = false;
+      try {
+        await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
+        return 1;
+      }
+      catch (error) {
+        router.push('/grades');
+      }
     }
   }
   catch (error) {
@@ -176,15 +188,21 @@ export default function HorizontalBarChart() {
   const [key, setKey] = useState(0);
   const [totalContributions, setTotalContributions] = useState<number>(0);
   const router = useRouter();
+  const [shouldShowUserLine, setShouldShowUserLine] = useState(true);
   
   useEffect(() => {
     const fetchData = async () => {
       setKey(key + await initPage(router));
+      setShouldShowUserLine(showUserLine);
       
       // Fetch contribution count
       try {
         const contributions = await database.getDocument('MacStats', 'StatData', 'total');
-        setTotalContributions(contributions.streamCount);
+        // Sum comma separated distribution values to get total contributions
+        const distributionStr = contributions.distribution || "";
+        const distributionArr = distributionStr.split(",").map(Number).filter((x: number) => !isNaN(x));
+        const sum = distributionArr.reduce((acc: number, val: number) => acc + val, 0);
+        setTotalContributions(sum);
       } catch (error) {
         console.error("Error fetching contribution count:", error);
       }
@@ -214,7 +232,7 @@ export default function HorizontalBarChart() {
   // Show loading animation when key is 0
   if (key === 0) {
     return (
-      <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
+      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4 relative overflow-hidden">
         <CardHeader className="text-neutral-500">
           <CardTitle className="text-subtitle ">Loading Stream Data...</CardTitle>
 
@@ -231,15 +249,11 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
+    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-            <div className="relative w-3 h-3">
-              <div className="absolute inset-0 rounded-full bg-red-500"></div>
-              <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
-            </div>
-            Live Estimated Stream Cutoffs
+            Live 2025/2026 Estimated Stream Cutoffs
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Current Contributions: {totalContributions}</p>
@@ -261,11 +275,13 @@ export default function HorizontalBarChart() {
               <CartesianGrid horizontal={false} stroke="#333" />
               <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
               <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}/>
-              <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
-                <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
-                  You ✎
-                </Label>
-              </ReferenceLine>
+              {shouldShowUserLine && (
+                <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
+                  <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
+                    You ✎
+                  </Label>
+                </ReferenceLine>
+              )}
               <ChartTooltip
                 cursor={false}
                 content={<CustomTooltip />}

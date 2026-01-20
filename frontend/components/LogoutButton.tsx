@@ -41,8 +41,8 @@ const LogoutButton = ({
                     } catch (error) {
                         console.log("User document doesn't exist in 2024 UserData collection");
                         if (window.location.pathname === '/dashboard') {
-                            router.push('/streams');
-                            console.log("Redirecting to streams page");
+                            router.push('/grades');
+                            console.log("Redirecting to grades page");
                         }
                     }
                 }
@@ -77,14 +77,15 @@ const LogoutButton = ({
                                 </svg>
                             </button>
                         </DialogTrigger>
-                        <DialogContent className="bg-neutral-900 border-none md:w-1/5 w-2/3 pt-10">
+                        <DialogContent className="bg-neutral-900 border-none md:w-2/5 w-2/3 pt-10">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
                             {!userGraduated ? (
-                                <Link href="/streams"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream</button></Link>
+                                // <Link href="/streams"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream</button></Link>
+                                <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Grades</button></Link>
                             ) : (
                                 <>
-                                    <div className="bg-[#e64640] text-white py-2 rounded-sm w-full block text-center">
+                                    <div className="bg-[#e64640] text-white py-2 rounded-sm w-full block text-center px-2">
                                         <div>
                                             <span className="text-white font-bold">Grades Locked</span>
                                         </div>

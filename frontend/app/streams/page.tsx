@@ -21,6 +21,11 @@ export default function StreamSelectionPage() {
   useEffect(() => {
     async function initiatePage() {
       try {
+
+        // THIS PAGE IS TEMPORARILY DISABLED AS GRADE INGEST IS NOW OPEN, DELETE TO ENABLE
+        router.push('/dashboard');
+        return;
+
         let loggedInUser = await account.get();
         
         // Comment to disable verification

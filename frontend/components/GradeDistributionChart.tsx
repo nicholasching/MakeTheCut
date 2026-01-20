@@ -58,7 +58,7 @@ async function fetchDistribution(course: string) {
 const chartConfig = {
   count: {
     label: "Count",
-    color: "#1B79C5", // Changed from #f4ab33 to blue
+    color: "#1B79C5", // Changed from #f4ab33 to red
   },
 } satisfies ChartConfig
 
@@ -120,19 +120,27 @@ export default function GradeDistributionChart() {
     const initPage = async () => {
       setIsLoading(true);
       
-      // Fetch contribution count
-      try {
-        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
-        setTotalContributions(contributions.streamCount);
-      } catch (error) {
-        console.error("Error fetching contribution count:", error);
-      }
+      // // Fetch contribution count
+      // try {
+      //   const contributions = await database.getDocument('MacStats', 'MarkData', 'total');
+        
+      //   // Sum comma separated distribution values to get total contributions
+      //   const distributionStr = contributions.distribution || "";
+      //   const distributionArr = distributionStr.split(",").map(Number).filter((x: number) => !isNaN(x));
+      //   const sum = distributionArr.reduce((acc: number, val: number) => acc + val, 0);
+      //   setTotalContributions(sum);
+      // } catch (error) {
+      //   console.error("Error fetching contribution count:", error);
+      // }
 
       // Fetch initial course data (math1za3)
       const distribution = await fetchDistribution("math1za3");
-      setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
+      distribution !== null && setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
       
       if (distribution) {
+        const sum = distribution.reduce((acc: number, val: number) => acc + val, 0);
+        setTotalContributions(sum);
+
         // Update chart data with fetched distribution
         const updatedData = initialChartData.map((item, index) => ({
           ...item,
@@ -157,10 +165,12 @@ export default function GradeDistributionChart() {
     setSelectedCourse(value);
     
     const distribution = await fetchDistribution(value);
-    console.log(distribution[12])
-    setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
+    distribution !== null && setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
     
     if (distribution) {
+      const sum = distribution.reduce((acc: number, val: number) => acc + val, 0);
+      setTotalContributions(sum);
+      
       // Update chart data with new distribution
       const updatedData = initialChartData.map((item, index) => ({
         ...item,
@@ -179,7 +189,7 @@ export default function GradeDistributionChart() {
   // Show loading animation when data is loading
   if (isLoading) {
     return (
-      <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-5 pt-10 relative overflow-hidden">
+      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4 relative overflow-hidden">
         <CardHeader className="text-neutral-500">
           <CardTitle className="text-subtitle">Loading Course Data...</CardTitle>
         </CardHeader>
@@ -195,15 +205,11 @@ export default function GradeDistributionChart() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full md:w-2/3 mx-auto border-none p-1 pt-10 pb-7 lg:pb-5">
+    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-            <div className="relative w-3 h-3">
-              <div className="absolute inset-0 rounded-full bg-blue-500"></div>
-              <div className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></div>
-            </div>
-            Live Course Distributions
+            Live 2025/2026 Course Distributions
           </CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Current Contributions: {totalContributions}</p>
@@ -212,89 +218,82 @@ export default function GradeDistributionChart() {
         <Tabs value={selectedCourse} className="w-full text-center flex-row justify-center mt-5" onValueChange={handleTabChange}>
             <TabsList className="bg-transparent text-neutral-500 flex flex-wrap gap-1 sm:gap-2 md:gap-3 lg:gap-4">
                 <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1za3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1za3" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="math1za3"
                 >
                     {selectedCourse === "math1za3" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Calc 1 / 1ZA3
                       </span> : 
                       "Calc 1 / 1ZA3"
                     }
                 </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zb3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                {/* <TabsTrigger 
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zb3" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="math1zb3"
                 >
                     {selectedCourse === "math1zb3" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Calc 2 / 1ZB3
                       </span> : 
                       "Calc 2 / 1ZB3"
                     }
-                </TabsTrigger>
+                </TabsTrigger> */}
                 <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zc3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zc3" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="math1zc3"
                 >
                     {selectedCourse === "math1zc3" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Linear Algebra / 1ZC3
                       </span> : 
                       "Linear Algebra / 1ZC3"
                     }
                 </TabsTrigger>
                 <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1d03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1d03" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="phys1d03"
                 >
                     {selectedCourse === "phys1d03" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Physics / 1D03
                       </span> : 
                       "Physics / 1D03"
                     }
                 </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1e03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                {/* <TabsTrigger 
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1e03" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="phys1e03"
                 >
                     {selectedCourse === "phys1e03" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Physics / 1E03
                       </span> : 
                       "Physics / 1E03"
                     }
                 </TabsTrigger>
                 <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "chem1e03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "chem1e03" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="chem1e03"
                 >
                     {selectedCourse === "chem1e03" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Chemistry / 1E03
                       </span> : 
                       "Chemistry / 1E03"
                     }
                 </TabsTrigger>
                 <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "eng1p13" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
+                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "eng1p13" ? "bg-neutral-800 ring-2 ring-red-500 ring-opacity-70 text-white" : ""}`}
                     value="eng1p13"
                 >
                     {selectedCourse === "eng1p13" ? 
                       <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
                         Engineer / 1P13
                       </span> : 
                       "Engineer / 1P13"
                     }
-                </TabsTrigger>
+                </TabsTrigger> */}
             </TabsList>
         </Tabs>
       </CardHeader>

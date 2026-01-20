@@ -45,8 +45,8 @@ function GradesContent() {
         async function initiatePage() {
 
             // THIS PAGE IS TEMPORARILY DISABLED AS GRADE INGEST IS NOT YET OPEN, DELETE TO ENABLE
-            router.push('/dashboard');
-            return;
+            // router.push('/dashboard');
+            // return;
 
             try {
                 let loggedInUser = await account.get();
@@ -292,13 +292,13 @@ function GradesContent() {
                     onChange={(value) => setMath1za3(value)}
                     maxLength={2}
                 />
-                <TextField 
+                {/* <TextField 
                     label="Math 1ZB3 (Calc 2)"
                     id="math1zb3"
                     value={math1zb3}
                     onChange={(value) => setMath1zb3(value)}
                     maxLength={2}
-                />
+                /> */}
                 <TextField 
                     label="Math 1ZC3 (Lin Alg)"
                     id="math1zc3"
@@ -313,14 +313,14 @@ function GradesContent() {
                     onChange={(value) => setPhysics1d03(value)}
                     maxLength={2}
                 />
-                <TextField 
+                {/* <TextField 
                     label="Physics 1E03"
                     id="physics1e03"
                     value={phys1e03}
                     onChange={(value) => setPhysics1e03(value)}
                     maxLength={2}
-                />
-                <TextField 
+                /> */}
+                {/* <TextField 
                     label="Chemistry 1E03"
                     id="chemistry1e03"
                     value={chem1e03}
@@ -333,15 +333,15 @@ function GradesContent() {
                     value={eng1p13}
                     onChange={(value) => setEngineering1p13(value)}
                     maxLength={2}
-                />
+                /> */}
                 <div>
                     <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-white transition-all duration-300" type="text" inputMode="numeric" name="elec1" placeholder="Elective 1 Grade" value={elective1Value} onChange={handleInputChange} maxLength={2}/>  
                     <Combobox value={selectedElective1} onChange={handleElective1Change}placeholder="Select first elective"/>
                 </div>
-                <div>
+                {/* <div>
                     <input className="text-subtext border-2 border-transparent p-2 rounded-t-sm outline-none bg-neutral-900 w-2/3 mx-auto focus:border-white transition-all duration-300" type="text" inputMode="numeric" name="elec2" placeholder="Elective 2 Grade" value={elective2Value} onChange={handleInputChange} maxLength={2} />  
                     <Combobox value={selectedElective2} onChange={handleElective2Change}placeholder="Select second elective"/>
-                </div>
+                </div> */}
                 <ComboboxStreams value={stream1Choice} onChange={handleStream1Change}placeholder="First Stream Choice" />
                 <ComboboxStreams value={stream2Choice} onChange={handleStream2Change}placeholder="Second Stream Choice" />
                 <ComboboxStreams value={stream3Choice} onChange={handleStream3Change}placeholder="Third Stream Choice" />

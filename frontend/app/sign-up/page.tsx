@@ -210,7 +210,7 @@ function SignUpContent() {
             onCheckedChange={(checked) => setIsGraduated(checked === true)}
           />
           <label className="text-sm font-medium leading-none text-neutral-300">
-            I just finished Engineering 1! (2024/2025)
+            I already finished Engineering 1! (2024/2025)
           </label>
         </div>
 
