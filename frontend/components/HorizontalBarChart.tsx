@@ -197,7 +197,7 @@ export default function HorizontalBarChart() {
       
       // Fetch contribution count
       try {
-        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
+        const contributions = await database.getDocument('MacStats', 'MarkData', 'total');
         // Sum comma separated distribution values to get total contributions
         const distributionStr = contributions.distribution || "";
         const distributionArr = distributionStr.split(",").map(Number).filter((x: number) => !isNaN(x));
