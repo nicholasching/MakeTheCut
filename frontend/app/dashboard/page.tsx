@@ -42,15 +42,15 @@ function StatisticsDropdown() {
         }`}
       >
         <div className="p-6 pt-0 space-y-8 bg-gradient-to-b from-transparent to-neutral-900/20">
-          <div className="transform transition-all duration-500 hover:scale-[1.01]">
+          <div>
             <HorizontalBarChart24 />
           </div>
           
-          <div className="transform transition-all duration-500 delay-100 hover:scale-[1.01]">
+          <div>
             <StreamChoiceGraph24 />
           </div>
           
-          <div className="transform transition-all duration-500 delay-200 hover:scale-[1.01]">
+          <div>
             <GradeDistributionChart24 />
           </div>
         </div>
@@ -222,11 +222,11 @@ function DashboardContent() {
               <GradeDistributionChart />
             </div>
             
-            <div className="transform transition-all duration-500 delay-100 hover:scale-[1.005]">
+            <div>
               <StatisticsDropdown />
             </div>
             
-            <div className="transform transition-all duration-500 delay-200 hover:scale-[1.005]">
+            <div>
               <MethodologyDropdown />
             </div>
           </div>
