@@ -1,24 +1,43 @@
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import { ChevronDown, Check } from "lucide-react"
 import { Bar, BarChart, ReferenceLine, Label, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
-import { account, database } from "../app/appwrite";
+import { database } from "../app/appwrite";
 import { useState, useEffect } from "react";
-import { createPrerenderSearchParamsForClientPage } from "next/dist/server/request/search-params"
+import { cn } from "@/lib/utils"
+
+const COURSES = [
+  { value: "math1za3", label: "Calc 1 / 1ZA3" },
+  { value: "math1zb3", label: "Calc 2 / 1ZB3" },
+  { value: "math1zc3", label: "Linear Algebra / 1ZC3" },
+  { value: "phys1d03", label: "Physics / 1D03" },
+  { value: "phys1e03", label: "Physics / 1E03" },
+  { value: "chem1e03", label: "Chemistry / 1E03" },
+  { value: "eng1p13", label: "Engineer / 1P13" },
+] as const
 
 // Initial structure for chart data
 const initialChartData = [
@@ -58,7 +77,7 @@ async function fetchDistribution(course: string) {
 const chartConfig = {
   count: {
     label: "Count",
-    color: "#1B79C5", // Changed from #f4ab33 to blue
+    color: "#1B79C5", // Changed from #f4ab33 to red
   },
 } satisfies ChartConfig
 
@@ -115,6 +134,7 @@ export default function GradeDistributionChart() {
   const [courseAvg, setCourseAvg] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState("math1za3");
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   useEffect(() => {
     const initPage = async () => {
@@ -130,7 +150,7 @@ export default function GradeDistributionChart() {
 
       // Fetch initial course data (math1za3)
       const distribution = await fetchDistribution("math1za3");
-      setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
+      distribution !== null && setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
       
       if (distribution) {
         // Update chart data with fetched distribution
@@ -151,14 +171,13 @@ export default function GradeDistributionChart() {
     initPage();
   }, []);
 
-  // Function to handle tab changes
-  const handleTabChange = async (value: string) => {
+  const handleCourseChange = async (value: string) => {
+    setPopoverOpen(false);
     setIsLoading(true);
     setSelectedCourse(value);
     
     const distribution = await fetchDistribution(value);
-    console.log(distribution[12])
-    setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
+    distribution !== null && setCourseAvg(distribution.pop() || 0); // Get the average from the distribution array
     
     if (distribution) {
       // Update chart data with new distribution
@@ -179,7 +198,7 @@ export default function GradeDistributionChart() {
   // Show loading animation when data is loading
   if (isLoading) {
     return (
-      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4 relative overflow-hidden">
+      <Card className="bg-neutral-900 text-white w-full border-0 p-1 pt-6 pb-4 relative overflow-hidden">
         <CardHeader className="text-neutral-500">
           <CardTitle className="text-subtitle">Loading Course Data...</CardTitle>
         </CardHeader>
@@ -195,113 +214,72 @@ export default function GradeDistributionChart() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+    <Card className="bg-neutral-900 text-white w-full border-0 gap-0 pt-6 pb-4">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
             2024/2025 Course Grade Distributions
           </CardTitle>
-          <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
+          <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse mb-4">
             <p>Total Contributions: {totalContributions}</p>
           </CardDescription>
+          <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                className={cn(
+                  "min-h-[35px] w-full max-w-[280px] bg-neutral-800 border-neutral-600 text-white hover:bg-neutral-700 hover:text-white rounded-md mb-2",
+                  "text-sm font-medium"
+                )}
+              >
+                <div className="flex items-center w-full justify-between">
+                  <ChevronDown className="h-4 w-4 shrink-0 opacity-70" />
+                  <span className="flex-1 text-center">
+                    {COURSES.find((c) => c.value === selectedCourse)?.label ?? "Select course"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 shrink-0 opacity-70" />
+                </div>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-[var(--radix-popover-trigger-width)] p-0 border-neutral-700 bg-neutral-900"
+              align="center"
+            >
+              <Command>
+                <CommandList>
+                  <CommandGroup>
+                    {COURSES.map((course) => (
+                      <CommandItem
+                        key={course.value}
+                        value={course.value}
+                        onSelect={() => handleCourseChange(course.value)}
+                        className="text-sm cursor-pointer"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedCourse === course.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {course.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
-        <Tabs value={selectedCourse} className="w-full text-center flex-row justify-center" onValueChange={handleTabChange}>
-            <TabsList className="bg-transparent text-neutral-500 flex flex-wrap gap-1 sm:gap-2 md:gap-3 lg:gap-4">
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1za3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="math1za3"
-                >
-                    {selectedCourse === "math1za3" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Calc 1 / 1ZA3
-                      </span> : 
-                      "Calc 1 / 1ZA3"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zb3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="math1zb3"
-                >
-                    {selectedCourse === "math1zb3" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Calc 2 / 1ZB3
-                      </span> : 
-                      "Calc 2 / 1ZB3"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "math1zc3" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="math1zc3"
-                >
-                    {selectedCourse === "math1zc3" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Linear Algebra / 1ZC3
-                      </span> : 
-                      "Linear Algebra / 1ZC3"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1d03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="phys1d03"
-                >
-                    {selectedCourse === "phys1d03" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Physics / 1D03
-                      </span> : 
-                      "Physics / 1D03"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "phys1e03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="phys1e03"
-                >
-                    {selectedCourse === "phys1e03" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Physics / 1E03
-                      </span> : 
-                      "Physics / 1E03"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "chem1e03" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="chem1e03"
-                >
-                    {selectedCourse === "chem1e03" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Chemistry / 1E03
-                      </span> : 
-                      "Chemistry / 1E03"
-                    }
-                </TabsTrigger>
-                <TabsTrigger 
-                    className={`text-teenytiny hover:bg-neutral-700 data-[state=active]:!bg-transparent transition-all ${selectedCourse === "eng1p13" ? "bg-neutral-800 ring-2 ring-blue-500 ring-opacity-70 text-white" : ""}`}
-                    value="eng1p13"
-                >
-                    {selectedCourse === "eng1p13" ? 
-                      <span className="flex items-center">
-                        <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
-                        Engineer / 1P13
-                      </span> : 
-                      "Engineer / 1P13"
-                    }
-                </TabsTrigger>
-            </TabsList>
-        </Tabs>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px]">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
                 accessibilityLayer
                 data={chartData}
                 margin={{
-                    top: 30, right: 30, left: 30, bottom: 20,
+                    top: 30, right: 10, left: -15, bottom: 20, // Reduced left from 30 to 10
                 }}
             >
                 <CartesianGrid vertical={false} stroke="#333" />
@@ -316,8 +294,8 @@ export default function GradeDistributionChart() {
                     label={{value: 'Grade', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}
                 />
                 <ReferenceLine x={Math.round(courseAvg).toString()} stroke="white" strokeDasharray="4 4">
-                  <Label position="top" fill="white" fontSize={14} dy={-10} className="cursor-pointer">
-                    {"Course Average: "+ courseAvg.toFixed(2)}
+                  <Label position="top" fill="white" fontSize={14} dy={-5} className="cursor-pointer text-[0.55rem] md:text-[0.7rem] text-color-neutral-500">
+                    {"Mean: "+ courseAvg.toFixed(2)}
                   </Label>
                 </ReferenceLine>
                 <YAxis
@@ -329,8 +307,8 @@ export default function GradeDistributionChart() {
                     label={{
                         value: 'Number of Students', 
                         angle: -90, 
-                        position: "insideLeft", 
-                        dx: -10,
+                        position: "insideMiddle", 
+                        dx: -5,
                         style: { fill: '#737373', textAnchor: 'middle' }
                     }}
                 />
