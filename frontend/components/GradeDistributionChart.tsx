@@ -26,8 +26,13 @@ import {
   ChartContainer,
 } from "@/components/ui/chart"
 import { database } from "../app/appwrite";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils"
+
+// S-curve easing: easeInOutCubic
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * Math.pow(t, 3) : 1 - Math.pow(-2 * t + 2, 3) / 2
+}
 
 const COURSES = [
   { value: "math1za3", label: "Calc 1 / 1ZA3" },
@@ -35,20 +40,20 @@ const COURSES = [
   { value: "phys1d03", label: "Physics / 1D03" },
 ] as const
 
-// Initial structure for chart data
+// Initial structure for chart data (numeric grade for smooth ReferenceLine positioning)
 const initialChartData = [
-  { grade: "1", count: 0 },
-  { grade: "2", count: 0 },
-  { grade: "3", count: 0 },
-  { grade: "4", count: 0 },
-  { grade: "5", count: 0 },
-  { grade: "6", count: 0 },
-  { grade: "7", count: 0 },
-  { grade: "8", count: 0 },
-  { grade: "9", count: 0 },
-  { grade: "10", count: 0 },
-  { grade: "11", count: 0 },
-  { grade: "12", count: 0 },
+  { grade: 1, count: 0 },
+  { grade: 2, count: 0 },
+  { grade: 3, count: 0 },
+  { grade: 4, count: 0 },
+  { grade: 5, count: 0 },
+  { grade: 6, count: 0 },
+  { grade: 7, count: 0 },
+  { grade: 8, count: 0 },
+  { grade: 9, count: 0 },
+  { grade: 10, count: 0 },
+  { grade: 11, count: 0 },
+  { grade: 12, count: 0 },
 ]
 
 async function fetchDistribution(course: string) {
@@ -128,9 +133,11 @@ export default function GradeDistributionChart() {
   const [totalContributions, setTotalContributions] = useState<number>(0);
   const [chartData, setChartData] = useState(initialChartData);
   const [courseAvg, setCourseAvg] = useState(0);
+  const [animatedCourseAvg, setAnimatedCourseAvg] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState("math1za3");
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     const initPage = async () => {
@@ -160,7 +167,7 @@ export default function GradeDistributionChart() {
         // Update chart data with fetched distribution
         const updatedData = initialChartData.map((item, index) => ({
           ...item,
-          count: distribution[index] || 0,
+          count: distribution[index] ?? 0,
         }));
         
         setChartData(updatedData);
@@ -190,7 +197,7 @@ export default function GradeDistributionChart() {
       // Update chart data with new distribution
       const updatedData = initialChartData.map((item, index) => ({
         ...item,
-        count: distribution[index] || 0,
+        count: distribution[index] ?? 0,
       }));
       
       setChartData(updatedData);
@@ -201,6 +208,36 @@ export default function GradeDistributionChart() {
     
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    const target = courseAvg;
+    const duration = 800;
+    setAnimatedCourseAvg(0);
+
+    const animate = (startTime: number) => {
+      const run = (now: number) => {
+        const elapsed = now - startTime;
+        if (elapsed >= duration) {
+          setAnimatedCourseAvg(target);
+          rafRef.current = null;
+          return;
+        }
+        const t = easeInOutCubic(elapsed / duration);
+        setAnimatedCourseAvg(target * t);
+        rafRef.current = requestAnimationFrame(run);
+      };
+      rafRef.current = requestAnimationFrame(run);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+  }, [courseAvg]);
 
   // Show loading animation when data is loading
   if (isLoading) {
@@ -292,17 +329,24 @@ export default function GradeDistributionChart() {
                 <CartesianGrid vertical={false} stroke="#333" />
                 <XAxis
                     dataKey="grade"
+                    type="number"
+                    domain={[0.5, 12.5]}
+                    ticks={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]}
                     tickLine={false}
                     axisLine={false}
                     tickMargin={10}
-                    tickFormatter={(value) => value.slice(0, 3)}
+                    tickFormatter={(value) => String(value)}
                     className="text-[0.55rem] md:text-[0.7rem]"
                     stroke="#737373"
                     label={{value: 'Grade', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}
                 />
-                <ReferenceLine x={Math.round(courseAvg).toString()} stroke="white" strokeDasharray="4 4">
+                <ReferenceLine
+                  x={courseAvg > 0 ? Math.max(0.5, animatedCourseAvg) : 1}
+                  stroke="white"
+                  strokeDasharray="4 4"
+                >
                   <Label position="top" fill="white" fontSize={14} dy={-5} className="cursor-pointer text-[0.55rem] md:text-[0.7rem] text-color-neutral-500">
-                    {"Mean: "+ courseAvg.toFixed(2)}
+                    {"Mean: "+ animatedCourseAvg.toFixed(2)}
                   </Label>
                 </ReferenceLine>
                 <YAxis
