@@ -110,7 +110,7 @@ const GridBackground = forwardRef<HTMLElement, GridBackgroundProps>(({ children,
                     INTENSITY_MID_REST + smoothedBunchRatio * (INTENSITY_MID_BUNCHED - INTENSITY_MID_REST);
                 return (
                     <div
-                        className="pointer-events-none absolute inset-0 animate-shimmer grid-highlight-mask"
+                        className="pointer-events-none absolute inset-0 -z-10 animate-shimmer grid-highlight-mask"
                         style={{
                             background: `
                                 radial-gradient(
