@@ -216,9 +216,11 @@ function DashboardContent() {
         
         <div className="w-full max-w-7xl mx-auto">          
           <div className="flex flex-col gap-8">
-            <HorizontalBarChart />
-            <StreamChoiceGraph />
-            <GradeDistributionChart />
+            <div className="z-10 flex flex-col gap-8">
+              <HorizontalBarChart />
+              <StreamChoiceGraph />
+              <GradeDistributionChart />
+            </div>
             
             <div className="transform transition-all duration-500 delay-100 hover:scale-[1.005]">
               <StatisticsDropdown />
