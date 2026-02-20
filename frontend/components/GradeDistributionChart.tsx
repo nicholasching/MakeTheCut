@@ -205,7 +205,7 @@ export default function GradeDistributionChart() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+    <Card className="bg-neutral-900 text-white w-full border-none gap-0 pt-6 pb-4">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
@@ -297,14 +297,14 @@ export default function GradeDistributionChart() {
             </TabsList>
         </Tabs>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px]">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
                 accessibilityLayer
                 data={chartData}
                 margin={{
-                    top: 30, right: 30, left: 30, bottom: 20,
+                    top: 30, right: 10, left: -15, bottom: 20, // Reduced left from 30 to 10
                 }}
             >
                 <CartesianGrid vertical={false} stroke="#333" />
@@ -319,8 +319,8 @@ export default function GradeDistributionChart() {
                     label={{value: 'Grade', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}
                 />
                 <ReferenceLine x={Math.round(courseAvg).toString()} stroke="white" strokeDasharray="4 4">
-                  <Label position="top" fill="white" fontSize={14} dy={-10} className="cursor-pointer">
-                    {"Course Average: "+ courseAvg.toFixed(2)}
+                  <Label position="top" fill="white" fontSize={14} dy={-5} className="cursor-pointer text-[0.55rem] md:text-[0.7rem] text-color-neutral-500">
+                    {"Mean: "+ courseAvg.toFixed(2)}
                   </Label>
                 </ReferenceLine>
                 <YAxis
@@ -332,8 +332,8 @@ export default function GradeDistributionChart() {
                     label={{
                         value: 'Number of Students', 
                         angle: -90, 
-                        position: "insideLeft", 
-                        dx: -10,
+                        position: "insideMiddle", 
+                        dx: -5,
                         style: { fill: '#737373', textAnchor: 'middle' }
                     }}
                 />

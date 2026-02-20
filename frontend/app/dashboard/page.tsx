@@ -16,42 +16,6 @@ import Footer from "@/components/Footer";
 import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { account } from "../appwrite";
 
-function WelcomeSection({ userName }: { userName: string | null }) {
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const getTimeOfDayGreeting = () => {
-    const hour = currentTime.getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
-
-  const firstName = userName?.split(' ')[0] || "User";
-
-  return (
-    <div className="relative overflow-hidden bg-gradient-to-br from-red-900/20 via-orange-900/20 to-orange-900/20 border border-red-500/30 rounded-2xl p-8 mb-8">
-      <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-orange-500/10 animate-pulse"></div>
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
-          <Sparkles className="w-8 h-8 text-red-500 animate-bounce" />
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-red-500 via-orange-600 to-orange-400 bg-clip-text text-transparent">
-            {getTimeOfDayGreeting()}, {firstName}!
-          </h1>
-        </div>
-        
-        <p className="text-lg text-neutral-300">
-          Welcome back! Check out the latest stream statistics and see how you compare.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function StatisticsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -250,26 +214,11 @@ function DashboardContent() {
         <HomeButton />
         <LogoutButton />
         
-        <div className="w-full max-w-7xl mx-auto">
-          <WelcomeSection userName={userName} />
-          
+        <div className="w-full max-w-7xl mx-auto">          
           <div className="flex flex-col gap-8">
-            <div className="transform transition-all duration-500 hover:scale-[1.005]">
-              <div className="bg-gradient-to-br from-neutral-800/50 to-neutral-900/50 backdrop-blur-sm border border-neutral-600/30 rounded-2xl p-1 shadow-2xl">
-                <div className="bg-gradient-to-br from-neutral-800 to-neutral-900 rounded-xl p-6 space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                  <div className="relative mt-1 w-4 h-4">
-                    <div className="absolute inset-0 rounded-full bg-red-500"></div>
-                    <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
-                  </div>
-                    <h2 className="text-2xl font-bold text-white">Current Year Stream Preferences</h2>
-                  </div>
-                  <HorizontalBarChart />
-                  <StreamChoiceGraph />
-                  <GradeDistributionChart />
-                </div>
-              </div>
-            </div>
+            <HorizontalBarChart />
+            <StreamChoiceGraph />
+            <GradeDistributionChart />
             
             <div className="transform transition-all duration-500 delay-100 hover:scale-[1.005]">
               <StatisticsDropdown />

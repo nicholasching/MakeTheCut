@@ -248,7 +248,7 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+    <Card className="bg-neutral-900 text-white w-full border-none gap-0 pt-6 pb-4">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
@@ -260,7 +260,7 @@ export default function HorizontalBarChart() {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] pr-3 pl-3 md:pl-7">
+      <CardContent className="h-[500px] md:h-[600px]">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
@@ -268,13 +268,13 @@ export default function HorizontalBarChart() {
               data={chartData} 
               layout="vertical" 
               margin={isMobile ? 
-              { top: 30, right: 20, left: 5, bottom: 20 } : 
-              { top: 30, right: 30, left: 30, bottom: 20 }
+              { top: 20, right: 10, left: 5, bottom: 20 } : 
+              { top: 20, right: 30, left: 30, bottom: 20 }
               }
             >
               <CartesianGrid horizontal={false} stroke="#333" />
-              <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]"/>
-              <XAxis type="number" tickLine={false} axisLine={true} domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}/>
+              <YAxis dataKey="stream" type="category" tickLine={false} axisLine={false} className="text-[0.55rem] md:text-[0.7rem]" width={55}/>
+              <XAxis type="number" tickLine={false} axisLine={true} className="text-[0.55rem] md:text-[0.7rem]" domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}/>
               {shouldShowUserLine && (
                 <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
                   <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">

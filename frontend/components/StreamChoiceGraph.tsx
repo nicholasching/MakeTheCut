@@ -22,7 +22,7 @@ const initialChartData = [
   { stream: "Civil", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Computer", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Electrical", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
-  { stream: "Eng Physics", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
+  { stream: "Engineering Physics", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Materials", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Mechanical", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Mechatronics", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
@@ -134,6 +134,16 @@ export default function StreamChoiceGraph() {
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [key, setKey] = useState(0);
+  const [yAxisWidth, setYAxisWidth] = useState(55);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      setYAxisWidth(window.innerWidth >= 768 ? 70 : 55);
+    };
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
 
   useEffect(() => {
     const initPage = async () => {
@@ -172,8 +182,8 @@ export default function StreamChoiceGraph() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
-      <CardHeader className="text-neutral-500 pb-2">
+    <Card className="bg-neutral-900 text-white w-full border-none gap-0 pt-6 pb-4">
+      <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
             Live 2025/2026 Stream Choice Distribution
@@ -183,7 +193,7 @@ export default function StreamChoiceGraph() {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px] px-2">
+      <CardContent className="h-[500px] md:h-[600px]">
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -192,7 +202,7 @@ export default function StreamChoiceGraph() {
               data={chartData}
               layout="vertical"
               margin={{
-                top: 20, right: 40, left: 20, bottom: 20,
+                top: 20, right: 10, left: 10, bottom: 20,
               }}
               barCategoryGap="20%"
             >
@@ -206,7 +216,7 @@ export default function StreamChoiceGraph() {
                 label={{
                   value: "Number of Students",
                   position: "insideBottom",
-                  dy: 20,
+                  dy: 10,
                   style: { fill: "#737373", textAnchor: "middle" },
                 }}
               />
@@ -217,7 +227,7 @@ export default function StreamChoiceGraph() {
                 axisLine={false}
                 className="text-[0.55rem] md:text-[0.7rem]"
                 stroke="#737373"
-                width={80}
+                width={yAxisWidth}
                 dx={-5}
               />
               <ChartTooltip
