@@ -233,7 +233,7 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen" ref={sectionRef}>
-      <GridBackground className="flex flex-1 p-5 pt-32 lg:p-12 lg:pt-32 overflow-y-scroll">
+      <GridBackground className="flex flex-1 p-5 pt-32 lg:p-12 lg:pt-32">
         <HomeButton />
         <LogoutButton />
         
