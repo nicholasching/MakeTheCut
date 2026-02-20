@@ -98,7 +98,7 @@ export default function StreamAdmissionPage() {
   };
 
   return (
-    <GridBackground className="pt-30 pb-20 overflow-y-scroll">
+    <GridBackground className="pt-30 pb-20">
       <HomeButton />
       <LogoutButton />
       <h1 className="text-center text-subtext text-neutral-400">

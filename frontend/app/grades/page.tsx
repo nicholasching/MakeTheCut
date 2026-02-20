@@ -420,7 +420,7 @@ function GradesContent() {
     };
 
     return (
-        <GridBackground className="pt-30 pb-20 overflow-y-scroll" ref={sectionRef}>
+        <GridBackground className="pt-30 pb-20" ref={sectionRef}>
             <HomeButton />
             <LogoutButton />
             <h1 className="text-center text-subtext text-neutral-400">
