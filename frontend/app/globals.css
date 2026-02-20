@@ -82,6 +82,33 @@ nextjs-portal {
 .animate-glow {
   animation: glow 2.5s ease-in-out infinite; /* Slightly faster animation */
 }
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.85; }
+  50% { opacity: 1; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Masks highlight to grid lines only - matches GridBackground grid pattern */
+.grid-highlight-mask {
+  mask-image: linear-gradient(white 1px, transparent 1px),
+    linear-gradient(90deg, white 1px, transparent 1px);
+  mask-size: 8vw 8vw;
+  mask-repeat: repeat;
+  -webkit-mask-image: linear-gradient(white 1px, transparent 1px),
+    linear-gradient(90deg, white 1px, transparent 1px);
+  -webkit-mask-size: 8vw 8vw;
+  -webkit-mask-repeat: repeat;
+}
+@media (min-width: 768px) {
+  .grid-highlight-mask {
+    mask-size: 4vw 4vw;
+    -webkit-mask-size: 4vw 4vw;
+  }
+}
 /* Temporary Styling for Announcement banner ends here */
 
 :root {
