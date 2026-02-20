@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { AnalyticsWrapper } from "@/components/AnalyticsWrapper"
+import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
+import { TransitionProvider } from "@/components/TransitionProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -73,15 +74,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <AnalyticsWrapper>
-          {/* Apply gradient background instead of glow */}
-          {/* <div className="bg-gradient-to-r from-blue-800 via-orange-700 to-orange-900 text-primary-foreground text-center p-3 text-sm font-medium animate-glow">
-            Good News! MakeTheCut now works on McMaster Wifi. We are also now requiring email verification for all accounts.
-          </div> */}
-          <main>
-            {children}
-          </main>
-        </AnalyticsWrapper>
+        <TransitionProvider>
+          <AnalyticsWrapper>
+            {/* Apply gradient background instead of glow */}
+            {/* <div className="bg-gradient-to-r from-blue-800 via-orange-700 to-orange-900 text-primary-foreground text-center p-3 text-sm font-medium animate-glow">
+              Good News! MakeTheCut now works on McMaster Wifi. We are also now requiring email verification for all accounts.
+            </div> */}
+            <main>
+              {children}
+            </main>
+          </AnalyticsWrapper>
+        </TransitionProvider>
       </body>
     </html>
   );

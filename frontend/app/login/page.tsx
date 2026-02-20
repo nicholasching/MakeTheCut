@@ -5,11 +5,10 @@ import { Models } from "appwrite";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
-import { useRouter } from "next/navigation";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { usePageTransition } from "@/components/TransitionProvider";
 
 function LoginContent() {
-  const [loggedInUser, setLoggedInUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -19,12 +18,12 @@ function LoginContent() {
   const [recoveryError, setRecoveryError] = useState("");
   const sectionRef = useSectionTracking<HTMLDivElement>("Login")
 
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   useEffect(() => {
     async function initiatePage() {
         try {
-            let loggedInUser = await account.get();
-            router.push('/dashboard');
+            await account.get();
+            navigate('/dashboard');
         }
         catch (error) {
             
@@ -37,8 +36,7 @@ function LoginContent() {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const session = await account.createEmailPasswordSession(email, password);
-      setLoggedInUser(await account.get());
+      await account.createEmailPasswordSession(email, password);
       setLoginError("");
       return true;
     } catch (error) {
@@ -49,8 +47,8 @@ function LoginContent() {
 
   const handleLogin = async (email: string, password: string) => {
     const success = await login(email, password);
-    if (success && loggedInUser) {
-      window.location.href = '/dashboard';
+    if (success) {
+      navigate('/dashboard');
     }
   };
 
@@ -101,13 +99,6 @@ function LoginContent() {
     setRecoveryError("");
     setForgotPasswordEmail("");
   };
-
-  if (loggedInUser) {
-    if (typeof window !== 'undefined') {
-      window.location.href = '/dashboard'; // TEMPORARY REDIRECT TO GRADES INSTEAD OF DASHBOARD PAGE (FOR NEXT 3 DAYS)
-      return null;
-    }
-  }
 
   return (
     <GridBackground className="h-svh flex items-center justify-center" ref={sectionRef}>

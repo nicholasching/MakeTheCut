@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { account, database } from "../app/appwrite";
 import { Models } from "appwrite";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -14,7 +14,7 @@ interface LogoutButtonProps {
 
 const LogoutButton = ({ 
 }: LogoutButtonProps) => {
-    const router = useRouter();
+    const { navigate } = usePageTransition();
     const [userGraduated, setuserGraduated] = useState<boolean>(true);
 
     useEffect(() => {
@@ -29,7 +29,7 @@ const LogoutButton = ({
                     } catch (error) {
                         console.log("User document doesn't exist in 2024 StreamData collection");
                         if (window.location.pathname === '/dashboard') {
-                            router.push('/stream');
+                            navigate('/stream');
                             console.log("Redirecting to stream page");
                         }
                     }
@@ -41,7 +41,7 @@ const LogoutButton = ({
                     } catch (error) {
                         console.log("User document doesn't exist in 2024 UserData collection");
                         if (window.location.pathname === '/dashboard') {
-                            router.push('/grades');
+                            navigate('/grades');
                             console.log("Redirecting to grades page");
                         }
                     }
@@ -57,8 +57,7 @@ const LogoutButton = ({
     const logout = async () => {
         try {
             await account.deleteSession("current");
-            // Optionally redirect after logout
-            window.location.href = "/login";
+            navigate("/login");
         } catch (error) {
             console.error("Logout failed", error);
         }
