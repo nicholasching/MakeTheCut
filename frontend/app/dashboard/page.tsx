@@ -13,35 +13,35 @@ import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
-import { ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
 import { account } from "../appwrite";
 
 function StatisticsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="w-full bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-sm border border-neutral-600/50 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full p-6 hover:bg-white/5 transition-all duration-300 group"
+        className="flex items-center justify-between w-full p-6 hover:bg-white/[0.04] transition-all duration-300 group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse" />
           <span className="text-xl font-semibold text-white group-hover:text-purple-300 transition-colors">
             2024/2025 Stream Statistics
           </span>
         </div>
-        <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-          <ChevronDown className="w-6 h-6 text-neutral-400 group-hover:text-purple-400" />
+        <div className={`transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
+          <ChevronDown className="w-6 h-6 text-neutral-400 group-hover:text-blue-400" />
         </div>
       </button>
-      
-      <div 
+
+      <div
         className={`transition-all duration-700 ease-out overflow-hidden ${
-          isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'
+          isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="p-6 pt-0 space-y-8 bg-gradient-to-b from-transparent to-neutral-900/20">
+        <div className="p-6 pt-2 space-y-8">
           <div>
             <HorizontalBarChart24 />
           </div>
@@ -63,102 +63,125 @@ function MethodologyDropdown() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="w-full bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 backdrop-blur-sm border border-neutral-600/50 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full p-6 hover:bg-white/5 transition-all duration-300 group"
+        className="flex items-center justify-between w-full p-6 hover:bg-white/[0.04] transition-all duration-300 group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
           <span className="text-xl font-semibold text-white group-hover:text-blue-300 transition-colors">
             Methodology & Data Sources
           </span>
         </div>
-        <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
+        <div className={`transform transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}>
           <ChevronDown className="w-6 h-6 text-neutral-400 group-hover:text-blue-400" />
         </div>
       </button>
-      
-      <div 
+
+      <div
         className={`transition-all duration-700 ease-out overflow-hidden ${
-          isOpen ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'
+          isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="p-6 pt-0 space-y-6 bg-gradient-to-b from-transparent to-neutral-900/20">
+        <div className="p-6 pt-0 space-y-8">
+          <p className="text-neutral-400 text-base leading-relaxed">
+            MakeTheCut uses two separate pipelines: estimated cutoffs from simulated allocation and reported cutoffs from student admission outcomes.
+          </p>
+
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Estimated Cutoffs Section */}
-            <div className="bg-gradient-to-br from-amber-900/20 to-orange-900/20 border border-amber-500/30 rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-amber-400">Estimated Cutoffs</h3>
+            {/* Estimated Cutoffs */}
+            <div className="bg-white/[0.04] border border-neutral-600/40 rounded-xl p-6 hover:border-blue-500/20 transition-colors">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-blue-500/15">
+                  <Calculator className="w-5 h-5 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Estimated Cutoffs</h3>
               </div>
-              <div className="space-y-3 text-neutral-300 text-sm">
-                <p>
-                  <strong className="text-amber-300">How We Calculate:</strong> Using McMaster's exact allocation algorithm:
-                </p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Apply historical seat distribution (%) from 4 years of official McMaster data</li>
-                  <li>Calculate available seats based on current submission volume</li>
-                  <li>Allocate students starting with free choice, then by descending GPA</li>
-                  <li>The last admitted student's GPA becomes the stream cutoff</li>
-                </ul>
-                <p className="text-xs text-amber-200/80 italic">
-                  * 2024/2025 data is locked - no further updates to estimates.
-                </p>
-              </div>
+              <p className="text-neutral-400 text-sm mb-4">
+                Simulated allocation using McMaster&apos;s historical seat proportions and current preference submissions:
+              </p>
+              <ul className="space-y-2.5 text-neutral-300 text-sm">
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">1.</span>
+                  Exclude submissions with zero GPA; apply historical stream seat shares (averaged over 4 years).
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">2.</span>
+                  Assign free-choice students first, then non-free-choice by descending GPA, respecting preferences and capacity.
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">3.</span>
+                  Cutoff = lowest non-free-choice GPA admitted. Underfilled streams use 4.0; fully free-choice-filled streams use 12.0.
+                </li>
+              </ul>
+              <p className="mt-4 text-xs text-neutral-500 italic">
+                2024/25 estimates are locked; no further updates.
+              </p>
             </div>
 
-            {/* Reported Cutoffs Section */}
-            <div className="bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-500/30 rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-green-400">Reported Cutoffs</h3>
+            {/* Reported Cutoffs */}
+            <div className="bg-white/[0.04] border border-neutral-600/40 rounded-xl p-6 hover:border-blue-500/20 transition-colors">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-blue-500/15">
+                  <ClipboardList className="w-5 h-5 text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">Reported Cutoffs</h3>
               </div>
-              <div className="space-y-3 text-neutral-300 text-sm">
-                <p>
-                  <strong className="text-green-300">How We Calculate:</strong> Based on real student admission reports:
-                </p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Collect student reports of acceptances and rejections by stream</li>
-                  <li>Set cutoff as the higher of: lowest accepted GPA or highest rejected GPA</li>
-                  <li>Filter outliers: remove data points with inconsistencies, those where the (highest rejected GPA - lowest accepted GPA) &gt; 0.5/12 GPA</li>
-                  <li>Average the lowest accepted GPA and highest rejected GPA to get the reported cutoff</li>
-                </ul>
-                <p className="text-xs text-green-200/80 italic">
-                  * Updates live as students share their results.
-                </p>
-              </div>
+              <p className="text-neutral-400 text-sm mb-4">
+                Derived from student-reported admission and rejection outcomes by stream:
+              </p>
+              <ul className="space-y-2.5 text-neutral-300 text-sm">
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">1.</span>
+                  Collect stream-in and stream-out reports linked to GPA; exclude free-choice and invalid/zero GPA entries.
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">2.</span>
+                  Iteratively remove outlier pairs when the gap between lowest admitted and highest rejected exceeds 0.5 GPA.
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-blue-400/80 shrink-0">3.</span>
+                  Cutoff = midpoint of lowest admitted and highest rejected, or a one-sided bound when only one side exists.
+                </li>
+              </ul>
+              <p className="mt-4 text-xs text-neutral-500 italic">
+                Updated as students share results.
+              </p>
             </div>
           </div>
 
-          {/* Additional Information */}
-          <div className="bg-gradient-to-br from-blue-900/20 to-indigo-900/20 border border-blue-500/30 rounded-xl p-6">
+          {/* Notes & Disclaimer */}
+          <div className="bg-white/[0.04] border border-neutral-600/40 rounded-xl p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <h3 className="text-lg font-semibold text-blue-400">Important Notes</h3>
+              <div className="p-2 rounded-lg bg-blue-500/15">
+                <Info className="w-5 h-5 text-blue-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white">Limitations & Updates</h3>
             </div>
-                                      <div className="grid md:grid-cols-2 gap-4 text-neutral-300 text-sm">
-               <div>
-                 <p className="font-medium text-blue-300 mb-2">Limitations:</p>
-                 <ul className="list-disc list-inside space-y-1">
-                    <li>Limited sample sizes may reduce accuracy</li>
-                    <li>Possible fake submissions affect data quality</li>
-                    <li>Seat counts based on historical data may vary</li>
-                 </ul>
-               </div>
-               <div>
-                 <p className="font-medium text-blue-300 mb-2">Update Schedule:</p>
-                 <ul className="list-disc list-inside space-y-1">
-                    <li>Stream Preferences: Updated in real-time</li>
-                    <li>Reported Cutoffs: Updated as students report results</li>
-                    <li>Estimated Cutoffs: Locked for 2024/25 cycle</li>
-                    <li>Historical Data: Annual verification and archiving</li>
-                 </ul>
-               </div>
-             </div>
-            <div className="mt-4 p-3 bg-blue-900/30 rounded-lg">
-              <p className="text-xs text-blue-200 text-center">
-                <strong>Disclaimer:</strong> This data is for informational purposes only. Always consult official university sources for final admission requirements and decisions.
+            <div className="grid md:grid-cols-2 gap-6 text-neutral-300 text-sm">
+              <div className="space-y-2">
+                <p className="font-medium text-neutral-200">Limitations</p>
+                <ul className="space-y-1.5">
+                  <li>• Limited sample sizes may reduce accuracy</li>
+                  <li>• Possible fake submissions affect data quality</li>
+                  <li>• Seat shares based on historical data may vary</li>
+                </ul>
+              </div>
+              <div className="space-y-2">
+                <p className="font-medium text-neutral-200">Update cadence</p>
+                <ul className="space-y-1.5">
+                  <li>• Stream preferences: real-time</li>
+                  <li>• Reported cutoffs: as students report</li>
+                  <li>• Estimated cutoffs: locked for 2024/25</li>
+                  <li>• Historical data: annual verification</li>
+                </ul>
+              </div>
+            </div>
+            <div className="mt-5 flex items-start gap-3 p-4 rounded-lg bg-neutral-800/50 border border-neutral-600/30">
+              <AlertCircle className="w-5 h-5 text-amber-400/90 shrink-0 mt-0.5" />
+              <p className="text-sm text-neutral-400">
+                <strong className="text-neutral-300">Disclaimer:</strong> This data is for informational purposes only. Always consult official university sources for final admission requirements and decisions.
               </p>
             </div>
           </div>

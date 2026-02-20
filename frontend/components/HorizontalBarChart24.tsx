@@ -233,7 +233,7 @@ export default function HorizontalBarChart() {
   // Show loading animation when key is 0
   if (key === 0) {
     return (
-      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4 relative overflow-hidden">
+      <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 relative overflow-hidden">
         <CardHeader className="text-neutral-500 pb-2">
           <CardTitle className="text-subtitle ">Loading Stream Data...</CardTitle>
 
@@ -250,7 +250,7 @@ export default function HorizontalBarChart() {
   }
   
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+    <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden">
       <CardHeader className="text-neutral-500 pb-2">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">

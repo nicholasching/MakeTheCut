@@ -153,7 +153,7 @@ export default function StreamChoiceGraph() {
 
   if (isLoading) {
     return (
-      <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+      <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden">
         <CardHeader className="text-neutral-500">
           <div className="flex flex-col justify-center items-center">
             <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
@@ -172,7 +172,7 @@ export default function StreamChoiceGraph() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full border-none p-1 pt-6 pb-4">
+    <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">

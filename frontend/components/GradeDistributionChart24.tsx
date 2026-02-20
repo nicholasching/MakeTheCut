@@ -198,7 +198,7 @@ export default function GradeDistributionChart() {
   // Show loading animation when data is loading
   if (isLoading) {
     return (
-      <Card className="bg-neutral-900 text-white w-full border-0 p-1 pt-6 pb-4 relative overflow-hidden">
+      <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 relative overflow-hidden">
         <CardHeader className="text-neutral-500">
           <CardTitle className="text-subtitle">Loading Course Data...</CardTitle>
         </CardHeader>
@@ -214,7 +214,7 @@ export default function GradeDistributionChart() {
   }
 
   return (
-    <Card className="bg-neutral-900 text-white w-full border-0 gap-0 pt-6 pb-4">
+    <Card className="bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl gap-0 pt-6 pb-4 overflow-hidden">
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
           <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
