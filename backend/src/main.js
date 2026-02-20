@@ -309,7 +309,7 @@ async function calculateCutoffs(documents) {
   Object.keys(streamCounts).forEach(stream => {
     // If stream is filled or partially filled by non-freechoice students
     if (lowestGPAs[stream] !== -1) {
-      cutoffGPAs[stream] = lowestGPAs[stream];
+      cutoffGPAs[stream] = Math.max(lowestGPAs[stream], 4);
     } 
     // If stream filled entirely by freechoice students
     else if (streamCounts[stream] >= actualSeats[stream]) {
