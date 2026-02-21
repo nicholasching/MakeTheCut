@@ -15,7 +15,7 @@ const sCurve = [0.87, 0, 0.13, 1] as const;
 const DURATION = 0.75;
 // After each reveal, reset just offscreen then drift to idle.
 const Y_RESET_START = "80%";
-const Y_IDLE = "70%";
+const Y_IDLE = "75%";
 const RESET_DRIFT_DURATION = 2.5;
 
 interface TransitionContextValue {
