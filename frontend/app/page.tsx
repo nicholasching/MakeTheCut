@@ -22,7 +22,7 @@ function HomeContent() {
 
   return (
     <section ref={sectionRef}>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col">
         <GridBackground className="flex-1 flex flex-col pt-50 md:p-24 lg:p-36 text-center md:text-left">
           <GradientPulse />
           <div className="flex-1">
