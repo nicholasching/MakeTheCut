@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect, Suspense } from "react";
 import { addLog } from "../../actions/logActions";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Combobox from "@/components/Combobox";
@@ -111,7 +111,7 @@ function handleGradeChange(value: string, setter: (value: string) => void) {
 }
 
 function GradesContent() {
-    const router = useRouter();
+    const { navigate } = usePageTransition();
     const sectionRef = useSectionTracking<HTMLDivElement>("Grades")
     const [math1za3, setMath1za3] = useState<string>("");
     const [math1zb3, setMath1zb3] = useState<string>("");
@@ -141,7 +141,7 @@ function GradesContent() {
         async function initiatePage() {
 
             // THIS PAGE IS TEMPORARILY DISABLED AS GRADE INGEST IS NOT YET OPEN, DELETE TO ENABLE
-            // router.push('/dashboard');
+            // navigate('/dashboard');
             // return;
 
             try {
@@ -149,14 +149,14 @@ function GradesContent() {
                 
                 // Comment to disable verification
                 if (!loggedInUser.emailVerification){
-                    router.push('/authenticate');
+                    navigate('/authenticate');
                 }
 
                 // Check if user document exists in UserData24 (graduated users)
                 try {
                     await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
                     // User is graduated, redirect to dashboard
-                    router.push('/dashboard');
+                    navigate('/dashboard');
                     return;
                 } catch (error) {
                     // User document doesn't exist in UserData24, continue with normal flow
@@ -205,11 +205,11 @@ function GradesContent() {
                 }
             }
             catch (error) {
-                router.push('/login');
+                navigate('/login');
             }
         }
         initiatePage();
-    }, []);
+    }, [navigate]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -410,7 +410,7 @@ function GradesContent() {
 
             console.log("Submitting grades with electives and streams:", gradesData);
             await addLog(gradesData);
-            router.push('/dashboard'); 
+            navigate('/dashboard'); 
         } catch (err) {
             console.error("Error submitting data:", err);
             setError("Failed to submit data. Please try again.");
@@ -505,7 +505,7 @@ function GradesContent() {
                     {status === "Update" && (
                         <button 
                             className="text-subtext text-neutral-400 rounded-sm border-none cursor-pointer hover:scale-105 transition-all"
-                            onClick={() => router.push('/dashboard')}
+                            onClick={() => navigate('/dashboard')}
                         >
                             Discard Changes
                         </button>

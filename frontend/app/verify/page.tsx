@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { account } from "../appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 function VerifyContent() {
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const [isVerifying, setIsVerifying] = useState(true);
   const [verificationSuccess, setVerificationSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ function VerifyContent() {
         await account.updateVerification(userId, secret);
         setVerificationSuccess(true);
         // Chnage to /grades when grade intake begins
-        router.push("/streams");
+        navigate("/streams");
       } catch (error) {
         console.error("Verification error:", error);
         setError("Failed to verify your email. The link may be invalid or expired.");
@@ -43,7 +43,7 @@ function VerifyContent() {
     };
 
     verifyEmail();
-  }, []);
+  }, [navigate]);
 
   return (
     <GridBackground className="pt-30 pb-20" ref={sectionRef}>

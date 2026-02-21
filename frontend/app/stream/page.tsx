@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { addStreamAdmission } from "../../actions/logActions";
+import { usePageTransition } from "@/components/TransitionProvider";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import ComboboxStreams from "@/components/ComboboxStream";
@@ -10,7 +10,7 @@ import LogoutButton from "@/components/LogoutButton";
 import { account, database } from "../appwrite";
 
 export default function StreamAdmissionPage() {
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const [streamInChoice, setStreamInChoice] = useState<string>("");
   const [streamOutChoice, setStreamOutChoice] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -24,7 +24,7 @@ export default function StreamAdmissionPage() {
         
         // Comment to disable verification
         if (!loggedInUser.emailVerification) {
-          router.push('/authenticate');
+          navigate('/authenticate');
         }
 
         // Check if user document exists in UserData24 (graduated users)
@@ -35,7 +35,7 @@ export default function StreamAdmissionPage() {
         } catch (error) {
           // User document doesn't exist in UserData24, redirect to dashboard
           console.log("User not found in UserData24, redirecting to dashboard");
-          router.push('/dashboard');
+          navigate('/dashboard');
           return;
         }
 
@@ -53,11 +53,11 @@ export default function StreamAdmissionPage() {
           console.log("No previous stream admission data:", error);
         }
       } catch (error) {
-        router.push('/login');
+        navigate('/login');
       }
     }
     initiatePage();
-  }, []);
+  }, [navigate]);
 
   const handleStreamInChange = (value: string) => setStreamInChoice(value);
   const handleStreamOutChange = (value: string) => setStreamOutChoice(value);
@@ -88,7 +88,7 @@ export default function StreamAdmissionPage() {
 
       console.log("Submitting stream admission data:", streamAdmissionData);
       await addStreamAdmission(streamAdmissionData);
-      router.push("/dashboard");
+      navigate("/dashboard");
     } catch (err) {
       console.error("Error submitting stream admission data:", err);
       setError("Failed to submit stream admission data. Please try again.");
@@ -138,7 +138,7 @@ export default function StreamAdmissionPage() {
           {status === "Update" && (
             <button 
               className="text-subtext text-neutral-400 rounded-sm border-none cursor-pointer hover:scale-105 transition-all"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => navigate('/dashboard')}
             >
               Discard Changes
             </button>

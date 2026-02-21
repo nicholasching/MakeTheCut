@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { account } from "../appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -9,7 +9,7 @@ import Link from "next/link";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 
 function ResetPasswordContent() {
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const [userId, setUserId] = useState<string>("");
   const [secret, setSecret] = useState<string>("");
   const [password, setPassword] = useState("");
@@ -63,7 +63,7 @@ function ResetPasswordContent() {
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/login');
+        navigate('/login');
       }, 3000);
     } catch (error: any) {
       console.error("Reset password error:", error);
