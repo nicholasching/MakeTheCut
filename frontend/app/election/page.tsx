@@ -60,7 +60,7 @@ const impactStats = [
   { value: 1000, suffix: "+", label: "MakeTheCut Users" },
   { value: 100000, suffix: "+", label: "Total Visits Across All Sites" },
   { value: 400000, suffix: "+", label: "YouTube Views" },
-  { value: 5000, suffix: "+", label: "MakeTheCut Users" },
+  { value: 5000, suffix: "+", label: "MakeTheSeat Users" },
 ];
 
 const platformPillars = [
