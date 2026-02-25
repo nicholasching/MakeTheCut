@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 import HorizontalBarChart from "@/components/HorizontalBarChart";
 import StreamChoiceGraph from "@/components/StreamChoiceGraph";
@@ -15,6 +14,7 @@ import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
 import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
 import { account } from "../appwrite";
+import { usePageTransition } from "@/components/TransitionProvider";
 
 function StatisticsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -192,7 +192,7 @@ function MethodologyDropdown() {
 }
 
 function DashboardContent() {
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const sectionRef = useSectionTracking<HTMLDivElement>("Dashboard");
   const [userName, setUserName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -204,21 +204,21 @@ function DashboardContent() {
         
         // Comment to disable verification
         if (!loggedInUser.emailVerification) {
-          router.push('/authenticate');
+          navigate('/authenticate');
           return;
         }
 
         setUserName(loggedInUser.name || "User");
         
       } catch (error) {
-        router.push('/login');
+        navigate('/login');
       } finally {
         setIsLoading(false);
       }
     }
     
     initiatePage();
-  }, [router]);
+  }, [navigate]);
 
   if (isLoading) {
     return (

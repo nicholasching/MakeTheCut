@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { client, account, database, ID } from "../appwrite";
 import { Models } from "appwrite";
 import Link from "next/link";
@@ -29,25 +29,25 @@ function SignUpContent() {
   
   const sectionRef = useSectionTracking<HTMLDivElement>("SignUp")
 
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   useEffect(() => {
     async function initiatePage() {
         try {
             let loggedInUser = await account.get();
             if (!isSigningUp) {
-              router.push('/dashboard');
+              navigate('/dashboard');
             }
         }
         catch (error) {
         }
     }
     initiatePage();
-  }, []);
+  }, [navigate]);
 
   const login = async (email: string, password: string) => {
     await account.createEmailPasswordSession(email, password);
     setLoggedInUser(await account.get());
-    //router.push('/grades');          // Comment out to enable verification
+    //navigate('/grades');          // Comment out to enable verification
   };
 
   const handleGpaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +143,7 @@ function SignUpContent() {
           console.log("Created documents for graduated user:", newUser.$id);
           
           // Redirect to dashboard for graduated users
-          router.push('/authenticate');
+          navigate('/authenticate');
         } catch (dbError) {
           console.error("Error creating graduated user documents:", dbError);
           setError("Failed to set up graduated user profile. Please try again.");
@@ -152,7 +152,7 @@ function SignUpContent() {
         }
       } else {
         // Regular user flow
-        router.push('/authenticate');
+        navigate('/authenticate');
       }
       setIsSigningUp(false);
     } catch (error) {

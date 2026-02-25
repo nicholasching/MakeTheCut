@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { addStreamChoices } from "../../actions/logActions";
+import { usePageTransition } from "@/components/TransitionProvider";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import ComboboxStreams from "@/components/ComboboxStream";
@@ -10,7 +10,7 @@ import LogoutButton from "@/components/LogoutButton";
 import { account, database } from "../appwrite";
 
 export default function StreamSelectionPage() {
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const [stream1Choice, setStream1Choice] = useState<string>("");
   const [stream2Choice, setStream2Choice] = useState<string>("");
   const [stream3Choice, setStream3Choice] = useState<string>("");
@@ -23,21 +23,21 @@ export default function StreamSelectionPage() {
       try {
 
         // THIS PAGE IS TEMPORARILY DISABLED AS GRADE INGEST IS NOW OPEN, DELETE TO ENABLE
-        router.push('/dashboard');
+        navigate('/dashboard');
         return;
 
         let loggedInUser = await account.get();
         
         // Comment to disable verification
         if (!loggedInUser.emailVerification) {
-          router.push('/authenticate');
+          navigate('/authenticate');
         }
 
         // Check if user document exists in UserData24 (graduated users)
         try {
           await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
           // User is graduated, redirect to dashboard
-          router.push('/dashboard');
+          navigate('/dashboard');
           return;
         } catch (error) {
           // User document doesn't exist in UserData24, continue with normal flow
@@ -57,11 +57,11 @@ export default function StreamSelectionPage() {
           console.error("No previous data:", error);
         }
       } catch (error) {
-        router.push('/login');
+        navigate('/login');
       }
     }
     initiatePage();
-  }, []);
+  }, [navigate]);
 
   const handleStream1Change = (value: string) => setStream1Choice(value);
   const handleStream2Change = (value: string) => setStream2Choice(value);
@@ -95,7 +95,7 @@ export default function StreamSelectionPage() {
 
       console.log("Submitting stream choices:", streamData);
       await addStreamChoices(streamData);
-      router.push("/dashboard");
+      navigate("/dashboard");
     } catch (err) {
       console.error("Error submitting stream choices:", err);
       setError("Failed to submit stream choices. Please try again.");
@@ -140,7 +140,7 @@ export default function StreamSelectionPage() {
           {status === "Update" && (
             <button 
               className="text-subtext text-neutral-400 rounded-sm border-none cursor-pointer hover:scale-105 transition-all"
-              onClick={() => router.push('/dashboard')}
+              onClick={() => navigate('/dashboard')}
             >
               Discard Changes
             </button>

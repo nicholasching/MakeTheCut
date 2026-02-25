@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { account } from "../appwrite";
 import LogoutButton from "@/components/LogoutButton";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 
 function AuthenticateContent() {
-    const router = useRouter();
+    const { navigate } = usePageTransition();
     const [error, setError] = useState("");
     const sectionRef = useSectionTracking<HTMLDivElement>("Authenticate")
 
@@ -16,7 +16,7 @@ function AuthenticateContent() {
             try {
                 let loggedInUser = await account.get();
                 if (loggedInUser.emailVerification) {
-                    router.push('/dashboard');
+                    navigate('/dashboard');
                 }
                 else {
                     try{
@@ -30,11 +30,11 @@ function AuthenticateContent() {
                 }
             }
             catch (error) {
-                router.push('/login');
+                navigate('/login');
             }
         }
         initiatePage();
-    }, []);
+    }, [navigate]);
 
     return (
         <div className="flex flex-col h-svh items-center justify-center gap-5" ref={sectionRef}>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePageTransition } from "@/components/TransitionProvider";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
 import { account, database } from "../app/appwrite";
 import { CardDescription } from "@/components/ui/card";
@@ -42,7 +42,7 @@ let chartData = [
   { stream: "Software", GPA: cutoffs.software, people: 0 },
 ]
 
-async function initPage(router: any) {
+async function initPage(navigate: (href: string) => void) {
   try {
     loggedInUser = await account.get();
 
@@ -60,7 +60,7 @@ async function initPage(router: any) {
         await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
       }
       catch (error) {
-        router.push('/grades');
+        navigate('/grades');
       }
     }
 
@@ -122,7 +122,7 @@ async function initPage(router: any) {
     return 1
   }
   catch (error) {
-    router.push('/login');
+    navigate('/login');
   }
 
   return 0
@@ -186,12 +186,12 @@ export default function HorizontalBarChart() {
   const [isMobile, setIsMobile] = useState(false);
   const [key, setKey] = useState(0);
   const [totalContributions, setTotalContributions] = useState<number>(0);
-  const router = useRouter();
+  const { navigate } = usePageTransition();
   const [shouldShowUserLine, setShouldShowUserLine] = useState(true);
   
   useEffect(() => {
     const fetchData = async () => {
-      setKey(key + await initPage(router));
+      setKey(key + await initPage(navigate));
       setShouldShowUserLine(showUserLine);
       
       // Fetch contribution count
@@ -277,7 +277,7 @@ export default function HorizontalBarChart() {
               <XAxis type="number" tickLine={false} axisLine={true} className="text-[0.55rem] md:text-[0.7rem]" domain={[0, 12]} ticks={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]} label={{value: 'GPA Cutoffs', position: "outsideBottom", dy: 20, style: { fill: '#737373', textAnchor: 'middle' }}}/>
               {shouldShowUserLine && (
                 <ReferenceLine x={userGPA} stroke="white" strokeDasharray="4 4">
-                  <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => router.push('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
+                  <Label position="top" fill="white" fontSize={14} dy={-10} onClick={() => navigate('/grades')} className="cursor-pointer hover:fill-[#CC7400] transition-all underline">
                     You ✎
                   </Label>
                 </ReferenceLine>
