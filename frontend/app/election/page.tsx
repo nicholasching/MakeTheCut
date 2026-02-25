@@ -178,18 +178,24 @@ export default function ElectionsPage() {
           <GradientPulse />
           {/* MES logo — embossed into hero background */}
           <div className="absolute inset-0 flex items-center justify-center lg:justify-end lg:pr-[10%] pointer-events-none select-none overflow-hidden">
-            <Image
-              src="/MES.png"
-              alt=""
-              width={275}
-              height={275}
-              className="opacity-[0.10]"
-              style={{
-                mixBlendMode: "screen",
-                filter: "blur(3px)",
-                transform: "translateX(10px)"
-              }}
-            />
+            <motion.div
+              initial={{ opacity: 0, x: 150 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.75, ease: "easeOut", delay: 0 }}
+            >
+              <Image
+                src="/MES.png"
+                alt=""
+                width={275}
+                height={275}
+                className="opacity-[0.10]"
+                style={{
+                  mixBlendMode: "screen",
+                  filter: "blur(3px)",
+                  transform: "translateX(10px)"
+                }}
+              />
+            </motion.div>
           </div>
           <motion.div
             initial="hidden"
