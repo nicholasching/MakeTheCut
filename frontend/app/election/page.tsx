@@ -155,7 +155,7 @@ const bobaRanking = [
   { tier: "S", label: "God-tier", shops: ["HeyTea"], color: "bg-red-500" },
   { tier: "A", label: "Excellent", shops: ["CoCo", "OneZo"], color: "bg-orange-500" },
   { tier: "B", label: "Good", shops: ["The Alley"], color: "bg-yellow-500" },
-  { tier: "C", label: "Mid", shops: ["Chatime", "Prestotea"], color: "bg-neutral-500" },
+  { tier: "C", label: "Mid", shops: ["Chatime", "PresoTea"], color: "bg-neutral-500" },
   { tier: "D", label: "Why?", shops: ["Gong Cha"], color: "bg-neutral-700" },
 ];
 
