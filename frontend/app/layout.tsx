@@ -77,7 +77,7 @@ export default function RootLayout({
       <body className={`${inter.variable} font-sans antialiased`}>
         <TransitionProvider>
           <AnalyticsWrapper>
-            <ElectionBanner />
+            {/* <ElectionBanner /> */}
             <main>
               {children}
             </main>
