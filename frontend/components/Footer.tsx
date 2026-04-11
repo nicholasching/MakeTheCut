@@ -1,6 +1,7 @@
 "use client";
 
-import { Link } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
+import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,8 +14,11 @@ export default function Footer() {
         </p>
       </div>
       <div className="flex items-center gap-4">
+        <Link href="/stats" className="text-neutral-500 hover:text-white transition-colors text-tiny">
+          Site Stats &amp; Roadmap
+        </Link>
         <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
-          <Link size={12} />
+          <LinkIcon size={12} />
         </a>
       </div>
     </footer>

@@ -6,6 +6,7 @@ export const DATABASE_ID = "MacStats";
 export const COLL_USERS = "users";
 export const COLL_MARKS = "marks";
 export const COLL_CUTOFFS = "cutoffs";
+export const COLL_TRAFFIC = "traffic";
 
 /**
  * Admission cohort (2-digit keys). `current` is derived from calendar gates in
