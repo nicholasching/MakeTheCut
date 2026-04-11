@@ -178,6 +178,49 @@ function formatMonthYearTick(dateStr: string): string {
   return `${year} ${month}`;
 }
 
+/** Round to `sigDigits` significant figures (positive values only). */
+function roundToSignificantDigits(value: number, sigDigits: number): number {
+  if (value === 0) return 0;
+  const v = Math.abs(value);
+  const p = Math.floor(Math.log10(v));
+  const magnitude = 10 ** (sigDigits - 1 - p);
+  const rounded = Math.round(v * magnitude) / magnitude;
+  return value < 0 ? -rounded : rounded;
+}
+
+/**
+ * Y-axis: always 3 significant digits, e.g. 100, 1.00K, 10.0K, 100K, 1.00M (no scientific notation).
+ */
+function formatTrafficYAxisTick(v: number): string {
+  if (v === 0) return "";
+  const sign = v < 0 ? "-" : "";
+  const n = Math.abs(v);
+
+  let divisor = 1;
+  let suffix = "";
+  if (n >= 1_000_000) {
+    divisor = 1_000_000;
+    suffix = "M";
+  } else if (n >= 1000) {
+    divisor = 1000;
+    suffix = "K";
+  }
+
+  let m = roundToSignificantDigits(n / divisor, 3);
+  if (suffix === "K" && m >= 1000) {
+    divisor = 1_000_000;
+    suffix = "M";
+    m = roundToSignificantDigits(n / divisor, 3);
+  }
+
+  let body: string;
+  if (m >= 100) body = String(Math.round(m));
+  else if (m >= 10) body = m.toFixed(1);
+  else body = m.toFixed(2);
+
+  return sign + body + suffix;
+}
+
 /**
  * Pick which `date` values get X-axis labels. Always includes first & last
  * indices so the right edge shows the true end date (Recharts minTickGap +
@@ -385,11 +428,11 @@ const stagger = {
 const RANGE_VIEW_EASE = [0.25, 0.1, 0.25, 1] as const;
 const rangeViewTransition = { duration: 0.32, ease: RANGE_VIEW_EASE };
 
-const RANGE_OPTIONS: { key: RangeKey; label: string }[] = [
-  { key: "7d", label: "7 days" },
-  { key: "30d", label: "30 days" },
-  { key: "365d", label: "365 days" },
-  { key: "all", label: "All time" },
+const RANGE_OPTIONS: { key: RangeKey; label: string; shortLabel: string }[] = [
+  { key: "7d", label: "7 Days", shortLabel: "7D" },
+  { key: "30d", label: "30 Days", shortLabel: "30D" },
+  { key: "365d", label: "365 Days", shortLabel: "365D" },
+  { key: "all", label: "All Time", shortLabel: "AT" },
 ];
 
 type TrafficOverviewStats = {
@@ -524,13 +567,7 @@ function TrafficOverviewBody({
                 axisLine={false}
                 tickMargin={4}
                 tick={{ fill: "#a3a3a3", fontSize: 11 }}
-                tickFormatter={(v: number) => {
-                  if (v === 0) return "";
-                  if (v >= 1_000_000)
-                    return `${(v / 1_000_000).toFixed(1)}M`;
-                  if (v >= 1000) return `${(v / 1000).toFixed(1)}k`;
-                  return String(v);
-                }}
+                tickFormatter={(v: number) => formatTrafficYAxisTick(v)}
                 width={40}
               />
               <Tooltip
@@ -844,7 +881,7 @@ export default function StatsPage() {
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-red-500 rounded-full shrink-0" />
                 <h2 className="text-xl font-semibold text-white">
-                  Traffic overview
+                  Traffic Overview
                 </h2>
               </div>
               <div
@@ -852,11 +889,12 @@ export default function StatsPage() {
                 role="tablist"
                 aria-label="Date range"
               >
-                {RANGE_OPTIONS.map(({ key, label }) => (
+                {RANGE_OPTIONS.map(({ key, label, shortLabel }) => (
                   <button
                     key={key}
                     type="button"
                     role="tab"
+                    aria-label={label}
                     aria-selected={range === key}
                     onClick={() => setRange(key)}
                     className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border ${
@@ -865,7 +903,10 @@ export default function StatsPage() {
                         : "bg-white/[0.04] text-neutral-400 border-neutral-600/40 hover:bg-white/[0.07] hover:text-neutral-200"
                     }`}
                   >
-                    {label}
+                    <span className="md:hidden" aria-hidden="true">
+                      {shortLabel}
+                    </span>
+                    <span className="hidden md:inline">{label}</span>
                   </button>
                 ))}
               </div>
