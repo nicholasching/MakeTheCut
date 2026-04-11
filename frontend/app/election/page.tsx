@@ -45,7 +45,11 @@ function AnimatedCounter({ target, suffix = "" }: { target: number; suffix?: str
 // ---------------------------------------------------------------------------
 const fadeUp = {
   hidden: { opacity: 0, y: 32 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" as const },
+  },
 };
 
 const staggerContainer = {
@@ -181,7 +185,7 @@ export default function ElectionsPage() {
             <motion.div
               initial={{ opacity: 0, x: 150 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.75, ease: "easeOut", delay: 0 }}
+              transition={{ duration: 0.75, ease: "easeOut" as const, delay: 0 }}
             >
               <Image
                 src="/MES.png"
@@ -267,7 +271,7 @@ export default function ElectionsPage() {
               <span className="text-xs tracking-widest uppercase">Scroll For More</span>
               <motion.div
                 animate={{ y: [0, 6, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" as const }}
                 className="w-px h-8 bg-gradient-to-b from-neutral-400 to-transparent"
               />
             </motion.div>
