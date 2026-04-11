@@ -88,7 +88,7 @@ const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
-    version: "2.3",
+    version: "1.3",
     date: "January 2026",
     features: [
       "Enter letter grades (for example A+) as well as numeric GPAs",
