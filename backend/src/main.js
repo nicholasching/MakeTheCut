@@ -125,9 +125,11 @@ export default async ({ req, res, log, error }) => {
       }
 
       // ── WORKFLOW 3: Reported cutoffs (streamResultsOpen → streamResultsLock)
+      // Grades may still be edited until streamResultsLock — keep marks in sync.
       if (wf.inReportedCutoffsWindow) {
+        await runGradeDistributions(database, documents, y, log);
         await runReportedCutoffs(database, documents, y, log);
-        results.push(`${y}: reportedCutoffs`);
+        results.push(`${y}: reportedCutoffs (+ grade distributions)`);
       }
     }
 
