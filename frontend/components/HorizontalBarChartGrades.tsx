@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
-import { account, database } from "../app/appwrite";
+import { database } from "../app/appwrite";
+import { Query } from "appwrite";
+import {
+  ADMISSION,
+  DATABASE_ID,
+  COLL_MARKS,
+  COLL_CUTOFFS,
+  markDocId,
+  cutoffDocId,
+} from "@/lib/appwriteDb";
 import { CardDescription } from "@/components/ui/card";
 
 import {
@@ -28,33 +37,45 @@ let courseData = [
   { course: "Engineering 1P13", average: 0 },
 ];
 
+const MARK_COURSE_IDS = [
+  "math1za3",
+  "math1zb3",
+  "math1zc3",
+  "phys1d03",
+  "phys1e03",
+  "chem1e03",
+  "eng1p13",
+] as const;
+
 async function initPage() {
   try {
-    // Fetch course averages from the database
-    let documents = await database.listDocuments('MacStats', 'MarkData');
+    const markIds = MARK_COURSE_IDS.map((c) => markDocId(ADMISSION.current, c));
+    let documents = await database.listDocuments(DATABASE_ID, COLL_MARKS, [
+      Query.equal("$id", markIds),
+    ]);
 
-    // Access documents and update averages
-    documents.documents.forEach(doc => {
-      if (doc.$id === 'math1za3') {
-        courseData[0].average = parseFloat(doc.average || "0");
+    documents.documents.forEach((doc) => {
+      const baseId = doc.$id.replace(/^\d+_/, "");
+      if (baseId === "math1za3") {
+        courseData[0].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'math1zb3') {
-        courseData[1].average = parseFloat(doc.average || "0");
+      if (baseId === "math1zb3") {
+        courseData[1].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'math1zc3') {
-        courseData[2].average = parseFloat(doc.average || "0");
+      if (baseId === "math1zc3") {
+        courseData[2].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'phys1d03') {
-        courseData[3].average = parseFloat(doc.average || "0");
+      if (baseId === "phys1d03") {
+        courseData[3].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'phys1e03') {
-        courseData[4].average = parseFloat(doc.average || "0");
+      if (baseId === "phys1e03") {
+        courseData[4].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'chem1e03') {
-        courseData[5].average = parseFloat(doc.average || "0");
+      if (baseId === "chem1e03") {
+        courseData[5].average = parseFloat(String(doc.average || "0"));
       }
-      if (doc.$id === 'eng1p13') {
-        courseData[6].average = parseFloat(doc.average || "0");
+      if (baseId === "eng1p13") {
+        courseData[6].average = parseFloat(String(doc.average || "0"));
       }
     });
 
@@ -132,7 +153,11 @@ export default function CourseGradeChart() {
 
       // Fetch contribution count
       try {
-        const contributions = await database.getDocument('MacStats', 'StatData', 'total');
+        const contributions = await database.getDocument(
+          DATABASE_ID,
+          COLL_CUTOFFS,
+          cutoffDocId(ADMISSION.current, "total")
+        );
         setTotalContributions(contributions.streamCount);
       } catch (error) {
         console.error("Error fetching contribution count:", error);

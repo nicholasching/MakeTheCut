@@ -32,8 +32,8 @@ function VerifyContent() {
         // Update verification with Appwrite
         await account.updateVerification(userId, secret);
         setVerificationSuccess(true);
-        // Chnage to /grades when grade intake begins
-        navigate("/streams");
+        // Post-verify: profile lives at /me
+        navigate("/me");
       } catch (error) {
         console.error("Verification error:", error);
         setError("Failed to verify your email. The link may be invalid or expired.");

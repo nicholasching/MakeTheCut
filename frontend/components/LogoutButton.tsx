@@ -1,8 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
 import { usePageTransition } from "@/components/TransitionProvider";
-import { account, database } from "../app/appwrite";
-import { Models } from "appwrite";
+import { account } from "../app/appwrite";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
@@ -12,47 +10,9 @@ interface LogoutButtonProps {
     className?: string;
 }
 
-const LogoutButton = ({ 
+const LogoutButton = ({
 }: LogoutButtonProps) => {
     const { navigate } = usePageTransition();
-    const [userGraduated, setuserGraduated] = useState<boolean>(true);
-
-    useEffect(() => {
-        const checkUserInUserData = async () => {
-            try {
-                const loggedInUser = await account.get();
-                try {
-                    await database.getDocument('MacStats', 'UserData24', loggedInUser.$id);
-                    setuserGraduated(true);
-                    try {
-                        await database.getDocument('MacStats', 'StreamData24', loggedInUser.$id);
-                    } catch (error) {
-                        console.log("User document doesn't exist in 2024 StreamData collection");
-                        if (window.location.pathname === '/dashboard') {
-                            navigate('/stream');
-                            console.log("Redirecting to stream page");
-                        }
-                    }
-                } catch (error) {
-                    // User document doesn't exist in 2024 UserData collection
-                    setuserGraduated(false);
-                    try {
-                        await database.getDocument('MacStats', 'UserData', loggedInUser.$id);
-                    } catch (error) {
-                        console.log("User document doesn't exist in 2024 UserData collection");
-                        if (window.location.pathname === '/dashboard') {
-                            navigate('/grades');
-                            console.log("Redirecting to grades page");
-                        }
-                    }
-                }
-            } catch (error) {
-                console.error("Error checking user authentication:", error);
-            }
-        };
-
-        checkUserInUserData();
-    }, []);
 
     const logout = async () => {
         try {
@@ -79,22 +39,14 @@ const LogoutButton = ({
                         <DialogContent className="bg-neutral-900 border-none md:w-2/5 w-2/3 pt-10">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
-                            {!userGraduated ? (
-                                // <Link href="/streams"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream</button></Link>
-                                <Link href="/grades"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Grades</button></Link>
-                            ) : (
-                                <>
-                                    <div className="bg-[#e64640] text-white py-2 rounded-sm w-full block text-center px-2">
-                                        <div>
-                                            <span className="text-white font-bold">Grades Locked</span>
-                                        </div>
-                                        <div>
-                                            Congratulations, you are no longer in Eng 1!
-                                        </div>
-                                    </div>
-                                    <Link href="/stream"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Edit Stream Admission</button></Link>
-                                </>
-                            )}
+                            <Link href="/me">
+                                <button
+                                    type="button"
+                                    className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all"
+                                >
+                                    Edit My Data
+                                </button>
+                            </Link>
                             <Link href="/"><button className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all">Home</button></Link>
                             <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button>
                         </DialogContent>

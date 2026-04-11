@@ -174,11 +174,18 @@ const courses = [
 
 ]
 
+export type ComboboxOption = { value: string; label: string };
+
 interface ComboboxProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
+  /** When set, uses these options instead of the elective course list (e.g. admission years). */
+  items?: ComboboxOption[];
+  searchPlaceholder?: string;
+  emptyMessage?: string;
 }
 
 export default function Combobox({
@@ -186,7 +193,14 @@ export default function Combobox({
   onChange,
   placeholder = "Select Elective",
   className = "w-2/3 mx-auto",
+  disabled = false,
+  items,
+  searchPlaceholder = "Search",
+  emptyMessage,
 }: ComboboxProps) {
+  const options: ComboboxOption[] = items ?? courses;
+  const emptyText = emptyMessage ?? (items ? "No match." : "No course found.");
+
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState(externalValue || "")
 
@@ -197,51 +211,65 @@ export default function Combobox({
     }
   }, [externalValue]);
 
+  const resolveRow = (selected: string) =>
+    options.find((o) => o.value.toLowerCase() === selected.toLowerCase());
+
   const handleSelect = (currentValue: string) => {
-    const newValue = currentValue === value ? "" : currentValue;
-    setValue(newValue);
-    setOpen(false);
-    
-    // Call the parent's onChange handler with the new value
-    if (onChange) {
-      onChange(newValue);
+    let row: ComboboxOption | undefined;
+    if (items) {
+      row = options.find(
+        (o) => o.label.toLowerCase() === currentValue.toLowerCase()
+      );
+      if (!row) row = resolveRow(currentValue);
+    } else {
+      row = resolveRow(currentValue);
     }
+    if (!row) return;
+    const canonical = row.value;
+    const next = canonical === value ? "" : canonical;
+    setValue(next);
+    setOpen(false);
+    onChange?.(next);
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={disabled ? false : open}
+      onOpenChange={(v) => {
+        if (!disabled) setOpen(v);
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={className}
+          disabled={disabled}
         >
-          {value
-            ? courses.find((course) => course.value === value)?.label
-            : placeholder}
+          {value ? options.find((o) => o.value === value)?.label : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0">
         <Command>
-          <CommandInput placeholder="Search" />
+          <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
-            <CommandEmpty>No course found.</CommandEmpty>
+            <CommandEmpty>{emptyText}</CommandEmpty>
             <CommandGroup>
-              {courses.map((course) => (
+              {options.map((row) => (
                 <CommandItem
-                  key={course.value}
-                  value={course.value}
+                  key={row.value}
+                  value={items ? row.label : row.value}
                   onSelect={handleSelect}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === course.value ? "opacity-100" : "opacity-0"
+                      value === row.value ? "opacity-100" : "opacity-0"
                     )}
                   />
-                  {course.label}
+                  {row.label}
                 </CommandItem>
               ))}
             </CommandGroup>

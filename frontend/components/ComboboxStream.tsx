@@ -36,6 +36,7 @@ interface ComboboxProps {
   onChange?: (value: string) => void;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function ComboboxStreams ({
@@ -43,6 +44,7 @@ export default function ComboboxStreams ({
   onChange,
   placeholder = "Select Elective",
   className = "w-2/3 mx-auto",
+  disabled = false,
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false)
   const [value, setValue] = React.useState(externalValue || "")
@@ -66,13 +68,19 @@ export default function ComboboxStreams ({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={disabled ? false : open}
+      onOpenChange={(v) => {
+        if (!disabled) setOpen(v);
+      }}
+    >
       <PopoverTrigger asChild>
         <Button
           variant="outline"
           role="combobox"
           aria-expanded={open}
           className={className}
+          disabled={disabled}
         >
           {value
             ? streams.find((stream) => stream.value === value)?.label

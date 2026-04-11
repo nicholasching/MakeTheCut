@@ -1,6 +1,10 @@
+/**
+ * DEPRECATED — Reported-cutoff calculation is now handled automatically by
+ * `backend/src/main.js` (runs for every cohort in its streamResultsOpen →
+ * streamResultsLock window). Kept for reference / manual debugging only.
+ */
 import { Client, Databases, Query } from 'node-appwrite';
 
-// Initialize Appwrite client
 const client = new Client()
     .setEndpoint('https://nyc.cloud.appwrite.io/v1')
     .setProject('makethecut')
@@ -9,8 +13,14 @@ const client = new Client()
 const databases = new Databases(client);
 
 const DATABASE_ID = 'MacStats';
-const STREAM_DATA_COLLECTION = 'StreamData24';
-const USER_DATA_COLLECTION = 'UserData24';
+const USERS_COLLECTION = 'users';
+const CUTOFFS_COLLECTION = 'cutoffs';
+/**
+ * Cohort year for “just finished Eng 1” users when computing reported cutoffs.
+ * Increment each May with rollover (matches prior-cohort stream results).
+ * Not imported from the frontend schedule.
+ */
+const ADMIT_GRAD = 24;
 
 /**
  * Calculates actual stream cutoffs based on admission and rejection data
@@ -32,33 +42,34 @@ async function calculateActualCutoffs() {
             soft: { admitted: [], rejected: [] }
         };
 
-        // Get all stream admission/rejection documents
-        const streamDocuments = await getAllDocuments(databases, DATABASE_ID, STREAM_DATA_COLLECTION);
-        console.log(`Found ${streamDocuments.length} stream admission records`);
+        const streamDocuments = await getAllDocuments(
+            databases,
+            DATABASE_ID,
+            USERS_COLLECTION,
+            [Query.equal('admitYear', ADMIT_GRAD)]
+        );
+        console.log(`Found ${streamDocuments.length} graduated user rows (admitYear ${ADMIT_GRAD})`);
 
         // Store the total number of documents in the 'total' document
         try {
             await databases.updateDocument(
                 DATABASE_ID,
-                'StatData24',
-                'total',
+                CUTOFFS_COLLECTION,
+                '24_total',
                 { reportCutoff: streamDocuments.length }
             );
-            console.log(`Updated 'total' document with count: ${streamDocuments.length}`);
+            console.log(`Updated '24_total' document with count: ${streamDocuments.length}`);
         } catch (error) {
-            console.error(`Failed to update 'total' document count:`, error.message);
+            console.error(`Failed to update '24_total' document count:`, error.message);
         }
 
-        // Debug: collect all unique stream names to see what's actually in the database
         const uniqueStreamNames = new Set();
 
-        // Process each stream document
         for (const streamDoc of streamDocuments) {
             const userId = streamDoc.$id;
             const streamIn = streamDoc.streamIn;
             const streamOut = streamDoc.streamOut;
 
-            // Debug: add stream names to our set
             if (streamIn && streamIn !== 'null') {
                 uniqueStreamNames.add(streamIn);
             }
@@ -66,24 +77,18 @@ async function calculateActualCutoffs() {
                 uniqueStreamNames.add(streamOut);
             }
 
-            // Skip if no valid stream data
             if (!streamIn || streamIn === 'null') {
                 continue;
             }
 
             try {
-                // Get user's GPA from UserData24
-                const userDoc = await databases.getDocument(DATABASE_ID, USER_DATA_COLLECTION, userId);
-
-                // Skip users with free choice
-                if (userDoc.freechoice === true) {
+                if (streamDoc.freechoice === true) {
                     console.log(`Skipping user ${userId} - user has free choice.`);
                     continue;
                 }
 
-                const userGPA = parseFloat(userDoc.gpa);
+                const userGPA = parseFloat(streamDoc.gpa);
 
-                // Skip users with 0 or null GPA
                 if (!userGPA || userGPA === 0) {
                     console.log(`Skipping user ${userId} - GPA is ${userGPA}`);
                     continue;
@@ -91,7 +96,6 @@ async function calculateActualCutoffs() {
 
                 console.log(`Processing user ${userId}: streamIn=${streamIn}, streamOut=${streamOut}, GPA=${userGPA}`);
 
-                // Map stream names to internal keys
                 const streamInKey = mapStreamName(streamIn);
                 const streamOutKey = streamOut && streamOut !== 'null' ? mapStreamName(streamOut) : null;
 
@@ -100,7 +104,6 @@ async function calculateActualCutoffs() {
                     console.log(`Mapped streamOut "${streamOut}" to "${streamOutKey}"`);
                 }
 
-                // Add GPA to admitted stream
                 if (streamInKey && streamData[streamInKey]) {
                     streamData[streamInKey].admitted.push(userGPA);
                     console.log(`✓ Added GPA ${userGPA} to ${streamInKey} admitted list`);
@@ -108,7 +111,6 @@ async function calculateActualCutoffs() {
                     console.log(`✗ StreamInKey "${streamInKey}" not found in streamData`);
                 }
 
-                // Add GPA to rejected stream
                 if (streamOutKey && streamData[streamOutKey]) {
                     streamData[streamOutKey].rejected.push(userGPA);
                     console.log(`✓ Added GPA ${userGPA} to ${streamOutKey} rejected list`);
@@ -117,30 +119,27 @@ async function calculateActualCutoffs() {
                 }
 
             } catch (error) {
-                console.log(`Could not find GPA for user ${userId}:`, error.message);
+                console.log(`Could not process user ${userId}:`, error.message);
             }
         }
 
-        // Debug: print all unique stream names found
         console.log('\n=== DEBUG: Unique stream names found in database ===');
         console.log(Array.from(uniqueStreamNames).sort());
         console.log('====================================================\n');
 
-        // Calculate cutoffs for each stream
         const cutoffs = {};
         
         for (const [streamKey, data] of Object.entries(streamData)) {
-            let admitted = [...data.admitted].sort((a, b) => a - b); // Sort ascending (copy array)
-            let rejected = [...data.rejected].sort((a, b) => b - a); // Sort descending (copy array)
+            let admitted = [...data.admitted].sort((a, b) => a - b);
+            let rejected = [...data.rejected].sort((a, b) => b - a);
 
             console.log(`\n${streamKey}: ${admitted.length} admitted, ${rejected.length} rejected`);
             if (admitted.length > 0) console.log(`  Original Admitted GPAs: ${admitted.join(', ')}`);
             if (rejected.length > 0) console.log(`  Original Rejected GPAs: ${rejected.join(', ')}`);
 
-            // Remove outliers when gap between highest rejected and lowest admitted > 0.5
             if (admitted.length > 0 && rejected.length > 0) {
                 let iterations = 0;
-                const maxIterations = Math.min(admitted.length, rejected.length) - 1; // Prevent removing all data
+                const maxIterations = Math.min(admitted.length, rejected.length) - 1;
                 
                 while (admitted.length > 1 && rejected.length > 1 && iterations < maxIterations) {
                     const lowestAdmitted = admitted[0];
@@ -149,8 +148,8 @@ async function calculateActualCutoffs() {
                     
                     if (gap > 0.5) {
                         console.log(`  Removing outliers: lowest admitted ${lowestAdmitted}, highest rejected ${highestRejected} (gap: ${gap.toFixed(2)})`);
-                        admitted.shift(); // Remove lowest admitted
-                        rejected.shift(); // Remove highest rejected
+                        admitted.shift();
+                        rejected.shift();
                         iterations++;
                     } else {
                         break;
@@ -167,18 +166,15 @@ async function calculateActualCutoffs() {
             let cutoff = 0;
 
             if (admitted.length > 0 && rejected.length > 0) {
-                // Both admitted and rejected data available
                 const lowestAdmitted = admitted[0];
                 const highestRejected = rejected[0];
                 cutoff = (lowestAdmitted + highestRejected) / 2;
                 console.log(`${streamKey}: Final - Lowest admitted: ${lowestAdmitted}, Highest rejected: ${highestRejected}, Cutoff: ${cutoff}`);
             } else if (admitted.length > 0) {
-                // Only admitted data available
-                cutoff = admitted[0]; // Lowest admitted
+                cutoff = admitted[0];
                 console.log(`${streamKey}: Only admitted data available, using lowest admitted: ${cutoff}`);
             } else if (rejected.length > 0) {
-                // Only rejected data available
-                cutoff = rejected[0]; // Highest rejected
+                cutoff = rejected[0];
                 console.log(`${streamKey}: Only rejected data available, using highest rejected: ${cutoff}`);
             } else {
                 console.log(`${streamKey}: No data available`);
@@ -187,17 +183,16 @@ async function calculateActualCutoffs() {
 
             cutoffs[streamKey] = cutoff;
 
-            // Update the StatData24 collection with calculated cutoff
             try {
                 await databases.updateDocument(
                     DATABASE_ID,
-                    'StatData24',
-                    streamKey,
+                    CUTOFFS_COLLECTION,
+                    `24_${streamKey}`,
                     { reportCutoff: cutoff }
                 );
-                console.log(`Updated ${streamKey} cutoff to ${cutoff}`);
+                console.log(`Updated 24_${streamKey} cutoff to ${cutoff}`);
             } catch (error) {
-                console.error(`Failed to update ${streamKey} cutoff:`, error.message);
+                console.error(`Failed to update 24_${streamKey} cutoff:`, error.message);
             }
         }
 
@@ -210,9 +205,6 @@ async function calculateActualCutoffs() {
     }
 }
 
-/**
- * Maps stream display names to internal database keys
- */
 function mapStreamName(streamName) {
     if (!streamName || streamName === 'null') return null;
     
@@ -227,7 +219,6 @@ function mapStreamName(streamName) {
         'mechanical': 'mech',
         'mechatronics': 'tron',
         'software': 'soft',
-        // Add more variations that might be in the database
         'chem': 'chem',
         'civ': 'civ',
         'comp': 'comp', 
@@ -243,26 +234,31 @@ function mapStreamName(streamName) {
     return mapping[normalizedName] || null;
 }
 
-/**
- * Helper function to fetch all documents from a collection using pagination
- */
-async function getAllDocuments(databases, databaseId, collectionId) {
+async function getAllDocuments(databases, databaseId, collectionId, filterQueries = []) {
     const limit = 100;
     let allDocuments = [];
-    let offset = 0;
+    let lastId = null;
     let hasMore = true;
 
     while (hasMore) {
         try {
+            const queries = [
+                Query.limit(limit),
+                Query.orderAsc('$id'),
+                ...filterQueries,
+            ];
+            if (lastId) {
+                queries.push(Query.cursorAfter(lastId));
+            }
             const response = await databases.listDocuments(
                 databaseId,
                 collectionId,
-                [Query.limit(limit), Query.offset(offset)]
+                queries
             );
 
             if (response.documents.length > 0) {
                 allDocuments = [...allDocuments, ...response.documents];
-                offset += limit;
+                lastId = response.documents[response.documents.length - 1].$id;
                 hasMore = response.documents.length === limit;
             } else {
                 hasMore = false;
@@ -276,7 +272,6 @@ async function getAllDocuments(databases, databaseId, collectionId) {
     return allDocuments;
 }
 
-// Run the calculation
 calculateActualCutoffs()
     .then(() => {
         console.log('\nScript completed successfully!');
