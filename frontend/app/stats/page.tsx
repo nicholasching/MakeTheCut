@@ -53,33 +53,111 @@ interface ChartPoint {
 // ---------------------------------------------------------------------------
 // Changelog
 // ---------------------------------------------------------------------------
-const CHANGELOG: {
+type ChangelogEntry = {
   version: string;
   date: string;
-  changes: string[];
-}[] = [
+  features: string[];
+  maintenance: string[];
+};
+
+const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "2.1",
+    date: "April 2026",
+    features: [
+      "Statistics & roadmap page with site traffic charts (7 days through all time)",
+      "If you're already signed in, the home page offers a quick way to open your dashboard",
+    ],
+    maintenance: [
+      "Faster, more reliable data syncing so dashboards stay up to date",
+      "Smoother page transitions once the site has finished loading",
+      "Grade distribution charts behave more reliably after you choose a stream",
+      "Easier-to-tap navigation, traffic charts that read better on phones, and smoother rotating text on iOS",
+    ],
+  },
   {
     version: "2.0",
+    date: "February 2026",
+    features: [],
+    maintenance: [
+      "Smoother moves between pages with a subtle glow so it's clearer you've changed screens",
+      "Fixed awkward double scrollbars on the home page and elsewhere",
+      "Methodology and chart areas refreshed with a cleaner, glass-style look",
+      "Grade distribution chart animates more naturally and switching courses feels quicker",
+      "Cutoff estimates won't drop below 4 when a stream still has empty seats—so numbers stay realistic",
+    ],
+  },
+  {
+    version: "2.3",
+    date: "January 2026",
+    features: [
+      "Enter letter grades (for example A+) as well as numeric GPAs",
+      "Live count of how many community data points power the estimates",
+      "Graduates see cutoff and contribution info that matches their situation",
+      "Site updated for the new admissions cycle (2025/26)",
+    ],
+    maintenance: [
+      "Clearer note when a chart is based on a smaller sample",
+      "More accurate cutoff estimates by ignoring incomplete submissions",
+    ],
+  },
+  {
+    version: "1.2",
+    date: "June 2025",
+    features: [
+      "Compare estimated cutoffs with what students actually reported after offers",
+      "Crowdsourced stream results on the dashboard so everyone benefits from shared info",
+      "Dedicated sign-up flow if you already graduated, with clearer handling for free-choice streams",
+      "New stream-choice visuals and a clearer way to pick and compare streams",
+      "Forgot your password? You can now reset it when logging in",
+    ],
+    maintenance: [
+      "Cutoffs and charts target the right application year after the annual rollover",
+      "Clearer wording on how cutoffs work and cleaner live contribution counts",
+    ],
+  },
+  {
+    version: "1.1",
     date: "April 2025",
-    changes: [
-      "Launched MakeTheCut v2 with full redesign",
-      "Added grade distribution charts",
-      "Added stream choice graphs",
-      "Added estimated vs. reported cutoff methodology",
-      "Introduced multi-cohort dashboard support",
+    features: [
+      "Grade and mark distribution charts with tabs, readable labels, and a class-average line",
+      "Accounts stay McMaster-only (@mcmaster.ca) for privacy and trust",
+      "See how many people are contributing and read real course names on the graphs",
+      "Branded logo and timely banners when something important is happening",
+    ],
+    maintenance: [
+      "Press Enter to sign in; brighter, easier-to-read chart colors",
+      "More trustworthy cutoff numbers end-to-end",
+      "Stricter password rules and tighter email verification",
     ],
   },
   {
     version: "1.0",
-    date: "January 2025",
-    changes: [
-      "Initial public launch of MakeTheCut",
-      "Anonymous GPA and stream preference submission",
-      "Live cutoff estimates using seat availability data",
-      "Basic dashboard with horizontal bar charts",
+    date: "March 2025",
+    features: [
+      "First release of MakeTheCut: cutoffs at a glance on the home dashboard",
+      "Choose your stream and submit grades to improve estimates for everyone",
+      "Create an account, verify your email, and sign in securely",
     ],
+    maintenance: [],
   },
 ];
+
+function ChangelogBulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="flex flex-col gap-2.5">
+      {items.map((text, i) => (
+        <li key={i} className="flex items-start gap-3 text-sm">
+          <span
+            className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
+            aria-hidden
+          />
+          <span className="text-neutral-300 leading-relaxed">{text}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Date helpers (UTC)
@@ -829,11 +907,10 @@ export default function StatsPage() {
           ref={sectionRef}
           className="flex flex-col gap-6 md:gap-8 px-6 md:px-16 lg:px-28 pt-24 pb-16 max-w-6xl mx-auto w-full"
         >
-          <div className="pt-10">
-            <h1 className="text-4xl md:text-5xl font-medium text-white leading-tight">
-              MakeTheCut Statistics &amp; Roadmap
-            </h1>
-          </div>
+          <h1 className="text-4xl md:text-5xl font-medium text-white leading-tight">
+            MakeTheCut Statistics &amp; Change Log
+          </h1>
+
 
           <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
             <div className="p-6 md:p-8 border-b border-neutral-600/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -906,7 +983,7 @@ export default function StatsPage() {
 
           <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
             <div className="p-6 md:p-8 border-b border-neutral-600/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <h2 className="text-xl font-semibold text-white">Changelog</h2>
+              <h2 className="text-xl font-semibold text-white">Change Log</h2>
               <p className="text-neutral-500 text-sm sm:text-right">
                 Product updates &amp; milestones
               </p>
@@ -926,19 +1003,30 @@ export default function StatsPage() {
                       {entry.date}
                     </span>
                   </div>
-                  <ul className="flex flex-col gap-2.5">
-                    {entry.changes.map((change, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm">
-                        <span
-                          className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
-                          aria-hidden
-                        />
-                        <span className="text-neutral-300 leading-relaxed">
-                          {change}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="space-y-4">
+                    {entry.features.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-neutral-500 text-xs font-medium uppercase tracking-wider">
+                          New features
+                        </p>
+                        <ChangelogBulletList items={entry.features} />
+                      </div>
+                    )}
+                    {entry.maintenance.length > 0 && (
+                      <div
+                        className={
+                          entry.features.length > 0
+                            ? "space-y-2 pt-4 border-t border-neutral-700/40"
+                            : "space-y-2"
+                        }
+                      >
+                        <p className="text-neutral-500 text-xs font-medium uppercase tracking-wider">
+                          Maintenance &amp; quality of life
+                        </p>
+                        <ChangelogBulletList items={entry.maintenance} />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
