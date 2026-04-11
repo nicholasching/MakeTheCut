@@ -119,8 +119,10 @@ async function fetchStreamChoiceData(year: number) {
 
 export default function StreamChoiceGraph({
   year = ADMISSION.current,
+  onTransitionReadyChange,
 }: {
   year?: number;
+  onTransitionReadyChange?: (ready: boolean) => void;
 }) {
   const access = useMemo(() => getCohortAccess(year), [year]);
   const [chartData, setChartData] = useState(initialChartData);
@@ -136,6 +138,7 @@ export default function StreamChoiceGraph({
       : `${academicYearFullLabel(year)} Stream Choice Distribution`;
 
   const hideLive = year === ADMISSION.current && !access.streamChoiceVisible;
+  const transitionReady = hideLive || !isLoading;
 
   useEffect(() => {
     const updateLayout = () => {
@@ -163,6 +166,10 @@ export default function StreamChoiceGraph({
     };
     initPage();
   }, [year, hideLive]);
+
+  useEffect(() => {
+    onTransitionReadyChange?.(transitionReady);
+  }, [onTransitionReadyChange, transitionReady]);
 
   if (hideLive) {
     return null;

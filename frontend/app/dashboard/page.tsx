@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import HorizontalBarChart from "@/components/HorizontalBarChart";
 import StreamChoiceGraph from "@/components/StreamChoiceGraph";
@@ -11,7 +11,10 @@ import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
 import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
 import { account, database } from "../appwrite";
-import { usePageTransition } from "@/components/TransitionProvider";
+import {
+  usePageTransition,
+  useTransitionPageReady,
+} from "@/components/TransitionProvider";
 import {
   ADMISSION,
   COLL_USERS,
@@ -21,6 +24,14 @@ import {
   priorCohortYear,
 } from "@/lib/appwriteDb";
 import { getCompletedYears, getCohortAccess } from "@/lib/scheduleConfig";
+
+type DashboardGraphKey = "cutoffs" | "streamChoice" | "gradeDistribution";
+
+const initialChartReadyState: Record<DashboardGraphKey, boolean> = {
+  cutoffs: false,
+  streamChoice: false,
+  gradeDistribution: false,
+};
 
 function StatisticsDropdown({ year }: { year: number }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -209,6 +220,33 @@ function DashboardContent() {
   const sectionRef = useSectionTracking<HTMLDivElement>("Dashboard");
   const [, setUserName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [chartReady, setChartReady] = useState(() => initialChartReadyState);
+  const setChartTransitionReady = useCallback(
+    (key: DashboardGraphKey, ready: boolean) => {
+      setChartReady((prev) =>
+        prev[key] === ready ? prev : { ...prev, [key]: ready }
+      );
+    },
+    []
+  );
+  const handleCutoffsTransitionReady = useCallback(
+    (ready: boolean) => setChartTransitionReady("cutoffs", ready),
+    [setChartTransitionReady]
+  );
+  const handleStreamChoiceTransitionReady = useCallback(
+    (ready: boolean) => setChartTransitionReady("streamChoice", ready),
+    [setChartTransitionReady]
+  );
+  const handleGradeDistributionTransitionReady = useCallback(
+    (ready: boolean) => setChartTransitionReady("gradeDistribution", ready),
+    [setChartTransitionReady]
+  );
+  const dashboardReady =
+    !isLoading &&
+    chartReady.cutoffs &&
+    chartReady.streamChoice &&
+    chartReady.gradeDistribution;
+  useTransitionPageReady(dashboardReady);
   const completedYears = getCompletedYears();
 
   useEffect(() => {
@@ -315,9 +353,15 @@ function DashboardContent() {
         <div className="w-full max-w-7xl mx-auto">
           <div className="flex flex-col gap-8">
             <div className="z-10 flex flex-col gap-8">
-              <HorizontalBarChart />
-              <StreamChoiceGraph />
-              <GradeDistributionChart />
+              <HorizontalBarChart
+                onTransitionReadyChange={handleCutoffsTransitionReady}
+              />
+              <StreamChoiceGraph
+                onTransitionReadyChange={handleStreamChoiceTransitionReady}
+              />
+              <GradeDistributionChart
+                onTransitionReadyChange={handleGradeDistributionTransitionReady}
+              />
             </div>
 
             <div className="flex flex-col gap-6">

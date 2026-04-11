@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { usePageTransition } from "@/components/TransitionProvider";
+import {
+  usePageTransition,
+  useTransitionPageReady,
+} from "@/components/TransitionProvider";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Combobox from "@/components/Combobox";
@@ -96,6 +99,7 @@ export default function MePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  useTransitionPageReady(ready);
 
   const showStreamPrefs = access.canEditStreamPrefs;
   const showSem1 = access.canEditSem1Grades;

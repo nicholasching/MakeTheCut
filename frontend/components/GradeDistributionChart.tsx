@@ -149,8 +149,10 @@ const SpinningLoader = () => (
 
 export default function GradeDistributionChart({
   year = ADMISSION.current,
+  onTransitionReadyChange,
 }: {
   year?: number;
+  onTransitionReadyChange?: (ready: boolean) => void;
 }) {
   const access = useMemo(() => getCohortAccess(year), [year]);
   const courses = useMemo(() => coursesForYear(year, access), [year, access]);
@@ -169,6 +171,7 @@ export default function GradeDistributionChart({
     year === ADMISSION.current
       ? `${liveAcademicYearLabel()} Course Distributions`
       : `${academicYearFullLabel(year)} Course Distributions`;
+  const transitionReady = noData || !isLoading;
 
   useEffect(() => {
     if (noData) {
@@ -255,6 +258,10 @@ export default function GradeDistributionChart({
       }
     };
   }, [courseAvg]);
+
+  useEffect(() => {
+    onTransitionReadyChange?.(transitionReady);
+  }, [onTransitionReadyChange, transitionReady]);
 
   if (noData) {
     return null;

@@ -135,8 +135,10 @@ const SpinningLoader = () => (
 
 export default function HorizontalBarChart({
   year = ADMISSION.current,
+  onTransitionReadyChange,
 }: {
   year?: number;
+  onTransitionReadyChange?: (ready: boolean) => void;
 }) {
   const access = useMemo(() => getCohortAccess(year), [year]);
   const { navigate } = usePageTransition();
@@ -156,6 +158,7 @@ export default function HorizontalBarChart({
   const contentClass = isLive
     ? "h-[500px] md:h-[600px]"
     : "h-[500px] md:h-[600px] px-2";
+  const transitionReady = !access.hasGradeData || !loading;
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -265,6 +268,10 @@ export default function HorizontalBarChart({
       cancelled = true;
     };
   }, [year, navigate]);
+
+  useEffect(() => {
+    onTransitionReadyChange?.(transitionReady);
+  }, [onTransitionReadyChange, transitionReady]);
 
   if (!access.hasGradeData) {
     return null;

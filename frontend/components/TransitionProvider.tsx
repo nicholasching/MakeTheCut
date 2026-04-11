@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -17,17 +18,48 @@ const DURATION = 0.75;
 const Y_RESET_START = "80%";
 const Y_IDLE = "75%";
 const RESET_DRIFT_DURATION = 2.5;
+const READY_TIMEOUT_MS = 5000;
 
 interface TransitionContextValue {
   navigate: (href: string) => void;
+  setPageReadyState: (path: string, isReady: boolean) => void;
+  clearPageReadyState: (path: string) => void;
 }
 
 const TransitionContext = createContext<TransitionContextValue>({
   navigate: () => {},
+  setPageReadyState: () => {},
+  clearPageReadyState: () => {},
 });
 
+function normalizePath(href: string) {
+  const withoutHash = href.split("#")[0] ?? href;
+  const withoutQuery = withoutHash.split("?")[0] ?? withoutHash;
+
+  if (typeof window === "undefined") {
+    return withoutQuery;
+  }
+
+  try {
+    return new URL(href, window.location.origin).pathname;
+  } catch {
+    return withoutQuery;
+  }
+}
+
 export function usePageTransition() {
-  return useContext(TransitionContext);
+  const { navigate } = useContext(TransitionContext);
+  return { navigate };
+}
+
+export function useTransitionPageReady(isReady: boolean) {
+  const pathname = usePathname();
+  const { setPageReadyState, clearPageReadyState } = useContext(TransitionContext);
+
+  useLayoutEffect(() => {
+    setPageReadyState(pathname, isReady);
+    return () => clearPageReadyState(pathname);
+  }, [pathname, isReady, setPageReadyState, clearPageReadyState]);
 }
 
 export function TransitionProvider({ children }: { children: React.ReactNode }) {
@@ -35,21 +67,192 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const controls = useAnimationControls();
 
-  // Track animation phase without causing re-renders
   const phaseRef = useRef<"idle" | "covering" | "covered" | "revealing">("idle");
+  const pathnameRef = useRef(pathname);
   const [blocking, setBlocking] = useState(false);
   const prevPathRef = useRef(pathname);
   const pendingHrefRef = useRef<string | null>(null);
   const driftingRef = useRef(false);
+  const activePathRef = useRef<string | null>(null);
+  const readyPathRef = useRef<string | null>(null);
+  const pageReadyKnownRef = useRef(false);
+  const pageReadyRef = useRef(true);
+  const readyTimeoutRef = useRef<number | null>(null);
+  const tryAdvanceRef = useRef<() => void>(() => {});
+  const startTransitionRef = useRef<(href: string) => void>(() => {});
 
-  // Step 1 of the wipe: cover the current page, then hand off to router.
-  // If we're already animating, queue the latest target route.
+  pathnameRef.current = pathname;
+
+  const clearReadyTimeout = useCallback(() => {
+    if (readyTimeoutRef.current === null || typeof window === "undefined") return;
+    window.clearTimeout(readyTimeoutRef.current);
+    readyTimeoutRef.current = null;
+  }, []);
+
+  const resetReadyGate = useCallback(() => {
+    clearReadyTimeout();
+    readyPathRef.current = null;
+    pageReadyKnownRef.current = false;
+    pageReadyRef.current = true;
+  }, [clearReadyTimeout]);
+
+  const pushCoveredNavigation = useCallback(
+    (href: string) => {
+      activePathRef.current = normalizePath(href);
+      resetReadyGate();
+
+      try {
+        router.prefetch(href);
+      } catch {
+        // Prefetch is opportunistic and should never block navigation.
+      }
+
+      router.push(href);
+    },
+    [resetReadyGate, router]
+  );
+
+  const startReveal = useCallback(() => {
+    if (phaseRef.current !== "covered") return;
+
+    phaseRef.current = "revealing";
+    clearReadyTimeout();
+
+    controls
+      .start({ y: "-100%", transition: { duration: DURATION, ease: sCurve } })
+      .then(() => {
+        controls.set({ y: Y_RESET_START });
+        activePathRef.current = null;
+        resetReadyGate();
+        phaseRef.current = "idle";
+        setBlocking(false);
+
+        const queuedHrefAfterReveal = pendingHrefRef.current;
+        pendingHrefRef.current = null;
+        if (
+          queuedHrefAfterReveal &&
+          normalizePath(queuedHrefAfterReveal) !== pathnameRef.current
+        ) {
+          startTransitionRef.current(queuedHrefAfterReveal);
+          return;
+        }
+
+        driftingRef.current = true;
+        void controls
+          .start({
+            y: Y_IDLE,
+            transition: { duration: RESET_DRIFT_DURATION, ease: sCurve },
+          })
+          .finally(() => {
+            driftingRef.current = false;
+          });
+      });
+  }, [clearReadyTimeout, controls, resetReadyGate]);
+
+  const tryAdvanceTransition = useCallback(() => {
+    if (phaseRef.current === "idle" || phaseRef.current === "revealing") {
+      return;
+    }
+
+    if (phaseRef.current === "covered") {
+      const queuedHref = pendingHrefRef.current;
+      if (queuedHref) {
+        const queuedPath = normalizePath(queuedHref);
+        if (queuedPath !== pathnameRef.current) {
+          pendingHrefRef.current = null;
+          pushCoveredNavigation(queuedHref);
+          return;
+        }
+        pendingHrefRef.current = null;
+      }
+    }
+
+    const activePath = activePathRef.current;
+    if (!activePath || pathnameRef.current !== activePath) return;
+    if (phaseRef.current !== "covered") return;
+
+    if (pageReadyKnownRef.current && !pageReadyRef.current) {
+      if (readyTimeoutRef.current === null && typeof window !== "undefined") {
+        readyTimeoutRef.current = window.setTimeout(() => {
+          readyTimeoutRef.current = null;
+          pageReadyKnownRef.current = false;
+          pageReadyRef.current = true;
+          tryAdvanceRef.current();
+        }, READY_TIMEOUT_MS);
+      }
+      return;
+    }
+
+    clearReadyTimeout();
+    startReveal();
+  }, [clearReadyTimeout, pushCoveredNavigation, startReveal]);
+
+  tryAdvanceRef.current = tryAdvanceTransition;
+
+  const startTransitionTo = useCallback(
+    (href: string) => {
+      phaseRef.current = "covering";
+      setBlocking(true);
+
+      void controls
+        .start({
+          y: "0%",
+          transition: { duration: DURATION, ease: sCurve },
+        })
+        .then(() => {
+          if (phaseRef.current !== "covering") return;
+          phaseRef.current = "covered";
+
+          const queuedHref = pendingHrefRef.current;
+          if (queuedHref) {
+            pendingHrefRef.current = null;
+            if (normalizePath(queuedHref) !== pathnameRef.current) {
+              pushCoveredNavigation(queuedHref);
+              tryAdvanceRef.current();
+              return;
+            }
+          }
+
+          // Only start routing once the wipe fully covers the current page.
+          pushCoveredNavigation(href);
+          tryAdvanceRef.current();
+        });
+    },
+    [controls, pushCoveredNavigation]
+  );
+
+  startTransitionRef.current = startTransitionTo;
+
+  const setPageReadyState = useCallback(
+    (path: string, isReady: boolean) => {
+      if (path !== pathnameRef.current) return;
+
+      readyPathRef.current = path;
+      pageReadyKnownRef.current = true;
+      pageReadyRef.current = isReady;
+
+      if (isReady) {
+        clearReadyTimeout();
+      }
+
+      tryAdvanceRef.current();
+    },
+    [clearReadyTimeout]
+  );
+
+  const clearPageReadyState = useCallback(
+    (path: string) => {
+      if (readyPathRef.current !== path) return;
+      resetReadyGate();
+    },
+    [resetReadyGate]
+  );
+
   const navigate = useCallback(
-    async (href: string) => {
-      if (href === pathname) return;
+    (href: string) => {
+      const targetPath = normalizePath(href);
+      if (targetPath === pathnameRef.current) return;
 
-      // If we're in idle drift, interrupt and begin the swipe immediately
-      // from the current visual position instead of snapping to a preset y.
       if (driftingRef.current) {
         driftingRef.current = false;
         controls.stop();
@@ -57,6 +260,9 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
 
       if (phaseRef.current !== "idle") {
         pendingHrefRef.current = href;
+        if (phaseRef.current === "covered") {
+          tryAdvanceRef.current();
+        }
         return;
       }
 
@@ -68,65 +274,23 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
         return;
       }
 
-      phaseRef.current = "covering";
-      setBlocking(true);
-      await controls.start({
-        y: "0%",
-        transition: { duration: DURATION, ease: sCurve },
-      });
-      phaseRef.current = "covered";
-      // Navigate now — new page mounts behind the overlay
-      router.push(href);
+      startTransitionRef.current(href);
     },
-    [controls, router, pathname]
+    [controls, router]
   );
 
-  // Step 2 of the wipe: when the new page has mounted (pathname changed),
-  // either consume queued routes while covered, or reveal when settled.
   useEffect(() => {
     if (prevPathRef.current === pathname) return;
     prevPathRef.current = pathname;
+    tryAdvanceTransition();
+  }, [pathname, tryAdvanceTransition]);
 
-    if (phaseRef.current !== "covered") return;
+  useEffect(() => {
+    return () => clearReadyTimeout();
+  }, [clearReadyTimeout]);
 
-    const queuedHrefBeforeReveal = pendingHrefRef.current;
-    if (queuedHrefBeforeReveal && queuedHrefBeforeReveal !== pathname) {
-      pendingHrefRef.current = null;
-      router.push(queuedHrefBeforeReveal);
-      return;
-    }
-
-    phaseRef.current = "revealing";
-    controls
-      .start({ y: "-100%", transition: { duration: DURATION, ease: sCurve } })
-      .then(() => {
-        controls.set({ y: Y_RESET_START });
-        phaseRef.current = "idle";
-        setBlocking(false);
-
-        // If a route was queued during reveal, run a fresh full transition.
-        const queuedHrefAfterReveal = pendingHrefRef.current;
-        pendingHrefRef.current = null;
-        if (queuedHrefAfterReveal && queuedHrefAfterReveal !== pathname) {
-          void navigate(queuedHrefAfterReveal);
-          return;
-        }
-
-        // When nothing is queued, gently settle from reset to idle.
-        driftingRef.current = true;
-        void controls
-          .start({
-            y: Y_IDLE,
-            transition: { duration: RESET_DRIFT_DURATION, ease: sCurve },
-          })
-          .finally(() => {
-            driftingRef.current = false;
-          });
-      });
-  }, [pathname, controls, router, navigate]);
-
-  // Intercept all internal <a> clicks in capture phase so we run
-  // the cover animation BEFORE Next.js navigates.
+  // Intercept all internal <a> clicks in capture phase so we can finish
+  // the cover animation before handing navigation off to Next.js.
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       const anchor = (e.target as HTMLElement).closest("a");
@@ -161,7 +325,9 @@ export function TransitionProvider({ children }: { children: React.ReactNode }) 
   }, [navigate]);
 
   return (
-    <TransitionContext.Provider value={{ navigate }}>
+    <TransitionContext.Provider
+      value={{ navigate, setPageReadyState, clearPageReadyState }}
+    >
       {children}
       <motion.div
         aria-hidden
