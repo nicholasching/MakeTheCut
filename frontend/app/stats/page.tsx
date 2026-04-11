@@ -408,22 +408,8 @@ function TrafficTooltip({
 }
 
 // ---------------------------------------------------------------------------
-// Motion
+// Motion (Site Traffic graph block only)
 // ---------------------------------------------------------------------------
-const fadeUp = {
-  hidden: { opacity: 0, y: 28 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.55, ease: "easeOut" as const },
-  },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
 /** Traffic block: cross-fade between ranges; next view mounts after exit (mode="wait"). */
 const RANGE_VIEW_EASE = [0.25, 0.1, 0.25, 1] as const;
 const rangeViewTransition = { duration: 0.32, ease: RANGE_VIEW_EASE };
@@ -841,49 +827,19 @@ export default function StatsPage() {
 
         <div
           ref={sectionRef}
-          className="flex flex-col gap-14 md:gap-16 px-6 md:px-16 lg:px-28 pt-24 pb-16 max-w-6xl mx-auto w-full"
+          className="flex flex-col gap-6 md:gap-8 px-6 md:px-16 lg:px-28 pt-24 pb-16 max-w-6xl mx-auto w-full"
         >
-          <motion.div
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
-            className="pt-10"
-          >
-            <motion.p
-              variants={fadeUp}
-              className="text-red-500 text-sm font-medium uppercase tracking-widest mb-3"
-            >
-              MakeTheCut
-            </motion.p>
-            <motion.h1
-              variants={fadeUp}
-              className="text-4xl md:text-5xl font-light text-white leading-tight mb-4"
-            >
-              Site Stats &amp; Changelog
-            </motion.h1>
-            <motion.p
-              variants={fadeUp}
-              className="text-subtext text-neutral-400 max-w-2xl leading-relaxed"
-            >
-              Live traffic from Google Analytics (synced daily). Data ends at
-              yesterday UTC so partial months don&apos;t show future days.
-            </motion.p>
-          </motion.div>
+          <div className="pt-10">
+            <h1 className="text-4xl md:text-5xl font-medium text-white leading-tight">
+              MakeTheCut Statistics &amp; Roadmap
+            </h1>
+          </div>
 
-          <motion.section
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl"
-          >
+          <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
             <div className="p-6 md:p-8 border-b border-neutral-600/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full shrink-0" />
-                <h2 className="text-xl font-semibold text-white">
-                  Traffic Overview
-                </h2>
-              </div>
+              <h2 className="text-xl font-semibold text-white">
+                Site Traffic
+              </h2>
               <div
                 className="flex flex-wrap gap-2"
                 role="tablist"
@@ -946,49 +902,47 @@ export default function StatsPage() {
                 </AnimatePresence>
               )}
             </div>
-          </motion.section>
+          </section>
 
-          <motion.section
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="pb-4"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-2 h-2 bg-red-500 rounded-full shrink-0" />
+          <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="p-6 md:p-8 border-b border-neutral-600/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <h2 className="text-xl font-semibold text-white">Changelog</h2>
+              <p className="text-neutral-500 text-sm sm:text-right">
+                Product updates &amp; milestones
+              </p>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="p-6 md:p-8 space-y-4 md:space-y-5">
               {CHANGELOG.map((entry) => (
-                <motion.div
+                <div
                   key={entry.version}
-                  variants={fadeUp}
-                  className="bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl p-6 md:p-8 shadow-2xl"
+                  className="bg-white/[0.04] border border-neutral-600/40 rounded-xl p-4 md:p-5"
                 >
-                  <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <div className="flex flex-wrap items-center gap-3 mb-3 md:mb-4">
                     <span className="bg-red-500/15 text-red-400 text-xs font-semibold px-3 py-1 rounded-full border border-red-500/30">
                       v{entry.version}
                     </span>
-                    <span className="text-neutral-500 text-sm">
+                    <span className="text-neutral-500 text-sm tabular-nums">
                       {entry.date}
                     </span>
                   </div>
-                  <ul className="flex flex-col gap-2">
+                  <ul className="flex flex-col gap-2.5">
                     {entry.changes.map((change, i) => (
                       <li key={i} className="flex items-start gap-3 text-sm">
-                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                        <span
+                          className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
+                          aria-hidden
+                        />
                         <span className="text-neutral-300 leading-relaxed">
                           {change}
                         </span>
                       </li>
                     ))}
                   </ul>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.section>
+          </section>
         </div>
       </GridBackground>
       <Footer />
