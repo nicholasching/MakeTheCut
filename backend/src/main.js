@@ -48,6 +48,21 @@ function cutoffDocDefaults(overrides = {}) {
   };
 }
 
+/**
+ * PATCH-style update: only keys in `data` are sent. Never pass full
+ * cutoffDocDefaults() here — that would zero out unrelated fields (e.g.
+ * estimated cutoffs must not wipe first/second/third choice counts;
+ * reported cutoffs must not wipe streamCutoff or choice counts).
+ * On missing document, create with defaults merged with `data`.
+ */
+async function patchCutoffDocument(database, documentId, data) {
+  try {
+    await database.updateDocument(DB_ID, COLL_CUTOFFS, documentId, data);
+  } catch {
+    await database.createDocument(DB_ID, COLL_CUTOFFS, documentId, cutoffDocDefaults(data));
+  }
+}
+
 // ── Workflow determination per cohort year ───────────────────────────────────
 // Returns which pipelines to run for a given admitYear at the current moment.
 function getWorkflows(admitYear, now = new Date()) {
@@ -146,17 +161,17 @@ async function runStreamChoiceCounts(database, documents, year, log) {
   }
 
   for (const k of STREAM_KEYS) {
-    await upsertDocument(database, COLL_CUTOFFS, `${year}_${k}`, cutoffDocDefaults({
+    await patchCutoffDocument(database, `${year}_${k}`, {
       firstChoice: choiceCounts[k].firstChoice,
       secondChoice: choiceCounts[k].secondChoice,
       thirdChoice: choiceCounts[k].thirdChoice,
-    }));
+    });
   }
 
   const validCount = documents.filter(d => d.streams && d.streams !== 'null' && d.streams.trim() !== '').length;
-  await upsertDocument(database, COLL_CUTOFFS, `${year}_total`, cutoffDocDefaults({
+  await patchCutoffDocument(database, `${year}_total`, {
     streamCount: validCount,
-  }));
+  });
 
   log(`   [choiceCounts] updated ${year}_* cutoff docs`);
 }
@@ -269,16 +284,16 @@ async function runEstimatedCutoffs(database, documents, year, log) {
   }
 
   for (const k of STREAM_KEYS) {
-    await upsertDocument(database, COLL_CUTOFFS, `${year}_${k}`, cutoffDocDefaults({
+    await patchCutoffDocument(database, `${year}_${k}`, {
       streamCount: streamCounts[k],
       streamCutoff: cutoffGPAs[k],
-    }));
+    });
   }
 
   const nullStreamsCount = documents.filter(d => !d.streams || d.streams === 'null' || d.streams.trim() === '').length;
-  await upsertDocument(database, COLL_CUTOFFS, `${year}_total`, cutoffDocDefaults({
+  await patchCutoffDocument(database, `${year}_total`, {
     streamCount: documents.length - nullStreamsCount,
-  }));
+  });
 
   log(`   [estimatedCutoffs] updated ${year}_* cutoff docs`);
 }
@@ -325,9 +340,9 @@ async function runReportedCutoffs(database, documents, year, log) {
     if (doc.streamIn && doc.streamIn !== 'null') totalReported++;
   }
 
-  await upsertDocument(database, COLL_CUTOFFS, `${year}_total`, cutoffDocDefaults({
+  await patchCutoffDocument(database, `${year}_total`, {
     reportCutoff: totalReported,
-  }));
+  });
 
   for (const k of STREAM_KEYS) {
     const data = streamData[k];
@@ -360,9 +375,9 @@ async function runReportedCutoffs(database, documents, year, log) {
       continue;
     }
 
-    await upsertDocument(database, COLL_CUTOFFS, `${year}_${k}`, cutoffDocDefaults({
+    await patchCutoffDocument(database, `${year}_${k}`, {
       reportCutoff: cutoff,
-    }));
+    });
   }
 
   log(`   [reportedCutoffs] updated ${year}_* cutoff docs`);
