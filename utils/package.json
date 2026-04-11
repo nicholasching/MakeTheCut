@@ -1,7 +1,7 @@
 {
   "name": "markdata-copy-script",
   "version": "1.0.0",
-  "description": "Script to copy MarkData collection to MarkData24",
+  "description": "Utility scripts (Appwrite migrations, copy helpers)",
   "type": "module",
   "main": "copy-markdata.js",
   "scripts": {

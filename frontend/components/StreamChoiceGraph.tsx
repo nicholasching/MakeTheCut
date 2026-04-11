@@ -1,8 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
+import { useState, useEffect, useMemo } from "react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartTooltip } from "recharts";
 import { database } from "../app/appwrite";
+import {
+  ADMISSION,
+  DATABASE_ID,
+  COLL_CUTOFFS,
+  queriesForCutoffYear,
+  streamKeyFromCutoffDocId,
+  liveAcademicYearLabel,
+  academicYearFullLabel,
+} from "@/lib/appwriteDb";
+import { getCohortAccess } from "@/lib/scheduleConfig";
 import {
   Card,
   CardContent,
@@ -10,13 +20,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 
-// Initial chart data structure
 const initialChartData = [
   { stream: "Chemical", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
   { stream: "Civil", firstChoice: 0, secondChoice: 0, thirdChoice: 0 },
@@ -30,26 +35,19 @@ const initialChartData = [
 ];
 
 const chartConfig = {
-    firstChoice: {
-        label: "First Choice",
-        color: "#7C3AED", // Deep purple
-    },
-    secondChoice: {
-        label: "Second Choice",
-        color: "#A78BFA", // Medium purple
-    },
-    thirdChoice: {
-        label: "Third Choice",
-        color: "#DDD6FE", // Light purple
-    },
+  firstChoice: { label: "First Choice", color: "#7C3AED" },
+  secondChoice: { label: "Second Choice", color: "#A78BFA" },
+  thirdChoice: { label: "Third Choice", color: "#DDD6FE" },
 } satisfies ChartConfig;
 
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payload: (typeof initialChartData)[0]; dataKey: string; color: string; value: number }[] }) => {
+  if (active && payload?.length) {
     return (
       <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-sm">
-        <p className="mb-1"><strong>{payload[0].payload.stream}</strong></p>
-        {payload.map((entry: any, index: number) => (
+        <p className="mb-1">
+          <strong>{payload[0].payload.stream}</strong>
+        </p>
+        {payload.map((entry, index) => (
           <p key={index} style={{ color: entry.color }}>
             {chartConfig[entry.dataKey as keyof typeof chartConfig].label}: {entry.value}
           </p>
@@ -60,57 +58,48 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-async function fetchStreamChoiceData() {
+async function fetchStreamChoiceData(year: number) {
   try {
-    // Fetch all documents from StatData collection
-    const documents = await database.listDocuments('MacStats', 'StatData');
-    
-    // Create a copy of initial data to update
+    const documents = await database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(year));
     const updatedChartData = [...initialChartData];
     let totalSubmissions = 0;
-    
-    // Update chart data with fetched choice counts
-    documents.documents.forEach(doc => {
+
+    documents.documents.forEach((doc) => {
       let streamIndex = -1;
-      
-      // Check if this is the total document to get submission count
-      if (doc.$id === 'total') {
+      const key = streamKeyFromCutoffDocId(doc.$id);
+      if (key === "total") {
         totalSubmissions = doc.streamCount || 0;
         return;
       }
-      
-      // Map document IDs to chart data indices
-      switch (doc.$id) {
-        case 'chem':
-          streamIndex = 0; // Chemical
+      switch (key) {
+        case "chem":
+          streamIndex = 0;
           break;
-        case 'civ':
-          streamIndex = 1; // Civil
+        case "civ":
+          streamIndex = 1;
           break;
-        case 'comp':
-          streamIndex = 2; // Computer
+        case "comp":
+          streamIndex = 2;
           break;
-        case 'elec':
-          streamIndex = 3; // Electrical
+        case "elec":
+          streamIndex = 3;
           break;
-        case 'engphys':
-          streamIndex = 4; // Engineering Physics
+        case "engphys":
+          streamIndex = 4;
           break;
-        case 'mat':
-          streamIndex = 5; // Materials
+        case "mat":
+          streamIndex = 5;
           break;
-        case 'mech':
-          streamIndex = 6; // Mechanical
+        case "mech":
+          streamIndex = 6;
           break;
-        case 'tron':
-          streamIndex = 7; // Mechatronics
+        case "tron":
+          streamIndex = 7;
           break;
-        case 'soft':
-          streamIndex = 8; // Software
+        case "soft":
+          streamIndex = 8;
           break;
       }
-      
-      // Update the chart data if we found a matching stream
       if (streamIndex !== -1) {
         updatedChartData[streamIndex] = {
           ...updatedChartData[streamIndex],
@@ -120,8 +109,7 @@ async function fetchStreamChoiceData() {
         };
       }
     });
-    
-    console.log("Stream choice data fetched successfully:", updatedChartData);
+
     return { chartData: updatedChartData, totalSubmissions };
   } catch (error) {
     console.error("Error fetching stream choice data:", error);
@@ -129,52 +117,75 @@ async function fetchStreamChoiceData() {
   }
 }
 
-export default function StreamChoiceGraph() {
+export default function StreamChoiceGraph({
+  year = ADMISSION.current,
+}: {
+  year?: number;
+}) {
+  const access = useMemo(() => getCohortAccess(year), [year]);
   const [chartData, setChartData] = useState(initialChartData);
   const [totalSubmissions, setTotalSubmissions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [key, setKey] = useState(0);
   const [yAxisWidth, setYAxisWidth] = useState(55);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const title =
+    year === ADMISSION.current
+      ? `${liveAcademicYearLabel()} Stream Choice Distribution`
+      : `${academicYearFullLabel(year)} Stream Choice Distribution`;
+
+  const hideLive = year === ADMISSION.current && !access.streamChoiceVisible;
 
   useEffect(() => {
-    const updateWidth = () => {
-      setYAxisWidth(window.innerWidth >= 768 ? 70 : 55);
+    const updateLayout = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setYAxisWidth(mobile ? 55 : 70);
     };
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    return () => window.removeEventListener("resize", updateLayout);
   }, []);
 
   useEffect(() => {
     const initPage = async () => {
+      if (hideLive) {
+        setIsLoading(false);
+        return;
+      }
       setIsLoading(true);
-      
-      // Fetch stream choice data
-      const data = await fetchStreamChoiceData();
+      const data = await fetchStreamChoiceData(year);
       setChartData(data.chartData);
       setTotalSubmissions(data.totalSubmissions);
-      setKey(prev => prev + 1); // Force re-render
-      
+      setKey((prev) => prev + 1);
       setIsLoading(false);
     };
-    
     initPage();
-  }, []);
+  }, [year, hideLive]);
+
+  if (hideLive) {
+    return null;
+  }
+
+  const isLive = year === ADMISSION.current;
+  const cardClass = isLive
+    ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
+    : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";
+  const contentClass = isLive ? "h-[500px] md:h-[600px]" : "h-[500px] md:h-[600px] px-2";
 
   if (isLoading) {
     return (
-      <Card className="bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full p-1 pt-6 pb-4 overflow-hidden">
+      <Card className={`${cardClass} relative`}>
         <CardHeader className="text-neutral-500 pb-2">
           <div className="flex flex-col justify-center items-center">
-            <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-              Live 2025/2026 Stream Choice Distribution
-            </CardTitle>
+            <CardTitle className="text-subtitle flex items-center gap-3 mb-1">{title}</CardTitle>
             <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
               <p>Loading choice distribution data...</p>
             </CardDescription>
           </div>
         </CardHeader>
-        <CardContent className="h-[500px] md:h-[600px] px-2 flex items-center justify-center">
+        <CardContent className={`${contentClass} flex items-center justify-center`}>
           <div className="text-neutral-400">Loading...</div>
         </CardContent>
       </Card>
@@ -182,18 +193,16 @@ export default function StreamChoiceGraph() {
   }
 
   return (
-    <Card className="bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden">
+    <Card className={cardClass}>
       <CardHeader className="text-neutral-500">
         <div className="flex flex-col justify-center items-center">
-          <CardTitle className="text-subtitle flex items-center gap-3 mb-1">
-            Live 2025/2026 Stream Choice Distribution
-          </CardTitle>
+          <CardTitle className="text-subtitle flex items-center gap-3 mb-1">{title}</CardTitle>
           <CardDescription className="text-tiny flex md:flex-col items-center text-center font-semibold flex-col-reverse">
             <p>Total Contributions: {totalSubmissions}</p>
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="h-[500px] md:h-[600px]">
+      <CardContent className={contentClass}>
         <ChartContainer config={chartConfig} className="h-full w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
@@ -201,9 +210,11 @@ export default function StreamChoiceGraph() {
               accessibilityLayer
               data={chartData}
               layout="vertical"
-              margin={{
-                top: 20, right: 10, left: 10, bottom: 20,
-              }}
+              margin={
+                isMobile
+                  ? { top: 20, right: 10, left: 5, bottom: 20 }
+                  : { top: 20, right: 30, left: 30, bottom: 20 }
+              }
               barCategoryGap="20%"
             >
               <CartesianGrid horizontal={false} stroke="#333" />
@@ -228,16 +239,12 @@ export default function StreamChoiceGraph() {
                 className="text-[0.55rem] md:text-[0.7rem]"
                 stroke="#737373"
                 width={yAxisWidth}
-                dx={-5}
               />
-              <ChartTooltip
-                cursor={false}
-                content={<CustomTooltip />}
-              />
+              <ChartTooltip cursor={false} content={<CustomTooltip />} />
               <Bar
                 dataKey="firstChoice"
                 radius={[0, 4, 4, 0]}
-                isAnimationActive={true}
+                isAnimationActive
                 fill={chartConfig.firstChoice.color}
                 name={chartConfig.firstChoice.label}
                 stroke="none"
@@ -245,7 +252,7 @@ export default function StreamChoiceGraph() {
               <Bar
                 dataKey="secondChoice"
                 radius={[0, 4, 4, 0]}
-                isAnimationActive={true}
+                isAnimationActive
                 fill={chartConfig.secondChoice.color}
                 name={chartConfig.secondChoice.label}
                 stroke="none"
@@ -253,7 +260,7 @@ export default function StreamChoiceGraph() {
               <Bar
                 dataKey="thirdChoice"
                 radius={[0, 4, 4, 0]}
-                isAnimationActive={true}
+                isAnimationActive
                 fill={chartConfig.thirdChoice.color}
                 name={chartConfig.thirdChoice.label}
                 stroke="none"

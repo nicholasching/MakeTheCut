@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { animate, motion, AnimatePresence } from "framer-motion";
 import { database } from "./../app/appwrite";
+import {
+  ADMISSION,
+  DATABASE_ID,
+  COLL_CUTOFFS,
+  cutoffDocId,
+  priorCohortYear,
+} from "@/lib/appwriteDb";
 
 interface LiveCounterProps {
     className?: string;
@@ -14,8 +21,16 @@ export default function LiveCounter({ className = "" }: LiveCounterProps) {
 
         useEffect(() => {
                 const getContributions = async () => {
-                        const total = await database.getDocument('MacStats', 'StatData', 'total');
-                        const total24 = await database.getDocument('MacStats', 'StatData24', 'total');
+                        const total = await database.getDocument(
+                                DATABASE_ID,
+                                COLL_CUTOFFS,
+                                cutoffDocId(ADMISSION.current, "total")
+                        );
+                        const total24 = await database.getDocument(
+                                DATABASE_ID,
+                                COLL_CUTOFFS,
+                                cutoffDocId(priorCohortYear(), "total")
+                        );
                         const contributions = total.streamCount * 8 + total24.streamCount * 10 + total24.reportCutoff;
                         setTotalContributions(contributions);
                 }

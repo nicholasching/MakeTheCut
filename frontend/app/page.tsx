@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import GridBackground from "@/components/GridBackground";
 
@@ -15,10 +15,27 @@ import ScrollButton from "@/components/ScrollButton";
 
 import LiveCounter from "@/components/LiveCounter";
 
-import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { useSectionTracking } from "@/hooks/useSectionTracking";
+import { usePageTransition } from "@/components/TransitionProvider";
+import { account } from "./appwrite";
 
 function HomeContent() {
-  const sectionRef = useSectionTracking("Home")
+  const sectionRef = useSectionTracking("Home");
+  const { navigate } = usePageTransition();
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        await account.get();
+        setLoggedIn(true);
+      } catch {
+        /* not logged in */
+      }
+    }
+    checkSession();
+  }, [navigate]);
+
 
   return (
     <section ref={sectionRef}>
@@ -32,9 +49,9 @@ function HomeContent() {
             </h1>
             <div className="flex justify-center md:justify-normal gap-5 flex-col-reverse md:flex-row mt-20">
               <ScrollButton />
-              <Link href="/login">
+              <Link href={loggedIn ? "/dashboard" : "/login"}>
                 <button className="bg-red-500 py-2 w-30 md:w-40 rounded-sm hover:scale-105 transition-transform duration-200 cursor-pointer">
-                  Login
+                  {loggedIn ? "Dashboard" : "Login"}
                 </button>
               </Link>
             </div>

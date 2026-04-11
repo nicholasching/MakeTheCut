@@ -1,5 +1,20 @@
-import {account, database, ID} from "../app/appwrite";
-import {Log} from "../../types";
+import { account, database } from "../app/appwrite";
+import { Permission, Role } from "appwrite";
+import {
+  ADMISSION,
+  COLL_USERS,
+  DATABASE_ID,
+} from "../lib/appwriteDb";
+import type { CohortAccess } from "../lib/scheduleConfig";
+import { calculateAverages } from "../lib/gradeCalc";
+
+function userDocPermissions(userId: string) {
+  return [
+    Permission.read(Role.user(userId)),
+    Permission.update(Role.user(userId)),
+    Permission.delete(Role.user(userId)),
+  ];
+}
 
 // Add interface for grades input
 export interface GradesInput {
@@ -62,19 +77,25 @@ export async function addLog(gradesInput: GradesInput) {
     console.log(newLog);
 
     try{
-      const response = await database.updateDocument(
-        'MacStats',
-        'UserData',
+      await database.updateDocument(
+        DATABASE_ID,
+        COLL_USERS,
         loggedInUser.$id,
         newLog
       )
     }
     catch (error) {
-      const response = await database.createDocument(
-        'MacStats',
-        'UserData',
+      await database.createDocument(
+        DATABASE_ID,
+        COLL_USERS,
         loggedInUser.$id,
-        newLog
+        {
+          ...newLog,
+          admitYear: ADMISSION.current,
+          streamIn: "null",
+          streamOut: "null",
+        },
+        userDocPermissions(loggedInUser.$id)
       );
     }
 }
@@ -101,18 +122,24 @@ export async function addStreamChoices(streamsInput: StreamsInput) {
     console.log("Submitting stream choices:", streamData);
 
     try {
-        const response = await database.updateDocument(
-            'MacStats',
-            'UserData',
+        await database.updateDocument(
+            DATABASE_ID,
+            COLL_USERS,
             loggedInUser.$id,
             streamData
         );
     } catch (error) {
-        const response = await database.createDocument(
-            'MacStats',
-            'UserData',
+        await database.createDocument(
+            DATABASE_ID,
+            COLL_USERS,
             loggedInUser.$id,
-            streamData
+            {
+              ...streamData,
+              admitYear: ADMISSION.current,
+              streamIn: "null",
+              streamOut: "null",
+            },
+            userDocPermissions(loggedInUser.$id)
         );
     }
 }
@@ -128,63 +155,190 @@ export async function addStreamAdmission(streamAdmissionInput: StreamAdmissionIn
     console.log("Submitting stream admission data:", streamAdmissionData);
 
     try {
-        const response = await database.updateDocument(
-            'MacStats',
-            'StreamData24',
+        await database.updateDocument(
+            DATABASE_ID,
+            COLL_USERS,
             loggedInUser.$id,
             streamAdmissionData
         );
     } catch (error) {
-        const response = await database.createDocument(
-            'MacStats',
-            'StreamData24',
+        await database.createDocument(
+            DATABASE_ID,
+            COLL_USERS,
             loggedInUser.$id,
-            streamAdmissionData
+            {
+              ...streamAdmissionData,
+              gpa: 0,
+              math1za3: 0,
+              math1zb3: 0,
+              math1zc3: 0,
+              phys1d03: 0,
+              phys1e03: 0,
+              chem1e03: 0,
+              eng1p13: 0,
+              elec1: "null",
+              elec2: "null",
+              streams: "null",
+              freechoice: false,
+              admitYear: ADMISSION.current,
+            },
+            userDocPermissions(loggedInUser.$id)
         );
     }
 }
 
-  function calculateAverages(grades: GradesInput): number {
-  
-  let totalGrade = 0;
-  let totalUnits = 0;
+/** Full profile form shape for `/me` (string grades like legacy forms). */
+export interface UserProfileInput extends GradesInput, StreamAdmissionInput {
+  admitYear?: number;
+}
 
-  if (parseFloat(grades.math1za3) > 0) {
-    totalGrade += parseFloat(grades.math1za3) * 3;
-    totalUnits += 3;
+function normalizeElectives(elec1: string, elec2: string) {
+  let e1 = elec1;
+  let e2 = elec2;
+  if (e1 == "," || e1.split(",")[0] == "" || e1.split(",")[1] == "") {
+    e1 = "null";
   }
-  if (parseFloat(grades.math1zb3) > 0) {
-    totalGrade += parseFloat(grades.math1zb3) * 3;
-    totalUnits += 3;
+  if (e2 == "," || e2.split(",")[0] == "" || e2.split(",")[1] == "") {
+    e2 = "null";
   }
-  if (parseFloat(grades.math1zc3) > 0) {
-    totalGrade += parseFloat(grades.math1zc3) * 3;
-    totalUnits += 3;
-  }
-  if (parseFloat(grades.phys1d03) > 0) {
-    totalGrade += parseFloat(grades.phys1d03) * 3;
-    totalUnits += 3;
-  }
-  if (parseFloat(grades.phys1e03) > 0) {
-    totalGrade += parseFloat(grades.phys1e03) * 3;
-    totalUnits += 3;
-  }
-  if (parseFloat(grades.chem1e03) > 0) {
-    totalGrade += parseFloat(grades.chem1e03) * 3;
-    totalUnits += 3;
-  }
-  if (parseFloat(grades.eng1p13) > 0) {
-    totalGrade += parseFloat(grades.eng1p13) * 13;
-    totalUnits += 13;
-  }
-  if (grades.elec1 != "," && grades.elec1.split(',')[0] != "" && grades.elec1.split(',')[1] != "" && parseFloat(grades.elec1.split(',')[1]) > 0) {
-    totalGrade += parseFloat(grades.elec1.split(',')[1]) * parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
-    totalUnits += parseFloat(grades.elec1.split(',')[0].substring(grades.elec1.split(',')[0].length - 1, grades.elec1.split(',')[0].length));
-  }
-  if (grades.elec2 != "," && grades.elec2.split(',')[0] != "" && grades.elec2.split(',')[1] != "" && parseFloat(grades.elec2.split(',')[1]) > 0) {
-    totalGrade += parseFloat(grades.elec2.split(',')[1]) * parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
-    totalUnits += parseFloat(grades.elec2.split(',')[0].substring(grades.elec2.split(',')[0].length - 1, grades.elec2.split(',')[0].length));
+  return { e1, e2 };
+}
+
+function docToGradeStrings(doc: Record<string, unknown>): GradesInput {
+  const n = (v: unknown) =>
+    v === null || v === undefined || v === "" ? "" : String(v);
+  const elec = (v: unknown) => (v === "null" || v == null ? "," : String(v));
+  return {
+    math1za3: n(doc.math1za3),
+    math1zb3: n(doc.math1zb3),
+    math1zc3: n(doc.math1zc3),
+    phys1d03: n(doc.phys1d03),
+    phys1e03: n(doc.phys1e03),
+    chem1e03: n(doc.chem1e03),
+    eng1p13: n(doc.eng1p13),
+    elec1: elec(doc.elec1),
+    elec2: elec(doc.elec2),
+    streams:
+      doc.streams === "null" || doc.streams == null
+        ? ""
+        : String(doc.streams),
+    freechoice: Boolean(doc.freechoice),
+  };
+}
+
+/**
+ * Persists only fields allowed by `access`. Merges with existing document so
+ * locked sections keep server values.
+ */
+export async function saveUserProfile(
+  input: UserProfileInput,
+  access: CohortAccess
+) {
+  const loggedInUser = await account.get();
+
+  let existing: Record<string, unknown> | null = null;
+  try {
+    existing = (await database.getDocument(
+      DATABASE_ID,
+      COLL_USERS,
+      loggedInUser.$id
+    )) as unknown as Record<string, unknown>;
+  } catch {
+    existing = null;
   }
 
-  return totalGrade / totalUnits;
+  const baseGrades = existing
+    ? docToGradeStrings(existing)
+    : {
+        math1za3: "",
+        math1zb3: "",
+        math1zc3: "",
+        phys1d03: "",
+        phys1e03: "",
+        chem1e03: "",
+        eng1p13: "",
+        elec1: ",",
+        elec2: ",",
+        streams: "",
+        freechoice: false,
+      };
+
+  const merged: GradesInput = { ...baseGrades };
+  if (access.canEditStreamPrefs) {
+    merged.streams = input.streams || "null";
+    merged.freechoice = input.freechoice;
+  }
+  if (access.canEditSem1Grades) {
+    merged.math1za3 = input.math1za3;
+    merged.math1zc3 = input.math1zc3;
+    merged.phys1d03 = input.phys1d03;
+    merged.elec1 = input.elec1;
+  }
+  if (access.canEditAllGrades) {
+    merged.math1zb3 = input.math1zb3;
+    merged.phys1e03 = input.phys1e03;
+    merged.chem1e03 = input.chem1e03;
+    merged.eng1p13 = input.eng1p13;
+    merged.elec2 = input.elec2;
+  }
+
+  let streamIn =
+    existing && existing.streamIn != null
+      ? String(existing.streamIn)
+      : "null";
+  let streamOut =
+    existing && existing.streamOut != null
+      ? String(existing.streamOut)
+      : "null";
+  if (access.canEditStreamResults) {
+    streamIn = input.streamIn || "null";
+    streamOut = input.streamOut ?? "null";
+  }
+
+  const { e1, e2 } = normalizeElectives(merged.elec1, merged.elec2);
+  const gradesForAvg: GradesInput = { ...merged, elec1: e1, elec2: e2 };
+  const avg = calculateAverages(gradesForAvg);
+  const averageGPA = Number.isFinite(avg) ? avg : 0;
+
+  const newLog = {
+    gpa: parseFloat(averageGPA.toFixed(2)),
+    math1za3: parseFloat(merged.math1za3) || 0,
+    math1zb3: parseFloat(merged.math1zb3) || 0,
+    math1zc3: parseFloat(merged.math1zc3) || 0,
+    phys1d03: parseFloat(merged.phys1d03) || 0,
+    phys1e03: parseFloat(merged.phys1e03) || 0,
+    chem1e03: parseFloat(merged.chem1e03) || 0,
+    eng1p13: parseFloat(merged.eng1p13) || 0,
+    elec1: e1,
+    elec2: e2,
+    streams: merged.streams || "null",
+    freechoice: merged.freechoice || false,
+    streamIn,
+    streamOut,
+  };
+
+  const admitYear =
+    (existing?.admitYear as number | undefined) ??
+    input.admitYear ??
+    ADMISSION.current;
+
+  try {
+    await database.updateDocument(
+      DATABASE_ID,
+      COLL_USERS,
+      loggedInUser.$id,
+      newLog
+    );
+  } catch {
+    await database.createDocument(
+      DATABASE_ID,
+      COLL_USERS,
+      loggedInUser.$id,
+      {
+        ...newLog,
+        admitYear,
+      },
+      userDocPermissions(loggedInUser.$id)
+    );
+  }
 }
