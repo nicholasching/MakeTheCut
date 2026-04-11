@@ -8,6 +8,7 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@google-analytics/data": "^4.9.0",
     "node-appwrite": "^23.1.0"
   },
   "devDependencies": {
