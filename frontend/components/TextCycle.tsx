@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 export const engineeringMajors = [
   "Mechanical",
@@ -21,92 +22,86 @@ interface TextCycleProps {
   className?: string;
 }
 
-export default function TextCycle({ 
-  words, 
-  interval = 4000, 
+export default function TextCycle({
+  words,
+  interval = 4000,
   fadeTime = 500,
   underlineDelay = 200,
   initialDelay = 2000,
-  className = ""
+  className = "",
 }: TextCycleProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [showUnderline, setShowUnderline] = useState(false);
-  
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reduceMotion = useReducedMotion();
+
   useEffect(() => {
-    // First show the underline on initial load
-    const firstUnderlineTimeout = setTimeout(() => {
-      setShowUnderline(true);
-    }, underlineDelay);
-    
-    // Then start the regular cycle after initial delay
-    const initialTimeout = setTimeout(() => {
-      setIsVisible(false);
-      
-      setTimeout(() => {
-        setShowUnderline(false);
-        
-        setTimeout(() => {
-          setCurrentIndex((prevIndex) => 
-            (prevIndex + 1) % words.length
-          );
-          setIsVisible(true);
-          
-          setTimeout(() => {
-            setShowUnderline(true);
-          }, underlineDelay);
-        }, 300);
-        
-      }, fadeTime);
-      
-      // Setup regular interval only after the first animation completes
-      const cycleInterval = setInterval(() => {
-        setIsVisible(false);
-        
-        setTimeout(() => {
-          setShowUnderline(false);
-          
-          setTimeout(() => {
-            setCurrentIndex((prevIndex) => 
-              (prevIndex + 1) % words.length
-            );
-            setIsVisible(true);
-            
-            setTimeout(() => {
-              setShowUnderline(true);
-            }, underlineDelay);
-          }, 300);
-          
-        }, fadeTime);
-        
-      }, interval);
-      
-      return () => clearInterval(cycleInterval);
-    }, initialDelay);
-    
-    return () => {
-      clearTimeout(firstUnderlineTimeout);
-      clearTimeout(initialTimeout);
+    const queue = (fn: () => void, ms: number) => {
+      const id = setTimeout(fn, ms);
+      timersRef.current.push(id);
+      return id;
     };
-  }, [words, interval, fadeTime, underlineDelay, initialDelay]);
-  
-  // Get max width by measuring all words
-  const placeholderText = words.reduce((a, b) => 
+
+    const runWordTransition = () => {
+      setIsVisible(false);
+      queue(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+        setIsVisible(true);
+      }, fadeTime);
+    };
+
+    timersRef.current = [];
+
+    queue(() => {
+      runWordTransition();
+      intervalRef.current = setInterval(runWordTransition, interval);
+    }, initialDelay);
+
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [words, interval, fadeTime, initialDelay]);
+
+  const placeholderText = words.reduce((a, b) =>
     a.length > b.length ? a : b
   );
-  
+
+  const fadeDuration = fadeTime / 1000;
+  const underlineTransition = reduceMotion
+    ? { duration: 0 }
+    : {
+        delay: underlineDelay / 1000,
+        duration: 0.7,
+        ease: "easeOut" as const,
+      };
+
   return (
-    <span className={`inline font-semibold font-inherit relative ${className}`}>
-      <span className={`transition-opacity duration-500 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
-        {words[currentIndex]}
-        {/* Animated underline */}
-        <span 
-          className={`absolute left-0 bottom-0 md:bottom-3 h-0.5 transform bg-red-500 transition-all duration-1000 ease-out -z-10 ${
-            showUnderline ? 'w-full opacity-100' : 'w-0 opacity-0'
-          }`}
-        ></span>
-      </span>
-      {/* Placeholder to maintain width */}
+    <span className={`relative inline font-semibold font-inherit ${className}`}>
+      <motion.span
+        className="inline-block"
+        initial={false}
+        animate={{ opacity: isVisible ? 1 : 0 }}
+        transition={{ duration: fadeDuration, ease: "easeInOut" }}
+      >
+        <span className="relative inline-block">
+          {words[currentIndex]}
+          <motion.span
+            key={currentIndex}
+            aria-hidden
+            className="pointer-events-none absolute left-0 top-full mt-0.5 block h-0.5 w-full origin-left rounded-sm bg-red-500"
+            style={{ transformOrigin: "0% 50%" }}
+            initial={{ scaleX: reduceMotion ? 1 : 0.02 }}
+            animate={{ scaleX: 1 }}
+            transition={underlineTransition}
+          />
+        </span>
+      </motion.span>
       <span className="invisible absolute">{placeholderText}</span>
     </span>
   );
