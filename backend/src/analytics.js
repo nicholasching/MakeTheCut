@@ -1,4 +1,4 @@
-import { Client, Databases, ID, Query } from 'node-appwrite';
+import { Client, Databases, Query } from 'node-appwrite';
 import { BetaAnalyticsDataClient } from '@google-analytics/data';
 
 const DB_ID = 'MacStats';
@@ -6,7 +6,7 @@ const COLL_TRAFFIC = 'traffic';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Return a YYYY-MM-DD string for a Date object. */
+/** Return a YYYY-MM-DD string for a Date object (UTC). */
 function toDateString(date) {
   return date.toISOString().slice(0, 10);
 }
@@ -19,16 +19,51 @@ function daysAgo(n) {
   return d;
 }
 
-/** Build an array of YYYY-MM-DD strings from startDate to endDate inclusive. */
-function dateRange(start, end) {
-  const dates = [];
-  const cur = new Date(start);
-  const last = new Date(end);
-  while (cur <= last) {
-    dates.push(toDateString(cur));
-    cur.setUTCDate(cur.getUTCDate() + 1);
+/** YYYY-MM for a UTC date. */
+function monthKeyFromDate(date) {
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+/** First calendar day of month (UTC) from YYYY-MM. */
+function firstDayOfMonth(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, 1));
+}
+
+/** Last calendar day of month (UTC) from YYYY-MM, as Date at 00:00 UTC. */
+function lastDayOfMonthDate(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0));
+}
+
+/** Number of days in month (UTC). */
+function daysInMonth(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  return new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+/** Appwrite document $id: 2-digit year + underscore + month 1–12 (e.g. 25_2). */
+function trafficDocId(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number);
+  return `${String(y).slice(-2)}_${m}`;
+}
+
+/** Enumerate every YYYY-MM from startDate through endDate (inclusive), UTC calendar months. */
+function monthRangeInclusive(startDate, endDate) {
+  const keys = [];
+  let cur = new Date(
+    Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), 1)
+  );
+  const end = new Date(
+    Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), 1)
+  );
+  while (cur <= end) {
+    keys.push(monthKeyFromDate(cur));
+    cur.setUTCMonth(cur.getUTCMonth() + 1);
   }
-  return dates;
+  return keys;
 }
 
 /** Paginate through all documents in a collection and return them. */
@@ -49,8 +84,6 @@ async function getAllDocuments(db, collId, queries = []) {
 /**
  * Query GA4 for pageviews over a date range and return an array of
  * { date: "YYYY-MM-DD", views: number } objects.
- *
- * GA4 returns dates in YYYYMMDD format — we normalise to YYYY-MM-DD.
  */
 async function fetchGA4Views(gaClient, propertyId, startDate, endDate, log) {
   log(`Fetching GA4 views from ${startDate} to ${endDate}`);
@@ -65,7 +98,7 @@ async function fetchGA4Views(gaClient, propertyId, startDate, endDate, log) {
   if (!response.rows) return [];
 
   return response.rows.map((row) => {
-    const raw = row.dimensionValues[0].value; // "20250410"
+    const raw = row.dimensionValues[0].value;
     const date = `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
     const views = parseInt(row.metricValues[0].value, 10);
     return { date, views };
@@ -73,18 +106,58 @@ async function fetchGA4Views(gaClient, propertyId, startDate, endDate, log) {
 }
 
 /**
- * Upsert a single traffic document.  $id is the date string so upserts are
- * idempotent and duplicate-safe.
+ * Build { average, total, byDate } for one calendar month from GA daily rows.
+ * byDate: comma-separated views for each calendar day 1..N (0 if GA returned no row).
+ * average: round(total / daysWithGaRow); daysWithGaRow = days that appear in the GA response.
  */
-async function upsertTraffic(db, date, views, log) {
+function buildMonthPayload(monthKey, dailyRows) {
+  const n = daysInMonth(monthKey);
+  const byDay = new Map();
+  for (const { date, views } of dailyRows) {
+    if (date.startsWith(monthKey)) byDay.set(date, views);
+  }
+
+  const values = [];
+  let total = 0;
+  let daysWithGaRow = 0;
+  const [y, mo] = monthKey.split('-').map(Number);
+
+  for (let day = 1; day <= n; day++) {
+    const ds = `${monthKey}-${String(day).padStart(2, '0')}`;
+    if (byDay.has(ds)) {
+      daysWithGaRow++;
+      const v = byDay.get(ds);
+      values.push(v);
+      total += v;
+    } else {
+      values.push(0);
+    }
+  }
+
+  const average =
+    daysWithGaRow > 0 ? Math.round(total / daysWithGaRow) : 0;
+  const byDate = values.join(',');
+
+  return { average, total, byDate };
+}
+
+async function upsertMonthDoc(db, docId, payload, log) {
+  const { average, total, byDate } = payload;
   try {
-    await db.updateDocument(DB_ID, COLL_TRAFFIC, date, { views });
+    await db.updateDocument(DB_ID, COLL_TRAFFIC, docId, {
+      average,
+      total,
+      byDate,
+    });
   } catch {
-    // Document does not exist yet — create it.
     try {
-      await db.createDocument(DB_ID, COLL_TRAFFIC, date, { date, views });
+      await db.createDocument(DB_ID, COLL_TRAFFIC, docId, {
+        average,
+        total,
+        byDate,
+      });
     } catch (err) {
-      log(`Failed to upsert ${date}: ${err.message}`);
+      log(`Failed to upsert ${docId}: ${err.message}`);
     }
   }
 }
@@ -96,19 +169,15 @@ async function upsertTraffic(db, date, views, log) {
  *
  * Schedule: 0 12 * * *  (12:00 UTC every day)
  *
- * Required environment variables (set in Appwrite Console):
- *   GA4_PROPERTY_ID            — numeric GA4 property ID (e.g. "123456789")
- *   GOOGLE_SERVICE_ACCOUNT_JSON — full service-account key JSON as a string
+ * Environment variables:
+ *   GA4_PROPERTY_ID, GOOGLE_SERVICE_ACCOUNT_JSON
  *
- * Appwrite collection required (create manually in Console):
- *   Database:    MacStats
- *   Collection:  traffic
- *   Fields:      date  (String, size 10, required)
- *                views (Integer, required)
- *   Permissions: Read → Any  |  Write → API Key only
+ * Collection `traffic`: one document per month, $id = YY_M (e.g. 25_2)
+ *   average (Integer) — mean daily views over days GA returned a row this month
+ *   total   (Integer) — sum of daily views for the month
+ *   byDate  (String)  — comma-separated daily views, calendar order (day 1..last; 0 = no GA row)
  */
 export default async ({ req, res, log, error }) => {
-  // ── Init Appwrite client ──────────────────────────────────────────────────
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
     .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
@@ -116,7 +185,6 @@ export default async ({ req, res, log, error }) => {
 
   const db = new Databases(client);
 
-  // ── Init GA4 client ───────────────────────────────────────────────────────
   const propertyId = process.env.GA4_PROPERTY_ID;
   if (!propertyId) {
     error('GA4_PROPERTY_ID is not set');
@@ -133,54 +201,43 @@ export default async ({ req, res, log, error }) => {
 
   const gaClient = new BetaAnalyticsDataClient({ credentials });
 
-  // ── Load existing cached dates ────────────────────────────────────────────
-  log('Loading existing traffic documents…');
+  log('Loading existing traffic month documents…');
   const existingDocs = await getAllDocuments(db, COLL_TRAFFIC);
-  const existingDates = new Set(existingDocs.map((d) => d.date));
-  log(`Found ${existingDates.size} cached dates`);
+  const existingMonths = new Set(existingDocs.map((d) => d.$id));
+  log(`Found ${existingMonths.size} cached months`);
 
-  // ── Determine what to fetch ───────────────────────────────────────────────
-  //
-  // Two ranges:
-  //   1. Backfill  — dates in [365daysAgo … 8daysAgo] with no cached doc
-  //   2. Refresh   — always re-fetch [7daysAgo … yesterday] because GA4
-  //                  data for recent days can be revised for up to 48 h
-  //
   const yesterday = daysAgo(1);
   const sevenDaysAgo = daysAgo(7);
   const eightDaysAgo = daysAgo(8);
   const maxHistory = daysAgo(365);
 
-  const backfillDates = dateRange(maxHistory, eightDaysAgo).filter(
-    (d) => !existingDates.has(d)
+  const backfillMonthStart = monthKeyFromDate(maxHistory);
+  const backfillMonthEnd = monthKeyFromDate(eightDaysAgo);
+  const backfillKeys = monthRangeInclusive(
+    firstDayOfMonth(backfillMonthStart),
+    lastDayOfMonthDate(backfillMonthEnd)
+  ).filter((k) => !existingMonths.has(trafficDocId(k)));
+
+  const refreshKeys = monthRangeInclusive(sevenDaysAgo, yesterday);
+
+  const monthsToFetch = [...new Set([...backfillKeys, ...refreshKeys])];
+  log(
+    `Months to fetch from GA: ${monthsToFetch.length} (${monthsToFetch.map(trafficDocId).join(', ')})`
   );
-  const refreshDates = dateRange(sevenDaysAgo, yesterday); // always re-fetch
 
-  log(`Backfill: ${backfillDates.length} missing dates`);
-  log(`Refresh:  ${refreshDates.length} dates (rolling 7-day window)`);
+  let monthsWritten = 0;
 
-  let upserted = 0;
-
-  // ── Backfill missing historical dates ────────────────────────────────────
-  if (backfillDates.length > 0) {
-    const startDate = backfillDates[0];
-    const endDate = backfillDates[backfillDates.length - 1];
-    const rows = await fetchGA4Views(gaClient, propertyId, startDate, endDate, log);
-    for (const { date, views } of rows) {
-      await upsertTraffic(db, date, views, log);
-      upserted++;
-    }
+  for (const monthKey of monthsToFetch) {
+    const docId = trafficDocId(monthKey);
+    const start = toDateString(firstDayOfMonth(monthKey));
+    const end = toDateString(lastDayOfMonthDate(monthKey));
+    const rows = await fetchGA4Views(gaClient, propertyId, start, end, log);
+    const inMonth = rows.filter((r) => r.date.startsWith(monthKey));
+    const payload = buildMonthPayload(monthKey, inMonth);
+    await upsertMonthDoc(db, docId, payload, log);
+    monthsWritten++;
   }
 
-  // ── Rolling 7-day refresh ─────────────────────────────────────────────────
-  const refreshStart = toDateString(sevenDaysAgo);
-  const refreshEnd = toDateString(yesterday);
-  const refreshRows = await fetchGA4Views(gaClient, propertyId, refreshStart, refreshEnd, log);
-  for (const { date, views } of refreshRows) {
-    await upsertTraffic(db, date, views, log);
-    upserted++;
-  }
-
-  log(`Done. Upserted ${upserted} documents.`);
-  return res.json({ ok: true, upserted });
+  log(`Done. Upserted ${monthsWritten} month document(s).`);
+  return res.json({ ok: true, monthsWritten });
 };
