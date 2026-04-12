@@ -14,10 +14,10 @@ export default function Footer() {
         </p>
       </div>
       <div className="flex items-center gap-4">
-        <Link href="/stats" className="text-neutral-500 hover:text-white transition-colors text-tiny">
+        <Link href="/stats" className="text-neutral-500 hover:text-red-500 transition-colors text-tiny">
           Site Stats &amp; Roadmap
         </Link>
-        <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-white transition-colors flex items-center gap-1">
+        <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-red-500 transition-colors flex items-center gap-1">
           <LinkIcon size={12} />
         </a>
       </div>

@@ -19,23 +19,20 @@ import Footer from "@/components/Footer";
 import { database } from "../appwrite";
 import { DATABASE_ID, COLL_TRAFFIC } from "@/lib/appwriteDb";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
+import {
+  addDaysUtc,
+  dailyToMap,
+  expandDocsToDaily,
+  getLastTrafficDayInclusiveUtc,
+  sumViewsInRange,
+  type DailyPoint,
+  type TrafficMonthDoc,
+} from "@/lib/trafficDaily";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 type RangeKey = "7d" | "30d" | "365d" | "all";
-
-interface TrafficMonthDoc {
-  $id: string;
-  average: number;
-  total: number;
-  byDate: string;
-}
-
-interface DailyPoint {
-  date: string;
-  views: number;
-}
 
 /**
  * Chart row: `views` = current period (solid); optional `prior` = previous window (dashed, 7d/30d).
@@ -162,100 +159,8 @@ function ChangelogBulletList({ items }: { items: string[] }) {
 // ---------------------------------------------------------------------------
 // Date helpers (UTC)
 // ---------------------------------------------------------------------------
-/**
- * Latest calendar day (UTC) included in traffic charts. A day's data is shown
- * only starting at 12:00 UTC on the following calendar day.
- */
-function getYesterdayUtc(): string {
-  const now = new Date();
-  const nowMs = now.getTime();
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  const d = now.getUTCDate();
-
-  const yesterday = new Date(Date.UTC(y, m, d));
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-  const yy = yesterday.getUTCFullYear();
-  const mm = yesterday.getUTCMonth();
-  const dd = yesterday.getUTCDate();
-  const releaseMs = Date.UTC(yy, mm, dd + 1, 12, 0, 0);
-
-  if (nowMs >= releaseMs) {
-    return yesterday.toISOString().slice(0, 10);
-  }
-
-  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
-  return yesterday.toISOString().slice(0, 10);
-}
-
-function addDaysUtc(dateStr: string, delta: number): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  d.setUTCDate(d.getUTCDate() + delta);
-  return d.toISOString().slice(0, 10);
-}
-
 function minDateStr(a: string, b: string): string {
   return a <= b ? a : b;
-}
-
-function parseTrafficDocId(
-  id: string
-): { year: number; month: number } | null {
-  const i = id.indexOf("_");
-  if (i < 0) return null;
-  const yy = parseInt(id.slice(0, i), 10);
-  const month = parseInt(id.slice(i + 1), 10);
-  if (Number.isNaN(yy) || Number.isNaN(month) || month < 1 || month > 12)
-    return null;
-  return { year: 2000 + yy, month };
-}
-
-/** Expand month docs to daily rows; drops days after `lastDateInclusive` (see `getYesterdayUtc`). */
-function expandDocsToDaily(
-  docs: TrafficMonthDoc[],
-  lastDateInclusive: string
-): DailyPoint[] {
-  const sorted = [...docs].sort((a, b) => {
-    const pa = parseTrafficDocId(a.$id);
-    const pb = parseTrafficDocId(b.$id);
-    if (!pa || !pb) return 0;
-    if (pa.year !== pb.year) return pa.year - pb.year;
-    return pa.month - pb.month;
-  });
-  const daily: DailyPoint[] = [];
-  for (const doc of sorted) {
-    const ym = parseTrafficDocId(doc.$id);
-    if (!ym) continue;
-    const { year: y, month: m } = ym;
-    const parts = doc.byDate.split(",").map((s) => parseInt(s.trim(), 10));
-    if (parts.some((n) => Number.isNaN(n))) continue;
-    const dim = new Date(Date.UTC(y, m, 0)).getUTCDate();
-    const ymd = `${y}-${String(m).padStart(2, "0")}`;
-    for (let day = 1; day <= dim && day <= parts.length; day++) {
-      const date = `${ymd}-${String(day).padStart(2, "0")}`;
-      if (date > lastDateInclusive) break;
-      daily.push({ date, views: parts[day - 1] ?? 0 });
-    }
-  }
-  return daily;
-}
-
-function dailyToMap(daily: DailyPoint[]): Map<string, number> {
-  return new Map(daily.map((d) => [d.date, d.views]));
-}
-
-function sumViewsInRange(
-  map: Map<string, number>,
-  start: string,
-  end: string
-): number {
-  let s = 0;
-  let d = start;
-  while (d <= end) {
-    s += map.get(d) ?? 0;
-    d = addDaysUtc(d, 1);
-  }
-  return s;
 }
 
 function formatShortDate(dateStr: string): string {
@@ -742,7 +647,7 @@ export default function StatsPage() {
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<RangeKey>("30d");
 
-  const yesterday = useMemo(() => getYesterdayUtc(), []);
+  const yesterday = useMemo(() => getLastTrafficDayInclusiveUtc(), []);
 
   useEffect(() => {
     async function load() {

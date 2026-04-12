@@ -7,6 +7,7 @@ import StreamChoiceGraph from "@/components/StreamChoiceGraph";
 import GradeDistributionChart from "@/components/GradeDistributionChart";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
+import LiveCounter from "@/components/LiveCounter";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
 import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
@@ -348,6 +349,7 @@ function DashboardContent() {
     <div className="flex flex-col min-h-screen" ref={sectionRef}>
       <GridBackground className="flex flex-1 p-5 pt-32 lg:p-12 lg:pt-32">
         <HomeButton />
+        <LiveCounter mode="siteViews" layout="dashboard" />
         <LogoutButton />
 
         <div className="w-full max-w-7xl mx-auto">
