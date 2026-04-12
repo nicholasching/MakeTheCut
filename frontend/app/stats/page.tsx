@@ -48,7 +48,11 @@ interface ChartPoint {
 }
 
 // ---------------------------------------------------------------------------
-// Changelog
+// Changelog (user-facing)
+// ---------------------------------------------------------------------------
+// Students read this on /stats. Keep bullets short, plain-language, and
+// benefit-focused — no frameworks, APIs, or internal implementation details.
+// When you ship something new, add lines only to the CHANGELOG array below.
 // ---------------------------------------------------------------------------
 type ChangelogEntry = {
   version: string;
@@ -64,6 +68,7 @@ const CHANGELOG: ChangelogEntry[] = [
     features: [
       "Statistics & roadmap page with site traffic charts (7 days through all time)",
       "If you're already signed in, the home page offers a quick way to open your dashboard",
+      "Signed-in users can reach the team from Contact Us (account menu or footer).",
     ],
     maintenance: [
       "Faster, more reliable data syncing so dashboards stay up to date",
