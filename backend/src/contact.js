@@ -112,22 +112,6 @@ export default async ({ req, res, log, error }) => {
       );
     }
 
-    const endpoint =
-      process.env.APPWRITE_ENDPOINT ||
-      process.env.APPWRITE_FUNCTION_API_ENDPOINT ||
-      "";
-    const projectId =
-      process.env.APPWRITE_PROJECT_ID || process.env.APPWRITE_FUNCTION_PROJECT_ID || "";
-    const apiKey = process.env.APPWRITE_API_KEY || "";
-    if (!endpoint || !projectId || !apiKey) {
-      log("Missing APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, or APPWRITE_API_KEY");
-      return sendJson(
-        res,
-        { ok: false, code: "SERVER", message: "Server misconfiguration" },
-        500
-      );
-    }
-
     const routes = getMessagingRoutes(log);
     if (!routes) {
       return sendJson(
@@ -138,9 +122,9 @@ export default async ({ req, res, log, error }) => {
     }
 
     const serverClient = new Client()
-      .setEndpoint(endpoint)
-      .setProject(projectId)
-      .setKey(apiKey);
+      .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
+      .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
+      .setKey(req.headers["x-appwrite-key"] ?? "");
     const users = new Users(serverClient);
     const messaging = new Messaging(serverClient);
 
