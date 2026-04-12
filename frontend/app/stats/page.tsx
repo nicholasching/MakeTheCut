@@ -645,7 +645,7 @@ export default function StatsPage() {
   const reduceMotion = useReducedMotion();
   const [dailyAll, setDailyAll] = useState<DailyPoint[]>([]);
   const [loading, setLoading] = useState(true);
-  const [range, setRange] = useState<RangeKey>("30d");
+  const [range, setRange] = useState<RangeKey>("7d");
 
   const yesterday = useMemo(() => getLastTrafficDayInclusiveUtc(), []);
 
