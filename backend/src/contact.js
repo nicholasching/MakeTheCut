@@ -1,9 +1,12 @@
-import { Client, Users, Messaging, ID } from "node-appwrite";
+import { Client, Users, Messaging, ID, Query } from "node-appwrite";
 
 const MAX_MESSAGE = 1000;
 const MAX_NAME = 128;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const LAST_MESSAGE_KEY = "lastMessage";
+
+/** Inbox: Appwrite user with this email (Messaging delivers to their email targets). */
+const CONTACT_INBOX_EMAIL = "chingn@mcmaster.ca";
 
 function getHeader(req, name) {
   const h = req.headers || {};
@@ -31,34 +34,6 @@ function sendJson(res, body, statusCode) {
   return res.text(JSON.stringify(body), statusCode, {
     "content-type": "application/json; charset=utf-8",
   });
-}
-
-/**
- * Messaging recipients: topic (subscribers) or comma-separated email target IDs.
- * Set APPWRITE_CONTACT_TOPIC_ID or APPWRITE_CONTACT_TARGET_IDS on the function.
- */
-function getMessagingRoutes(log) {
-  const topicId = (process.env.APPWRITE_CONTACT_TOPIC_ID || "").trim();
-  const targetsRaw = (process.env.APPWRITE_CONTACT_TARGET_IDS || "").trim();
-
-  if (topicId) {
-    return { topics: [topicId] };
-  }
-
-  if (targetsRaw) {
-    const targets = targetsRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    if (targets.length > 0) {
-      return { targets };
-    }
-  }
-
-  log(
-    "Set APPWRITE_CONTACT_TOPIC_ID (topic whose subscribers receive mail) or APPWRITE_CONTACT_TARGET_IDS (comma-separated Messaging email target IDs)."
-  );
-  return null;
 }
 
 export default async ({ req, res, log, error }) => {
@@ -112,23 +87,27 @@ export default async ({ req, res, log, error }) => {
       );
     }
 
-    const routes = getMessagingRoutes(log);
-    if (!routes) {
-      return sendJson(
-        res,
-        { ok: false, code: "SERVER", message: "Server misconfiguration" },
-        500
-      );
-    }
-
     const serverClient = new Client()
       .setEndpoint(process.env.APPWRITE_FUNCTION_API_ENDPOINT)
       .setProject(process.env.APPWRITE_FUNCTION_PROJECT_ID)
       .setKey(req.headers["x-appwrite-key"] ?? "");
-    const users = new Users(serverClient);
+    const usersService = new Users(serverClient);
     const messaging = new Messaging(serverClient);
 
-    const user = await users.get({ userId: userIdHeader });
+    const user = await usersService.get({ userId: userIdHeader });
+
+    const inboxList = await usersService.list({
+      queries: [Query.equal("email", CONTACT_INBOX_EMAIL), Query.limit(1)],
+    });
+    const inboxUser = inboxList.users?.[0];
+    if (!inboxUser) {
+      log(`No Appwrite user with email ${CONTACT_INBOX_EMAIL}`);
+      return sendJson(
+        res,
+        { ok: false, code: "SERVER", message: "Contact inbox is not configured" },
+        500
+      );
+    }
 
     const prefs = user.prefs && typeof user.prefs === "object" ? user.prefs : {};
     const lastMessage = prefs[LAST_MESSAGE_KEY];
@@ -155,10 +134,10 @@ export default async ({ req, res, log, error }) => {
       messageId: ID.unique(),
       subject: `[MakeTheCut Contact] ${displayName}`,
       content: emailText,
-      ...routes,
+      users: [inboxUser.$id],
     });
 
-    await users.updatePrefs({
+    await usersService.updatePrefs({
       userId: user.$id,
       prefs: { [LAST_MESSAGE_KEY]: new Date().toISOString() },
     });
