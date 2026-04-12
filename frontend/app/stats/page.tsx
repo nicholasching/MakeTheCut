@@ -926,7 +926,7 @@ export default function StatsPage() {
           ref={sectionRef}
           className="flex flex-col gap-6 md:gap-8 px-6 md:px-16 lg:px-28 pt-24 pb-16 max-w-6xl mx-auto w-full"
         >
-          <h1 className="text-4xl md:text-5xl font-medium text-white leading-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
             MakeTheCut Statistics &amp; Change Log
           </h1>
 
