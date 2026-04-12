@@ -2,9 +2,28 @@
 
 import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { account } from "../app/appwrite";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function check() {
+      try {
+        await account.get();
+        if (!cancelled) setLoggedIn(true);
+      } catch {
+        if (!cancelled) setLoggedIn(false);
+      }
+    }
+    check();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <footer className="w-full bg-neutral-950 border-t border-neutral-800 py-4 md:py-6 mt-auto flex justify-between px-10 md:px-30 gap-10">
@@ -13,7 +32,12 @@ export default function Footer() {
         Made with ❤️ by <a href="https://www.nicholasching.ca" className="text-neutral-500 hover:text-red-500 transition-colors">Nicholas Ching</a> and <a href="https://www.dylanli.ca/" className="text-neutral-500 hover:text-red-500 transition-colors">Dylan Li</a> / © {currentYear} MakeTheCut.
         </p>
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap justify-end">
+        {loggedIn && (
+          <Link href="/contact" className="text-neutral-500 hover:text-red-500 transition-colors text-tiny">
+            Contact Us
+          </Link>
+        )}
         <Link href="/stats" className="text-neutral-500 hover:text-red-500 transition-colors text-tiny">
           Site Stats &amp; Roadmap
         </Link>

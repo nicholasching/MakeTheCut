@@ -19,7 +19,8 @@ export default function TextField({
     maxLength,
     className, // Accept className prop
     type = 'text', // Default type
-    ...rest // Collect other standard HTML input attributes
+    disabled,
+    ...rest // HTML input attrs → inputProps (avoids MUI prop clashes e.g. color)
 }: CustomTextFieldProps) {
 
     // Handler to adapt MUI's event object to the desired (value: string) signature
@@ -42,6 +43,8 @@ export default function TextField({
                 className={className || "bg-neutral-900 rounded-lg w-2/3"} // Use external className if provided, otherwise fallback to original internal one
                 size="medium"
                 type={type} // Pass type down
+                disabled={disabled}
+                inputProps={{ maxLength, ...rest }}
                 sx={{ // Keep the original sx prop styling untouched
                     '& .MuiOutlinedInput-root': {
                         // Note: The 'color: white' here might target the wrong element for input text.
