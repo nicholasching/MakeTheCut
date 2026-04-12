@@ -162,11 +162,30 @@ function ChangelogBulletList({ items }: { items: string[] }) {
 // ---------------------------------------------------------------------------
 // Date helpers (UTC)
 // ---------------------------------------------------------------------------
+/**
+ * Latest calendar day (UTC) included in traffic charts. A day's data is shown
+ * only starting at 12:00 UTC on the following calendar day.
+ */
 function getYesterdayUtc(): string {
-  const d = new Date();
-  d.setUTCHours(0, 0, 0, 0);
-  d.setUTCDate(d.getUTCDate() - 1);
-  return d.toISOString().slice(0, 10);
+  const now = new Date();
+  const nowMs = now.getTime();
+  const y = now.getUTCFullYear();
+  const m = now.getUTCMonth();
+  const d = now.getUTCDate();
+
+  const yesterday = new Date(Date.UTC(y, m, d));
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  const yy = yesterday.getUTCFullYear();
+  const mm = yesterday.getUTCMonth();
+  const dd = yesterday.getUTCDate();
+  const releaseMs = Date.UTC(yy, mm, dd + 1, 12, 0, 0);
+
+  if (nowMs >= releaseMs) {
+    return yesterday.toISOString().slice(0, 10);
+  }
+
+  yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+  return yesterday.toISOString().slice(0, 10);
 }
 
 function addDaysUtc(dateStr: string, delta: number): string {
@@ -191,7 +210,7 @@ function parseTrafficDocId(
   return { year: 2000 + yy, month };
 }
 
-/** Expand month docs to daily rows; **drops days after `lastDateInclusive`** (use yesterday). */
+/** Expand month docs to daily rows; drops days after `lastDateInclusive` (see `getYesterdayUtc`). */
 function expandDocsToDaily(
   docs: TrafficMonthDoc[],
   lastDateInclusive: string
