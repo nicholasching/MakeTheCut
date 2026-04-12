@@ -122,17 +122,15 @@ export default async ({ req, res, log, error }) => {
     const displayName = nameIn || user.name || "Anonymous";
 
     const emailText = [
-      `User ID: ${user.$id}`,
-      `Account email: ${user.email}`,
-      `Display name: ${displayName}`,
-      "",
-      "Message:",
-      message,
-    ].join("\n");
+      `User ID:\n${user.$id}`,
+      `Account email:\n${user.email}`,
+      `Display name:\n${displayName}`,
+      `Message:\n${message}`,
+    ].join("\n\n");
 
     await messaging.createEmail({
       messageId: ID.unique(),
-      subject: `[MakeTheCut Contact] ${displayName}`,
+      subject: `Contact From [${displayName}]`,
       content: emailText,
       users: [inboxUser.$id],
     });
