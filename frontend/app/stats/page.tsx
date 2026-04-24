@@ -40,6 +40,7 @@ type RangeKey = "7d" | "30d" | "365d" | "all";
  */
 interface ChartPoint {
   date: string;
+  timestamp: number;
   views: number;
   label: string;
   prior?: number;
@@ -168,6 +169,10 @@ function minDateStr(a: string, b: string): string {
   return a <= b ? a : b;
 }
 
+function dateStrToUtcTimestamp(dateStr: string): number {
+  return Date.parse(dateStr + "T00:00:00Z");
+}
+
 function formatShortDate(dateStr: string): string {
   const d = new Date(dateStr + "T00:00:00Z");
   return d.toLocaleDateString("en-US", {
@@ -177,12 +182,20 @@ function formatShortDate(dateStr: string): string {
   });
 }
 
-/** X-axis: e.g. 2025 Jan (UTC, short month). */
-function formatMonthYearTick(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00Z");
-  const year = d.getUTCFullYear();
-  const month = d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
-  return `${year} ${month}`;
+/** X-axis day tick: MM.DD (UTC). */
+function formatAxisDayTick(timestamp: number): string {
+  const d = new Date(timestamp);
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${month}.${day}`;
+}
+
+/** X-axis month tick: MM.YY (UTC). */
+function formatAxisMonthTick(timestamp: number): string {
+  const d = new Date(timestamp);
+  const year = String(d.getUTCFullYear()).slice(-2);
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  return `${month}.${year}`;
 }
 
 /** Round to `sigDigits` significant figures (positive values only). */
@@ -233,22 +246,69 @@ function formatTrafficYAxisTick(v: number): string {
  * indices so the right edge shows the true end date (Recharts minTickGap +
  * interval was collapsing / mis-aligning the last tick).
  */
-function selectXAxisTickDates(data: ChartPoint[], maxTicks: number): string[] {
-  const dates = data.map((d) => d.date);
-  if (dates.length === 0) return [];
-  if (dates.length <= maxTicks) return dates;
-  const n = dates.length;
-  const indices = new Set<number>();
-  indices.add(0);
-  indices.add(n - 1);
-  const inner = maxTicks - 2;
-  for (let j = 1; j <= inner; j++) {
-    const idx = Math.round((j * (n - 1)) / (inner + 1));
-    indices.add(Math.min(n - 1, Math.max(0, idx)));
+function selectXAxisTickDates(
+  data: ChartPoint[],
+  maxTicks: number,
+  range: RangeKey
+): number[] {
+  if (data.length === 0) return [];
+  if (data.length === 1) return [data[0].timestamp];
+  const start = data[0].timestamp;
+  const end = data[data.length - 1].timestamp;
+  if (end <= start) return [start];
+
+  if (range === "30d") {
+    const dayMs = 24 * 60 * 60 * 1000;
+    const ticks: number[] = [];
+    let t = start;
+    while (t <= end) {
+      ticks.push(t);
+      t += 5 * dayMs;
+    }
+    return ticks;
   }
-  return Array.from(indices)
-    .sort((a, b) => a - b)
-    .map((i) => dates[i]);
+
+  // For long windows, use calendar-stepped month ticks so labels are accurate
+  // (e.g. 04.25, 06.25, 08.25...) instead of drifting day-based offsets.
+  if (range === "365d" || range === "all") {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const startMonth = Date.UTC(
+      startDate.getUTCFullYear(),
+      startDate.getUTCMonth(),
+      1
+    );
+    const endMonth = Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), 1);
+    const totalMonths =
+      (endDate.getUTCFullYear() - startDate.getUTCFullYear()) * 12 +
+      (endDate.getUTCMonth() - startDate.getUTCMonth()) +
+      1;
+    const stepMonths =
+      range === "all" ? Math.max(1, Math.floor(totalMonths / 6)) : 2;
+
+    const ticks: number[] = [];
+    let t = startMonth;
+    while (t < start) {
+      const d = new Date(t);
+      t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + stepMonths, 1);
+    }
+    while (t <= endMonth) {
+      ticks.push(t);
+      const d = new Date(t);
+      t = Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + stepMonths, 1);
+    }
+    if (ticks.length === 0) ticks.push(start);
+    return ticks;
+  }
+
+  const k = Math.max(2, maxTicks);
+  const span = end - start;
+  const ticks: number[] = [];
+  for (let i = 0; i < k; i++) {
+    const t = start + Math.round((i * span) / (k - 1));
+    ticks.push(t);
+  }
+  return ticks;
 }
 
 function pctChangeLabel(current: number, previous: number): string {
@@ -289,6 +349,7 @@ function alignedComparisonSeries(
     const dPrior = addDaysUtc(priorStart, i);
     points.push({
       date: dCur,
+      timestamp: dateStrToUtcTimestamp(dCur),
       views: map.get(dCur) ?? 0,
       label: formatShortDate(dCur),
       prior: map.get(dPrior) ?? 0,
@@ -299,12 +360,12 @@ function alignedComparisonSeries(
   return points;
 }
 
-/** Consecutive ≤7-day buckets from `windowStart` through `yesterday` (365-day window). */
-function weeklySeriesLast365Days(
+/** Consecutive 7-day buckets from `windowStart` through `yesterday` (364-day window). */
+function weeklySeriesLast364Days(
   map: Map<string, number>,
   yesterday: string
 ): ChartPoint[] {
-  const windowStart = addDaysUtc(yesterday, -364);
+  const windowStart = addDaysUtc(yesterday, -363);
   const points: ChartPoint[] = [];
   let ws = windowStart;
   while (ws <= yesterday) {
@@ -313,6 +374,7 @@ function weeklySeriesLast365Days(
     const sum = sumViewsInRange(map, ws, we);
     points.push({
       date: we,
+      timestamp: dateStrToUtcTimestamp(we),
       views: sum,
       label: `${formatShortDate(ws)} – ${formatShortDate(we)}`,
     });
@@ -340,6 +402,7 @@ function weeklyCumulativeAllTime(
     cum += sum;
     points.push({
       date: end,
+      timestamp: dateStrToUtcTimestamp(end),
       views: cum,
       label: `${formatShortDate(weekStart)} – ${formatShortDate(end)}`,
     });
@@ -452,7 +515,7 @@ function TrafficOverviewBody({
   stats: TrafficOverviewStats;
   loading: boolean;
   chartData: ChartPoint[];
-  xAxisTicks: string[];
+  xAxisTicks: number[];
 }) {
   return (
     <>
@@ -539,25 +602,36 @@ function TrafficOverviewBody({
               <CartesianGrid
                 strokeDasharray="3 3"
                 stroke="rgba(255,255,255,0.06)"
-                vertical={false}
+                vertical
               />
               <XAxis
-                type="category"
-                dataKey="date"
+                type="number"
+                dataKey="timestamp"
                 ticks={xAxisTicks}
+                scale="time"
+                domain={["dataMin", "dataMax"]}
+                interval={0}
                 tickLine={false}
-                axisLine={false}
+                axisLine={{
+                  stroke: "rgba(255,255,255,0.12)",
+                  strokeWidth: 1,
+                  strokeDasharray: "3 3",
+                }}
                 tick={{ fill: "#a3a3a3", fontSize: 11 }}
                 tickFormatter={(value) => {
-                  const v = String(value);
+                  const v = Number(value);
                   return range === "7d" || range === "30d"
-                    ? formatShortDate(v)
-                    : formatMonthYearTick(v);
+                    ? formatAxisDayTick(v)
+                    : formatAxisMonthTick(v);
                 }}
               />
               <YAxis
                 tickLine={false}
-                axisLine={false}
+                axisLine={{
+                  stroke: "rgba(255,255,255,0.12)",
+                  strokeWidth: 1,
+                  strokeDasharray: "3 3",
+                }}
                 tickMargin={4}
                 tick={{ fill: "#a3a3a3", fontSize: 11 }}
                 tickFormatter={(v: number) => formatTrafficYAxisTick(v)}
@@ -608,7 +682,7 @@ function TrafficOverviewBody({
         {(range === "7d" || range === "30d") &&
           !loading &&
           chartData.length > 0 && (
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-neutral-500">
+            <div className="mt-1 mb-3 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-neutral-500">
               <span className="flex items-center gap-2">
                 <span
                   className="inline-block w-10 h-0.5 rounded-full bg-red-500 shrink-0"
@@ -754,27 +828,27 @@ export default function StatsPage() {
     }
 
     if (range === "365d") {
-      const chartData = weeklySeriesLast365Days(map, yesterday);
+      const chartData = weeklySeriesLast364Days(map, yesterday);
       const total = sumViewsInRange(
         map,
-        addDaysUtc(yesterday, -364),
+        addDaysUtc(yesterday, -363),
         yesterday
       );
-      const avgDaily = Math.round(total / 365);
+      const avgDaily = Math.round(total / 364);
       const peak = chartData.reduce(
         (b, p) => (!b || p.views > b.views ? p : b),
         null as ChartPoint | null
       );
       const prevTotal = sumViewsInRange(
         map,
-        addDaysUtc(yesterday, -729),
-        addDaysUtc(yesterday, -365)
+        addDaysUtc(yesterday, -727),
+        addDaysUtc(yesterday, -364)
       );
       return {
         chartData,
         stats: {
           primary: total.toLocaleString(),
-          primaryLabel: "Views (365 days)",
+          primaryLabel: "Views (364 days)",
           secondary: avgDaily.toLocaleString(),
           secondaryLabel: "Daily average views",
           tertiary: peak ? peak.views.toLocaleString() : "—",
@@ -812,7 +886,7 @@ export default function StatsPage() {
     };
   }, [dailyAll, map, range, yesterday]);
 
-  const xAxisTicks = useMemo((): string[] => {
+  const xAxisTicks = useMemo((): number[] => {
     if (chartData.length === 0) return [];
     const maxTicks =
       range === "7d"
@@ -822,7 +896,7 @@ export default function StatsPage() {
         : range === "365d"
         ? 9
         : 10;
-    return selectXAxisTickDates(chartData, maxTicks);
+    return selectXAxisTickDates(chartData, maxTicks, range);
   }, [chartData, range]);
 
   const showCompareCard = range === "7d" || range === "30d";
@@ -836,8 +910,8 @@ export default function StatsPage() {
           ref={sectionRef}
           className="flex flex-col gap-6 md:gap-8 px-6 md:px-16 lg:px-28 pt-24 pb-16 max-w-6xl mx-auto w-full"
         >
-          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-            MakeTheCut Statistics &amp; Change Log
+          <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight text-center">
+            MakeTheCut Stats &amp; Change Log
           </h1>
 
 
@@ -874,9 +948,9 @@ export default function StatsPage() {
               </div>
             </div>
 
-            <div className="p-6 md:p-8">
+            <div className="p-6 pb-3 md:p-8 md:pb-3">
               {reduceMotion ? (
-                <div key={range} className="space-y-6">
+                <div key={range} className="space-y-8">
                   <TrafficOverviewBody
                     range={range}
                     showCompareCard={showCompareCard}
@@ -890,7 +964,7 @@ export default function StatsPage() {
                 <AnimatePresence mode="wait" initial={false}>
                   <motion.div
                     key={range}
-                    className="space-y-6"
+                    className="space-y-8"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
