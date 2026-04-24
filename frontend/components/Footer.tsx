@@ -26,19 +26,19 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="w-full bg-neutral-950 border-t border-neutral-800 py-4 md:py-6 mt-auto flex justify-between px-10 md:px-30 gap-10">
-      <div className="pt-2 md:text-left">
-        <p className="text-neutral-500 text-tiny">
-        Made with ❤️ by <a href="https://www.nicholasching.ca" className="text-neutral-500 hover:text-red-500 transition-colors">Nicholas Ching</a> and <a href="https://www.dylanli.ca/" className="text-neutral-500 hover:text-red-500 transition-colors">Dylan Li</a> / © {currentYear} MakeTheCut.
+    <footer className="w-full bg-neutral-950 border-t border-neutral-800 py-4 md:py-6 mt-auto flex flex-wrap items-center justify-center md:justify-between px-6 md:px-20 gap-x-10 gap-y-2">
+      <div className="w-full md:w-auto text-center md:text-left shrink-0">
+        <p className="text-neutral-500 text-sm whitespace-nowrap">
+        Made with ❤️ by <a href="https://www.nicholasching.ca" className="text-neutral-500 hover:text-red-500 transition-colors">Nicholas Ching</a> and <a href="https://www.dylanli.ca/" className="text-neutral-500 hover:text-red-500 transition-colors">Dylan Li</a>
         </p>
       </div>
-      <div className="flex items-center gap-4 flex-wrap justify-end">
+      <div className="w-full md:w-auto flex items-center gap-4 justify-center md:justify-end shrink-0 whitespace-nowrap">
         {loggedIn && (
-          <Link href="/contact" className="text-neutral-500 hover:text-red-500 transition-colors text-tiny">
+          <Link href="/contact" className="text-neutral-500 hover:text-red-500 transition-colors text-sm">
             Contact Us
           </Link>
         )}
-        <Link href="/stats" className="text-neutral-500 hover:text-red-500 transition-colors text-tiny">
+        <Link href="/stats" className="text-neutral-500 hover:text-red-500 transition-colors text-sm">
           Site Stats &amp; Roadmap
         </Link>
         <a href="https://www.eng.mcmaster.ca/about-us/fast-facts/" className="text-neutral-400 hover:text-red-500 transition-colors flex items-center gap-1">
