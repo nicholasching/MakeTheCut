@@ -347,12 +347,14 @@ function DashboardContent() {
 
   return (
     <div className="flex flex-col min-h-screen" ref={sectionRef}>
-      <GridBackground className="flex flex-1 p-5 pt-32 lg:p-12 lg:pt-32">
+      <GridBackground className="flex flex-1 p-5 pt-28 lg:p-12 lg:pt-28">
         <HomeButton />
-        <LiveCounter mode="siteViews" layout="dashboard" />
         <LogoutButton />
 
-        <div className="w-full max-w-7xl mx-auto">
+        <div className="relative w-full max-w-7xl mx-auto">
+          <div className="pointer-events-none absolute inset-x-0 -top-20 z-20 flex justify-center">
+            <LiveCounter mode="siteViews" layout="dashboard" />
+          </div>
           <div className="flex flex-col gap-8">
             <div className="z-10 flex flex-col gap-8">
               <HorizontalBarChart

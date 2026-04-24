@@ -164,17 +164,16 @@ export default function LiveCounter({
 
   const positionClass =
     mode === "siteViews" && layout === "dashboard"
-      ? "fixed top-10 left-1/2 -translate-x-1/2 w-fit max-w-[min(20rem,calc(100vw-7rem))] z-20"
+      ? "w-fit"
       : "fixed top-10 w-fit left-1/2 transform -translate-x-1/2 md:translate-x-0 md:right-15 md:left-auto z-10";
 
   const mergedClass = `${shell} ${positionClass} ${className}`.trim();
-
   if (mode === "siteViews") {
     return (
       <button
         type="button"
         onClick={() => navigate("/stats")}
-        className={`${mergedClass} cursor-pointer border border-white/10 text-subtitle hover:bg-white/[0.14] hover:border-white/20 transition-colors duration-200 group`}
+        className={`${mergedClass} pointer-events-auto cursor-pointer border border-white/10 text-subtitle hover:bg-white/[0.14] hover:border-white/20 transition-colors duration-200 group`}
         aria-label="Open site statistics and traffic charts"
       >
         <div
@@ -184,7 +183,7 @@ export default function LiveCounter({
           <span className="absolute inset-0 rounded-full bg-red-500" />
           <span className="absolute inset-0 rounded-full bg-red-500 opacity-75 animate-ping" />
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-white leading-normal">
+        <div className="flex items-center gap-x-1 whitespace-nowrap text-white leading-normal">
           <span className="shrink-0">Site Traffic:</span>
           <span className="inline-flex items-center tabular-nums font-semibold">
             <AnimatePresence mode="wait">
@@ -231,6 +230,8 @@ export default function LiveCounter({
                         : "text-neutral-400"
                   }`}
                 >
+                  {animatedWowPercent >= 0 ? "+" : ""}
+                  {animatedWowPercent.toFixed(1)}%
                   {wowInfo.direction === "up" && (
                     <TrendingUp
                       className="size-[1em] shrink-0"
@@ -245,8 +246,6 @@ export default function LiveCounter({
                       aria-hidden
                     />
                   )}
-                  {animatedWowPercent >= 0 ? "+" : ""}
-                  {animatedWowPercent.toFixed(1)}%
                 </span>
               )}
             </>
@@ -262,7 +261,7 @@ export default function LiveCounter({
         <div className="absolute inset-0 rounded-full bg-red-500"></div>
         <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75"></div>
       </div>
-      <p className="text-white text-subtitle">
+      <p className="text-white text-subtitle whitespace-nowrap">
         Lifetime Data Points:{" "}
         <AnimatePresence mode="wait">
           {totalContributions === null ? (
