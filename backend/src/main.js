@@ -112,7 +112,6 @@ export default async ({ req, res, log, error }) => {
       // ── WORKFLOW 1: Stream preferences only (streamPrefsOpen → sem1GradesOpen)
       if (wf.inStreamPrefsWindow) {
         await runStreamChoiceCounts(database, documents, y, log);
-        await runEstimatedCutoffs(database, documents, y, log);
         results.push(`${y}: streamPrefs (choices + estimated cutoffs)`);
       }
 
@@ -242,6 +241,7 @@ async function runEstimatedCutoffs(database, documents, year, log) {
   }
 
   const assigned = new Set();
+  const choiceOutcomeCounts = { firstChoice: 0, secondChoice: 0, thirdChoice: 0 };
 
   // Free-choice students first
   for (const student of sorted) {
@@ -251,6 +251,7 @@ async function runEstimatedCutoffs(database, documents, year, log) {
     if (first && streamCounts[first] !== undefined) {
       streamCounts[first]++;
       assigned.add(student.$id);
+      choiceOutcomeCounts.firstChoice++;
     }
   }
 
@@ -259,13 +260,17 @@ async function runEstimatedCutoffs(database, documents, year, log) {
     if (assigned.has(student.$id) || student.freechoice) continue;
     if (!student.streams || student.streams === 'null') continue;
     const prefs = student.streams.split(',').map(s => s.trim().toLowerCase());
-    for (const stream of prefs) {
+    for (let idx = 0; idx < prefs.length; idx++) {
+      const stream = prefs[idx];
       if (streamCounts[stream] !== undefined && streamCounts[stream] < actualSeats[stream]) {
         streamCounts[stream]++;
         assigned.add(student.$id);
         if (lowestGPAs[stream] === -1 || student.gpa < lowestGPAs[stream]) {
           lowestGPAs[stream] = student.gpa;
         }
+        if (idx === 0) choiceOutcomeCounts.firstChoice++;
+        else if (idx === 1) choiceOutcomeCounts.secondChoice++;
+        else if (idx === 2) choiceOutcomeCounts.thirdChoice++;
         break;
       }
     }
@@ -295,6 +300,9 @@ async function runEstimatedCutoffs(database, documents, year, log) {
   const nullStreamsCount = documents.filter(d => !d.streams || d.streams === 'null' || d.streams.trim() === '').length;
   await patchCutoffDocument(database, `${year}_total`, {
     streamCount: documents.length - nullStreamsCount,
+    firstChoice: choiceOutcomeCounts.firstChoice,
+    secondChoice: choiceOutcomeCounts.secondChoice,
+    thirdChoice: choiceOutcomeCounts.thirdChoice,
   });
 
   log(`   [estimatedCutoffs] updated ${year}_* cutoff docs`);
