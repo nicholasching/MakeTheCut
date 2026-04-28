@@ -10,7 +10,14 @@ import HomeButton from "@/components/HomeButton";
 import LiveCounter from "@/components/LiveCounter";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
-import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
+import {
+  ChevronDown,
+  Calculator,
+  ClipboardList,
+  Info,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 import { account, database } from "../appwrite";
 import {
   usePageTransition,
@@ -18,11 +25,17 @@ import {
 } from "@/components/TransitionProvider";
 import {
   ADMISSION,
+  COLL_CUTOFFS,
+  COLL_MARKS,
   COLL_USERS,
   DATABASE_ID,
   academicYearFullLabel,
   academicYearShortLabel,
+  cutoffDocId,
+  markDocId,
   priorCohortYear,
+  queriesForCutoffYear,
+  streamKeyFromCutoffDocId,
 } from "@/lib/appwriteDb";
 import { getCompletedYears, getCohortAccess } from "@/lib/scheduleConfig";
 
@@ -33,6 +46,82 @@ const initialChartReadyState: Record<DashboardGraphKey, boolean> = {
   streamChoice: false,
   gradeDistribution: false,
 };
+
+type ChoiceBucket = 1 | 2 | 3;
+
+type ChoiceSummary = {
+  first: number;
+  second: number;
+  third: number;
+  denominator: number;
+  projected: ChoiceBucket | null;
+};
+
+const initialChoiceSummary: ChoiceSummary = {
+  first: 0,
+  second: 0,
+  third: 0,
+  denominator: 0,
+  projected: null,
+};
+
+function percentageText(count: number, denominator: number) {
+  if (!denominator || denominator <= 0) return "0.0%";
+  return `${((count / denominator) * 100).toFixed(1)}%`;
+}
+
+function LiveChoiceProjectionSection({
+  summary,
+}: {
+  summary: ChoiceSummary;
+}) {
+  const cards: { key: ChoiceBucket; title: string; value: number }[] = [
+    { key: 1, title: "First Choice", value: summary.first },
+    { key: 2, title: "Second Choice", value: summary.second },
+    { key: 3, title: "Third Choice", value: summary.third },
+  ];
+
+  return (
+    <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl p-6 shadow-2xl">
+      <div className="flex items-center justify-center mb-3">
+        <div className="text-center">
+          <h2 className="text-lg md:text-xl font-semibold text-white">
+            Live Stream Choice Outcomes
+          </h2>
+          <p className="text-xs md:text-sm text-neutral-400">
+            Percentage of students projected to receive each choice from live submissions.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {cards.map((card) => {
+          const isProjected = summary.projected === card.key;
+          return (
+            <div
+              key={card.key}
+              className={`rounded-xl border p-4 transition-all ${
+                isProjected
+                  ? "border-red-400/70 bg-red-500/10 shadow-[0_0_0_1px_rgba(248,113,113,0.35)]"
+                  : "border-neutral-600/40 bg-white/[0.02]"
+              }`}
+            >
+              <div className="flex items-center justify-center text-center">
+                <p className="text-sm text-neutral-300 font-medium">{card.title}</p>
+              </div>
+              <p className="text-3xl font-bold text-white text-center">
+                {percentageText(card.value, summary.denominator)}
+              </p>
+              <p className="text-xs text-neutral-500 mt-1 text-center">
+                {card.value} / {summary.denominator || 0} students
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 function StatisticsDropdown({ year }: { year: number }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -222,6 +311,9 @@ function DashboardContent() {
   const [, setUserName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [chartReady, setChartReady] = useState(() => initialChartReadyState);
+  const [choiceSummary, setChoiceSummary] = useState<ChoiceSummary>(
+    initialChoiceSummary
+  );
   const setChartTransitionReady = useCallback(
     (key: DashboardGraphKey, ready: boolean) => {
       setChartReady((prev) =>
@@ -249,6 +341,7 @@ function DashboardContent() {
     chartReady.gradeDistribution;
   useTransitionPageReady(dashboardReady);
   const completedYears = getCompletedYears();
+  const showLiveChoiceProjection = getCohortAccess(ADMISSION.current).hasFullGradeData;
 
   useEffect(() => {
     async function initiatePage() {
@@ -324,6 +417,61 @@ function DashboardContent() {
             }
           }
         }
+
+        if (showLiveChoiceProjection) {
+          try {
+            const [cutoffTotalDoc, marksTotalDoc, allCutoffs] = await Promise.all([
+              database.getDocument(DATABASE_ID, COLL_CUTOFFS, cutoffDocId(ADMISSION.current, "total")),
+              database.getDocument(DATABASE_ID, COLL_MARKS, markDocId(ADMISSION.current, "total")),
+              database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(ADMISSION.current)),
+            ]);
+
+            const first = Number(cutoffTotalDoc.firstChoice) || 0;
+            const second = Number(cutoffTotalDoc.secondChoice) || 0;
+            const third = Number(cutoffTotalDoc.thirdChoice) || 0;
+            const distribution = String(marksTotalDoc.distribution || "")
+              .split(",")
+              .map((n) => Number(n))
+              .filter((n) => !Number.isNaN(n));
+            const denominator = distribution.reduce((sum, n) => sum + n, 0);
+
+            let projected: ChoiceBucket | null = null;
+            if (doc) {
+              const userGpa = Number(doc.gpa) || 0;
+              const isFreeChoice = Boolean(doc.freechoice);
+              const streamChoices = String(doc.streams || "")
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
+                .slice(0, 3);
+
+              if (isFreeChoice && streamChoices.length > 0) {
+                projected = 1;
+              } else if (userGpa > 0 && streamChoices.length > 0) {
+                const cutoffByStream: Record<string, number> = {};
+                allCutoffs.documents.forEach((cDoc: { $id: string; streamCutoff?: number | string }) => {
+                  const key = streamKeyFromCutoffDocId(cDoc.$id);
+                  if (!key || key === "total") return;
+                  cutoffByStream[key] = Number(cDoc.streamCutoff) || 0;
+                });
+
+                if (streamChoices[0] && userGpa >= (cutoffByStream[streamChoices[0]] ?? 13)) {
+                  projected = 1;
+                } else if (streamChoices[1] && userGpa >= (cutoffByStream[streamChoices[1]] ?? 13)) {
+                  projected = 2;
+                } else if (streamChoices[2] && userGpa >= (cutoffByStream[streamChoices[2]] ?? 13)) {
+                  projected = 3;
+                }
+              }
+            }
+
+            setChoiceSummary({ first, second, third, denominator, projected });
+          } catch {
+            setChoiceSummary(initialChoiceSummary);
+          }
+        } else {
+          setChoiceSummary(initialChoiceSummary);
+        }
         // ── End gating ──
       } catch {
         navigate("/login");
@@ -357,6 +505,9 @@ function DashboardContent() {
           </div>
           <div className="flex flex-col gap-8">
             <div className="z-10 flex flex-col gap-8">
+              {showLiveChoiceProjection && (
+                <LiveChoiceProjectionSection summary={choiceSummary} />
+              )}
               <HorizontalBarChart
                 onTransitionReadyChange={handleCutoffsTransitionReady}
               />
