@@ -39,6 +39,7 @@ const SEAT_COUNTS = {
 function cutoffDocDefaults(overrides = {}) {
   return {
     streamCount: 0,
+    freeChoice: 0,
     streamCutoff: 4,
     firstChoice: 0,
     secondChoice: 0,
@@ -147,12 +148,21 @@ export default async ({ req, res, log, error }) => {
 async function runStreamChoiceCounts(database, documents, year, log) {
   const choiceCounts = {};
   for (const k of STREAM_KEYS) {
-    choiceCounts[k] = { firstChoice: 0, secondChoice: 0, thirdChoice: 0 };
+    choiceCounts[k] = { firstChoice: 0, secondChoice: 0, thirdChoice: 0, freeChoice: 0 };
   }
+  let totalFreeChoice = 0;
 
   for (const doc of documents) {
     if (!doc.streams || doc.streams === 'null') continue;
     const prefs = doc.streams.split(',').map(s => s.trim().toLowerCase());
+    const isFreeChoice = doc.freechoice === true;
+    if (isFreeChoice) {
+      totalFreeChoice++;
+      const firstPref = prefs[0];
+      if (choiceCounts[firstPref]) {
+        choiceCounts[firstPref].freeChoice++;
+      }
+    }
     prefs.forEach((stream, idx) => {
       if (!choiceCounts[stream]) return;
       if (idx === 0) choiceCounts[stream].firstChoice++;
@@ -166,12 +176,14 @@ async function runStreamChoiceCounts(database, documents, year, log) {
       firstChoice: choiceCounts[k].firstChoice,
       secondChoice: choiceCounts[k].secondChoice,
       thirdChoice: choiceCounts[k].thirdChoice,
+      freeChoice: choiceCounts[k].freeChoice,
     });
   }
 
   const validCount = documents.filter(d => d.streams && d.streams !== 'null' && d.streams.trim() !== '').length;
   await patchCutoffDocument(database, `${year}_total`, {
     streamCount: validCount,
+    freeChoice: totalFreeChoice,
   });
 
   log(`   [choiceCounts] updated ${year}_* cutoff docs`);
