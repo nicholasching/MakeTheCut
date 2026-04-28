@@ -64,6 +64,15 @@ type ChangelogEntry = {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2",
+    date: "May 2026",
+    features: [
+      "New dashboard section shows the live percentage of students projected to receive their first, second, or third stream choice",
+      "Projected cutoffs now include free-choice totals and per-stream composition (suggested by Shaheer Khan)",
+    ],
+    maintenance: [],
+  },
+  {
     version: "2.1",
     date: "April 2026",
     features: [
@@ -152,7 +161,7 @@ function ChangelogBulletList({ items }: { items: string[] }) {
       {items.map((text, i) => (
         <li key={i} className="flex items-start gap-3 text-sm">
           <span
-            className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
+            className="mt-2 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"
             aria-hidden
           />
           <span className="text-neutral-300 leading-relaxed">{text}</span>
