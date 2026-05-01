@@ -453,6 +453,9 @@ export default function MePage() {
       <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center gap-5 text-center py-10 rounded-md">
         {showStreamPrefs && (
           <>
+            <h2 className="text-lg font-semibold text-white mt-1">
+              Stream Preferences
+            </h2>
             <ComboboxStreams
               value={stream1Choice}
               onChange={setStream1Choice}
@@ -482,6 +485,14 @@ export default function MePage() {
                 Please select three stream preferences to continue.
               </p>
             )}
+          </>
+        )}
+
+        {showGradeBlock && (
+          <>
+            <h2 className="text-lg font-semibold text-white mt-2">
+              Grades
+            </h2>
           </>
         )}
 
@@ -598,6 +609,9 @@ export default function MePage() {
 
         {showStreamResults && (
           <>
+            <h2 className="text-lg font-semibold text-white mt-2">
+              Stream Outcomes
+            </h2>
             <p className="text-neutral-300 text-sm -mb-2">
               What stream did you get into?
             </p>
