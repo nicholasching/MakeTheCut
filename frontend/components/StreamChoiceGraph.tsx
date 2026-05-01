@@ -9,7 +9,6 @@ import {
   COLL_CUTOFFS,
   queriesForCutoffYear,
   streamKeyFromCutoffDocId,
-  liveAcademicYearLabel,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
 import { getCohortAccess } from "@/lib/scheduleConfig";
@@ -132,12 +131,12 @@ export default function StreamChoiceGraph({
   const [yAxisWidth, setYAxisWidth] = useState(55);
   const [isMobile, setIsMobile] = useState(false);
 
-  const title =
-    year === ADMISSION.current
-      ? `${liveAcademicYearLabel()} Stream Choice Distribution`
-      : `${academicYearFullLabel(year)} Stream Choice Distribution`;
+  const isLive = !access.isArchived;
+  const title = isLive
+    ? `Live ${academicYearFullLabel(year)} Stream Choice Distribution`
+    : `${academicYearFullLabel(year)} Stream Choice Distribution`;
 
-  const hideLive = year === ADMISSION.current && !access.streamChoiceVisible;
+  const hideLive = isLive && !access.streamChoiceVisible;
   const transitionReady = hideLive || !isLoading;
 
   useEffect(() => {
@@ -175,7 +174,6 @@ export default function StreamChoiceGraph({
     return null;
   }
 
-  const isLive = year === ADMISSION.current;
   const cardClass = isLive
     ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
     : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";

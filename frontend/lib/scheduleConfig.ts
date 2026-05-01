@@ -58,18 +58,27 @@ export function priorCohortYear(now = new Date()): number {
   return computeCurrentAdmitYear(now) - 1;
 }
 
+/** Smallest cohort year whose Aug 1 dashboard-archive gate is still in the future. */
+export function computeCurrentDashboardYear(now = new Date()): number {
+  let y = COHORT_LAUNCH_YEAR;
+  while (SCHEDULE.dashboardArchive(y) <= now) {
+    y++;
+  }
+  return y;
+}
+
 /** Incoming cohort can appear in sign-up from Apr 1 of their intake year. */
 export function incomingSignUpAvailable(now = new Date()): boolean {
   const inc = incomingCohortYear(now);
   return now >= SCHEDULE.streamPrefsOpen(inc);
 }
 
-/** Years with turnover passed (for dashboard archived sections), newest first. */
+/** Years with dashboard archive gate passed, newest first. */
 export function getCompletedYears(now = new Date()): number[] {
   const cur = computeCurrentAdmitYear(now);
   const out: number[] = [];
   for (let y = cur - 1; y >= COHORT_LAUNCH_YEAR; y--) {
-    if (SCHEDULE.turnover(y) <= now) out.push(y);
+    if (SCHEDULE.dashboardArchive(y) <= now) out.push(y);
   }
   return out;
 }
@@ -121,8 +130,7 @@ export function getCohortAccess(
 
   const showReportedCutoffs = now >= SCHEDULE.streamResultsOpen(y);
 
-  const streamChoiceVisible =
-    y === cur && now >= SCHEDULE.dashboardArchive(y - 1);
+  const streamChoiceVisible = y === computeCurrentDashboardYear(now);
 
   return {
     canEditStreamPrefs,

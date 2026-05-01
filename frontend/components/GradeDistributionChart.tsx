@@ -39,7 +39,6 @@ import {
   DATABASE_ID,
   COLL_MARKS,
   markDocId,
-  liveAcademicYearLabel,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
 import { getCohortAccess } from "@/lib/scheduleConfig";
@@ -167,10 +166,10 @@ export default function GradeDistributionChart({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const rafRef = useRef<number | null>(null);
 
-  const title =
-    year === ADMISSION.current
-      ? `${liveAcademicYearLabel()} Course Distributions`
-      : `${academicYearFullLabel(year)} Course Distributions`;
+  const isLive = !access.isArchived;
+  const title = isLive
+    ? `Live ${academicYearFullLabel(year)} Course Distributions`
+    : `${academicYearFullLabel(year)} Course Distributions`;
   const transitionReady = noData || !isLoading;
 
   useEffect(() => {
@@ -267,7 +266,6 @@ export default function GradeDistributionChart({
     return null;
   }
 
-  const isLive = year === ADMISSION.current;
   const cardClass = isLive
     ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
     : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";

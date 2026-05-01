@@ -27,7 +27,6 @@ import {
   streamKeyFromCutoffDocId,
   cutoffDocId,
   markDocId,
-  liveAcademicYearLabel,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
 import { getCohortAccess } from "@/lib/scheduleConfig";
@@ -158,7 +157,7 @@ export default function HorizontalBarChart({
   const [totalReported, setTotalReported] = useState(0);
 
   /** Restore original per-year styling: live uses subtle white, archived uses dark overlay. */
-  const isLive = year === ADMISSION.current && !access.showReportedCutoffs;
+  const isLive = !access.isArchived && !access.showReportedCutoffs;
   const cardClass = isLive
     ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
     : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";
@@ -311,7 +310,7 @@ export default function HorizontalBarChart({
 
   const title = access.showReportedCutoffs
     ? `${academicYearFullLabel(year)} Stream Cutoffs`
-    : `${liveAcademicYearLabel()} Estimated Stream Cutoffs`;
+    : `Live ${academicYearFullLabel(year)} Estimated Stream Cutoffs`;
 
   const barColors = [
     "#CC7400",

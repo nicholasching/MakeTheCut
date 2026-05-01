@@ -24,7 +24,6 @@ import {
   useTransitionPageReady,
 } from "@/components/TransitionProvider";
 import {
-  ADMISSION,
   COLL_CUTOFFS,
   COLL_MARKS,
   COLL_USERS,
@@ -33,11 +32,14 @@ import {
   academicYearShortLabel,
   cutoffDocId,
   markDocId,
-  priorCohortYear,
   queriesForCutoffYear,
   streamKeyFromCutoffDocId,
 } from "@/lib/appwriteDb";
-import { getCompletedYears, getCohortAccess } from "@/lib/scheduleConfig";
+import {
+  computeCurrentDashboardYear,
+  getCompletedYears,
+  getCohortAccess,
+} from "@/lib/scheduleConfig";
 
 type DashboardGraphKey = "cutoffs" | "streamChoice" | "gradeDistribution";
 
@@ -168,7 +170,7 @@ function StatisticsDropdown({ year }: { year: number }) {
   );
 }
 
-function MethodologyDropdown() {
+function MethodologyDropdown({ priorYear }: { priorYear: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -230,7 +232,7 @@ function MethodologyDropdown() {
                 </li>
               </ul>
               <p className="mt-4 text-xs text-neutral-500 italic">
-                {academicYearShortLabel(priorCohortYear())} estimates are locked; no further updates.
+                {academicYearShortLabel(priorYear)} estimates are locked; no further updates.
               </p>
             </div>
 
@@ -286,7 +288,7 @@ function MethodologyDropdown() {
                 <ul className="space-y-1.5">
                   <li>• Stream preferences: real-time</li>
                   <li>• Reported cutoffs: as students report</li>
-                  <li>• Estimated cutoffs: locked for {academicYearShortLabel(priorCohortYear())}</li>
+                  <li>• Estimated cutoffs: locked for {academicYearShortLabel(priorYear)}</li>
                   <li>• Historical data: annual verification</li>
                 </ul>
               </div>
@@ -340,8 +342,10 @@ function DashboardContent() {
     chartReady.streamChoice &&
     chartReady.gradeDistribution;
   useTransitionPageReady(dashboardReady);
+  const dashboardYear = computeCurrentDashboardYear();
+  const priorDashboardYear = dashboardYear - 1;
   const completedYears = getCompletedYears();
-  const showLiveChoiceProjection = getCohortAccess(ADMISSION.current).hasFullGradeData;
+  const showLiveChoiceProjection = getCohortAccess(dashboardYear).hasFullGradeData;
 
   useEffect(() => {
     async function initiatePage() {
@@ -363,7 +367,7 @@ function DashboardContent() {
           )) as unknown as Record<string, unknown>;
         } catch {
           // No user doc yet — redirect to /me whenever any window is open.
-          const a = getCohortAccess(ADMISSION.current);
+          const a = getCohortAccess(dashboardYear);
           if (
             a.canEditStreamPrefs ||
             a.canEditSem1Grades ||
@@ -376,7 +380,7 @@ function DashboardContent() {
         }
 
         if (doc) {
-          const admitYear = (doc.admitYear as number | undefined) ?? ADMISSION.current;
+          const admitYear = (doc.admitYear as number | undefined) ?? dashboardYear;
           const a = getCohortAccess(admitYear);
 
           // Apr 1 year N → Jun 1 year N+1: must have all three stream preferences set.
@@ -421,9 +425,9 @@ function DashboardContent() {
         if (showLiveChoiceProjection) {
           try {
             const [cutoffTotalDoc, marksTotalDoc, allCutoffs] = await Promise.all([
-              database.getDocument(DATABASE_ID, COLL_CUTOFFS, cutoffDocId(ADMISSION.current, "total")),
-              database.getDocument(DATABASE_ID, COLL_MARKS, markDocId(ADMISSION.current, "total")),
-              database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(ADMISSION.current)),
+              database.getDocument(DATABASE_ID, COLL_CUTOFFS, cutoffDocId(dashboardYear, "total")),
+              database.getDocument(DATABASE_ID, COLL_MARKS, markDocId(dashboardYear, "total")),
+              database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(dashboardYear)),
             ]);
 
             const first = Number(cutoffTotalDoc.firstChoice) || 0;
@@ -480,7 +484,7 @@ function DashboardContent() {
       }
     }
     initiatePage();
-  }, [navigate]);
+  }, [navigate, dashboardYear, showLiveChoiceProjection]);
 
   if (isLoading) {
     return (
@@ -509,12 +513,15 @@ function DashboardContent() {
                 <LiveChoiceProjectionSection summary={choiceSummary} />
               )}
               <HorizontalBarChart
+                year={dashboardYear}
                 onTransitionReadyChange={handleCutoffsTransitionReady}
               />
               <StreamChoiceGraph
+                year={dashboardYear}
                 onTransitionReadyChange={handleStreamChoiceTransitionReady}
               />
               <GradeDistributionChart
+                year={dashboardYear}
                 onTransitionReadyChange={handleGradeDistributionTransitionReady}
               />
             </div>
@@ -526,7 +533,7 @@ function DashboardContent() {
             </div>
 
             <div>
-              <MethodologyDropdown />
+              <MethodologyDropdown priorYear={priorDashboardYear} />
             </div>
           </div>
         </div>
