@@ -373,11 +373,15 @@ function DashboardContent() {
         } catch {
           // No user doc yet — redirect to /me whenever any window is open.
           const a = getCohortAccess(dashboardYear);
+          const shouldEnforceGating = !a.streamResultsLocked;
           if (
-            a.canEditStreamPrefs ||
-            a.canEditSem1Grades ||
-            a.canEditAllGrades ||
-            a.canEditStreamResults
+            shouldEnforceGating &&
+            (
+              a.canEditStreamPrefs ||
+              a.canEditSem1Grades ||
+              a.canEditAllGrades ||
+              a.canEditStreamResults
+            )
           ) {
             navigate("/me");
             return;
@@ -387,9 +391,10 @@ function DashboardContent() {
         if (doc) {
           const admitYear = (doc.admitYear as number | undefined) ?? dashboardYear;
           const a = getCohortAccess(admitYear);
+          const shouldEnforceGating = !a.streamResultsLocked;
 
           // Apr 1 year N → Jun 1 year N+1: must have all three stream preferences set.
-          if (a.canEditStreamPrefs) {
+          if (shouldEnforceGating && a.canEditStreamPrefs) {
             const streams = doc.streams as string | undefined;
             const parts =
               streams && streams !== "null" ? streams.split(",").filter(Boolean) : [];
@@ -400,7 +405,7 @@ function DashboardContent() {
           }
 
           // Dec 20 → lock: must have at least one grade > 0 (any course).
-          if (a.canEditSem1Grades || a.canEditAllGrades) {
+          if (shouldEnforceGating && (a.canEditSem1Grades || a.canEditAllGrades)) {
             const gradeCols = [
               "math1za3", "math1zb3", "math1zc3",
               "phys1d03", "phys1e03", "chem1e03", "eng1p13",
@@ -418,7 +423,7 @@ function DashboardContent() {
           }
 
           // Jun 1 N+1 → May 1 N+2: must have streamIn set.
-          if (a.canEditStreamResults) {
+          if (shouldEnforceGating && a.canEditStreamResults) {
             const streamIn = doc.streamIn as string | undefined;
             if (!streamIn || streamIn === "null" || streamIn.trim() === "") {
               navigate("/me");
