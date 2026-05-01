@@ -14,6 +14,7 @@ import Combobox from "@/components/Combobox";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import {
   computeCurrentAdmitYear,
+  getCohortAccess,
   getSignUpAdmitYearOptions,
 } from "@/lib/scheduleConfig";
 
@@ -24,7 +25,13 @@ function SignUpContent() {
   const [error, setError] = useState("");
   const [isSigningUp, setIsSigningUp] = useState(false);
 
-  const yearOptions = useMemo(() => getSignUpAdmitYearOptions(), []);
+  const yearOptions = useMemo(
+    () =>
+      getSignUpAdmitYearOptions().filter(
+        (o) => !getCohortAccess(o.value).streamResultsLocked
+      ),
+    []
+  );
   const yearItems = useMemo(
     () =>
       yearOptions.map((o) => ({
