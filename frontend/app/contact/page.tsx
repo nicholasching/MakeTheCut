@@ -11,6 +11,7 @@ import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import { account } from "../appwrite";
+import { getAccountCached } from "@/lib/appwriteCache";
 import { submitContactForm } from "@/lib/contactFunction";
 import { Loader2, Mail } from "lucide-react";
 
@@ -80,7 +81,7 @@ export default function ContactPage() {
     let cancelled = false;
     async function load() {
       try {
-        const user = await account.get();
+        const user = await getAccountCached();
         if (!user.emailVerification) {
           navigate("/authenticate");
           return;

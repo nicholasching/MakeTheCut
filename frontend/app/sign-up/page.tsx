@@ -5,6 +5,7 @@ import { usePageTransition } from "@/components/TransitionProvider";
 import { account, database, ID } from "../appwrite";
 import { Permission, Role } from "appwrite";
 import { COLL_USERS, DATABASE_ID } from "@/lib/appwriteDb";
+import { getAccountCached } from "@/lib/appwriteCache";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -49,7 +50,7 @@ function SignUpContent() {
   useEffect(() => {
     async function initiatePage() {
       try {
-        await account.get();
+        await getAccountCached();
         if (!isSigningUp) {
           navigate("/dashboard");
         }

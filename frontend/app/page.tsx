@@ -17,7 +17,7 @@ import LiveCounter from "@/components/LiveCounter";
 
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import { usePageTransition } from "@/components/TransitionProvider";
-import { account } from "./appwrite";
+import { getAccountCached } from "@/lib/appwriteCache";
 
 function HomeContent() {
   const sectionRef = useSectionTracking("Home");
@@ -27,7 +27,7 @@ function HomeContent() {
   useEffect(() => {
     async function checkSession() {
       try {
-        await account.get();
+        await getAccountCached();
         setLoggedIn(true);
       } catch {
         /* not logged in */

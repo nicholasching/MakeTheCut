@@ -1,4 +1,4 @@
-import { account, database } from "../app/appwrite";
+import { database } from "../app/appwrite";
 import { Permission, Role } from "appwrite";
 import {
   ADMISSION,
@@ -7,6 +7,7 @@ import {
 } from "../lib/appwriteDb";
 import type { CohortAccess } from "../lib/scheduleConfig";
 import { calculateAverages } from "../lib/gradeCalc";
+import { getAccountCached, getUserDocCached } from "../lib/appwriteCache";
 
 function userDocPermissions(userId: string) {
   return [
@@ -43,7 +44,7 @@ export interface StreamAdmissionInput {
 }
 
 export async function addLog(gradesInput: GradesInput) {
-    let loggedInUser = await account.get();
+    let loggedInUser = await getAccountCached();
     
     const averageGPA = calculateAverages(gradesInput).toFixed(2);
     
@@ -101,7 +102,7 @@ export async function addLog(gradesInput: GradesInput) {
 }
 
 export async function addStreamChoices(streamsInput: StreamsInput) {
-    let loggedInUser = await account.get();
+    let loggedInUser = await getAccountCached();
     
     const streamData = {
         streams: streamsInput.streams || "null",
@@ -145,7 +146,7 @@ export async function addStreamChoices(streamsInput: StreamsInput) {
 }
 
 export async function addStreamAdmission(streamAdmissionInput: StreamAdmissionInput) {
-    let loggedInUser = await account.get();
+    let loggedInUser = await getAccountCached();
     
     const streamAdmissionData = {
         streamIn: streamAdmissionInput.streamIn || "null",
@@ -234,15 +235,11 @@ export async function saveUserProfile(
   input: UserProfileInput,
   access: CohortAccess
 ) {
-  const loggedInUser = await account.get();
+  const loggedInUser = await getAccountCached();
 
   let existing: Record<string, unknown> | null = null;
   try {
-    existing = (await database.getDocument(
-      DATABASE_ID,
-      COLL_USERS,
-      loggedInUser.$id
-    )) as unknown as Record<string, unknown>;
+    existing = (await getUserDocCached(loggedInUser.$id)) as unknown as Record<string, unknown>;
   } catch {
     existing = null;
   }

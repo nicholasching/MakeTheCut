@@ -3,7 +3,7 @@
 import { Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { account } from "../app/appwrite";
+import { getAccountCached } from "@/lib/appwriteCache";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,7 +13,7 @@ export default function Footer() {
     let cancelled = false;
     async function check() {
       try {
-        await account.get();
+        await getAccountCached();
         if (!cancelled) setLoggedIn(true);
       } catch {
         if (!cancelled) setLoggedIn(false);
