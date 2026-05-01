@@ -2,15 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as ChartTooltip } from "recharts";
-import { database } from "../app/appwrite";
 import {
   ADMISSION,
-  DATABASE_ID,
-  COLL_CUTOFFS,
-  queriesForCutoffYear,
   streamKeyFromCutoffDocId,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
+import { listCutoffsForYearCached } from "@/lib/appwriteCache";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import {
   Card,
@@ -59,7 +56,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: { payl
 
 async function fetchStreamChoiceData(year: number) {
   try {
-    const documents = await database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(year));
+    const documents = await listCutoffsForYearCached(year);
     const updatedChartData = [...initialChartData];
     let totalSubmissions = 0;
 

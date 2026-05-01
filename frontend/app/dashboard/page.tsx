@@ -18,23 +18,22 @@ import {
   AlertCircle,
   Sparkles,
 } from "lucide-react";
-import { account, database } from "../appwrite";
 import {
   usePageTransition,
   useTransitionPageReady,
 } from "@/components/TransitionProvider";
 import {
-  COLL_CUTOFFS,
-  COLL_MARKS,
-  COLL_USERS,
-  DATABASE_ID,
   academicYearFullLabel,
   academicYearShortLabel,
-  cutoffDocId,
-  markDocId,
-  queriesForCutoffYear,
   streamKeyFromCutoffDocId,
 } from "@/lib/appwriteDb";
+import {
+  getAccountCached,
+  getCutoffTotalCached,
+  getMarksTotalCached,
+  getUserDocCached,
+  listCutoffsForYearCached,
+} from "@/lib/appwriteCache";
 import {
   computeCurrentDashboardYear,
   getCompletedYears,
@@ -127,13 +126,21 @@ function LiveChoiceProjectionSection({
 
 function StatisticsDropdown({ year }: { year: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const archived = getCohortAccess(year).isArchived;
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const toggleOpen = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) setHasOpened(true);
+      return next;
+    });
+  };
 
   return (
     <div className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleOpen}
         className="flex items-center justify-between w-full p-6 hover:bg-white/[0.04] transition-all duration-300 group"
       >
         <div className="flex items-center gap-3 flex-wrap">
@@ -154,17 +161,19 @@ function StatisticsDropdown({ year }: { year: number }) {
           isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="p-6 pt-2 space-y-8">
-          <div>
-            <HorizontalBarChart year={year} />
+        {hasOpened && (
+          <div className="p-6 pt-2 space-y-8">
+            <div>
+              <HorizontalBarChart year={year} />
+            </div>
+            <div>
+              <StreamChoiceGraph year={year} />
+            </div>
+            <div>
+              <GradeDistributionChart year={year} />
+            </div>
           </div>
-          <div>
-            <StreamChoiceGraph year={year} />
-          </div>
-          <div>
-            <GradeDistributionChart year={year} />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -350,7 +359,7 @@ function DashboardContent() {
   useEffect(() => {
     async function initiatePage() {
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         if (!loggedInUser.emailVerification) {
           navigate("/authenticate");
           return;
@@ -360,11 +369,7 @@ function DashboardContent() {
         // ── Gating: check required data for each currently-open window ──
         let doc: Record<string, unknown> | null = null;
         try {
-          doc = (await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          )) as unknown as Record<string, unknown>;
+          doc = (await getUserDocCached(loggedInUser.$id)) as unknown as Record<string, unknown>;
         } catch {
           // No user doc yet — redirect to /me whenever any window is open.
           const a = getCohortAccess(dashboardYear);
@@ -425,9 +430,9 @@ function DashboardContent() {
         if (showLiveChoiceProjection) {
           try {
             const [cutoffTotalDoc, marksTotalDoc, allCutoffs] = await Promise.all([
-              database.getDocument(DATABASE_ID, COLL_CUTOFFS, cutoffDocId(dashboardYear, "total")),
-              database.getDocument(DATABASE_ID, COLL_MARKS, markDocId(dashboardYear, "total")),
-              database.listDocuments(DATABASE_ID, COLL_CUTOFFS, queriesForCutoffYear(dashboardYear)),
+              getCutoffTotalCached(dashboardYear),
+              getMarksTotalCached(dashboardYear),
+              listCutoffsForYearCached(dashboardYear),
             ]);
 
             const first = Number(cutoffTotalDoc.firstChoice) || 0;

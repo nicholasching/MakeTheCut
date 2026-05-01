@@ -5,6 +5,7 @@ import { usePageTransition } from "@/components/TransitionProvider";
 import { account } from "../appwrite";
 import LogoutButton from "@/components/LogoutButton";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
+import { getAccountCached } from "@/lib/appwriteCache";
 
 function AuthenticateContent() {
     const { navigate } = usePageTransition();
@@ -14,7 +15,7 @@ function AuthenticateContent() {
     useEffect(() => {
         async function initiatePage() {
             try {
-                let loggedInUser = await account.get();
+                let loggedInUser = await getAccountCached();
                 if (loggedInUser.emailVerification) {
                     navigate('/dashboard');
                 }

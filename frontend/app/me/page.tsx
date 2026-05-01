@@ -11,8 +11,8 @@ import Combobox from "@/components/Combobox";
 import ComboboxStreams from "@/components/ComboboxStream";
 import LogoutButton from "@/components/LogoutButton";
 import { Checkbox } from "@/components/ui/checkbox";
-import { account, database } from "../appwrite";
-import { ADMISSION, COLL_USERS, DATABASE_ID } from "@/lib/appwriteDb";
+import { ADMISSION } from "@/lib/appwriteDb";
+import { getAccountCached, getUserDocCached } from "@/lib/appwriteCache";
 import TextField from "@/components/TextField";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import { getCohortAccess } from "@/lib/scheduleConfig";
@@ -190,7 +190,7 @@ export default function MePage() {
     let cancelled = false;
     async function load() {
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         if (!loggedInUser.emailVerification) {
           navigate("/authenticate");
           return;
@@ -199,11 +199,7 @@ export default function MePage() {
         let ay = ADMISSION.current;
         let hasDoc = false;
         try {
-          const doc = await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          );
+          const doc = await getUserDocCached(loggedInUser.$id);
           hasDoc = true;
           const d = doc as Record<string, unknown>;
           ay = Number(d.admitYear) || ADMISSION.current;

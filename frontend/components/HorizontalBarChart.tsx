@@ -14,21 +14,20 @@ import {
   Cell,
   Tooltip as ChartTooltip,
 } from "recharts";
-import { account, database } from "../app/appwrite";
 import {
   ADMISSION,
-  COLL_USERS,
-  DATABASE_ID,
-  COLL_CUTOFFS,
-  COLL_MARKS,
   isActiveEng1Cohort,
   isGraduatedCohort,
-  listCutoffsForYear,
   streamKeyFromCutoffDocId,
-  cutoffDocId,
-  markDocId,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
+import {
+  getAccountCached,
+  getCutoffTotalCached,
+  getMarksTotalCached,
+  getUserDocCached,
+  listCutoffsForYearCached,
+} from "@/lib/appwriteCache";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { CardDescription } from "@/components/ui/card";
 import {
@@ -186,13 +185,9 @@ export default function HorizontalBarChart({
       let ugpa = 4;
 
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         try {
-          const user = await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          );
+          const user = await getUserDocCached(loggedInUser.$id);
           const ay = (user as { admitYear?: number }).admitYear;
           ugpa = Number((user as { gpa?: number }).gpa) || 0;
           const acc = getCohortAccess(year);
@@ -211,7 +206,8 @@ export default function HorizontalBarChart({
           return;
         }
 
-        const cutoffDocs = await listCutoffsForYear(database, year);
+        const cutoffDocsRes = await listCutoffsForYearCached(year);
+        const cutoffDocs = cutoffDocsRes.documents;
         cutoffDocs.forEach(
           (doc: {
             $id: string;
@@ -233,26 +229,14 @@ export default function HorizontalBarChart({
 
         try {
           if (getCohortAccess(year).showReportedCutoffs) {
-            const totalDoc = await database.getDocument(
-              DATABASE_ID,
-              COLL_CUTOFFS,
-              cutoffDocId(year, "total")
-            );
-            setTotalContributions(Number(totalDoc.streamCount) || 0);
-            setTotalFreeChoiceContributions(Number(totalDoc.freeChoice) || 0);
-            setTotalReported(Number(totalDoc.reportCutoff) || 0);
+            const totalCached = await getCutoffTotalCached(year);
+            setTotalContributions(Number(totalCached.streamCount) || 0);
+            setTotalFreeChoiceContributions(Number(totalCached.freeChoice) || 0);
+            setTotalReported(Number(totalCached.reportCutoff) || 0);
           } else {
             const [marksTotal, cutoffTotal] = await Promise.all([
-              database.getDocument(
-                DATABASE_ID,
-                COLL_MARKS,
-                markDocId(year, "total")
-              ),
-              database.getDocument(
-                DATABASE_ID,
-                COLL_CUTOFFS,
-                cutoffDocId(year, "total")
-              ),
+              getMarksTotalCached(year),
+              getCutoffTotalCached(year),
             ]);
             const distributionStr = marksTotal.distribution || "";
             const distributionArr = distributionStr

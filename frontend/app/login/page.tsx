@@ -7,6 +7,7 @@ import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import { useSectionTracking } from "@/hooks/useSectionTracking"
 import { usePageTransition } from "@/components/TransitionProvider";
+import { getAccountCached } from "@/lib/appwriteCache";
 
 function LoginContent() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ function LoginContent() {
   useEffect(() => {
     async function initiatePage() {
         try {
-            await account.get();
+            await getAccountCached();
             navigate('/dashboard');
         }
         catch (error) {

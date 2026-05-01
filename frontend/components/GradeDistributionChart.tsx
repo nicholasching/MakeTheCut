@@ -33,14 +33,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { database } from "../app/appwrite";
 import {
   ADMISSION,
-  DATABASE_ID,
-  COLL_MARKS,
-  markDocId,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
+import { getMarksCourseCached } from "@/lib/appwriteCache";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -80,11 +77,7 @@ const initialChartData = Array.from({ length: 12 }, (_, i) => ({
 
 async function fetchDistribution(year: number, course: string) {
   try {
-    const document = await database.getDocument(
-      DATABASE_ID,
-      COLL_MARKS,
-      markDocId(year, course)
-    );
+    const document = await getMarksCourseCached(year, course);
     const grades = document.distribution.split(",").map(Number);
     grades.push(Number(document.average));
     return grades;

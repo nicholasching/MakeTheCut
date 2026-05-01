@@ -12,12 +12,10 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Query } from "appwrite";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Footer from "@/components/Footer";
-import { database } from "../appwrite";
-import { DATABASE_ID, COLL_TRAFFIC } from "@/lib/appwriteDb";
+import { listTrafficDocsCached } from "@/lib/appwriteCache";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import {
   addDaysUtc,
@@ -740,9 +738,7 @@ export default function StatsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await database.listDocuments(DATABASE_ID, COLL_TRAFFIC, [
-          Query.limit(120),
-        ]);
+        const res = await listTrafficDocsCached(120);
         const docs = res.documents as unknown as TrafficMonthDoc[];
         setDailyAll(expandDocsToDaily(docs, yesterday));
       } catch (e) {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { AnalyticsWrapper } from "@/components/AnalyticsWrapper";
 import { ElectionBanner } from "@/components/ElectionBanner";
+import { QueryProvider } from "@/components/QueryProvider";
 import { TransitionProvider } from "@/components/TransitionProvider";
 import "./globals.css";
 
@@ -75,14 +76,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <TransitionProvider>
-          <AnalyticsWrapper>
-            {/* <ElectionBanner /> */}
-            <main>
-              {children}
-            </main>
-          </AnalyticsWrapper>
-        </TransitionProvider>
+        <QueryProvider>
+          <TransitionProvider>
+            <AnalyticsWrapper>
+              {/* <ElectionBanner /> */}
+              <main>
+                {children}
+              </main>
+            </AnalyticsWrapper>
+          </TransitionProvider>
+        </QueryProvider>
       </body>
     </html>
   );
