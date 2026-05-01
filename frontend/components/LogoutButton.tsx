@@ -1,9 +1,13 @@
 "use client";
+import { useEffect, useState } from "react";
 import { usePageTransition } from "@/components/TransitionProvider";
 import { account } from "../app/appwrite";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import { ADMISSION } from "@/lib/appwriteDb";
+import { getCohortAccess } from "@/lib/scheduleConfig";
+import { getAccountCached, getUserDocCached } from "@/lib/appwriteCache";
 
 interface LogoutButtonProps {
     buttonText?: string;
@@ -13,6 +17,31 @@ interface LogoutButtonProps {
 const LogoutButton = ({
 }: LogoutButtonProps) => {
     const { navigate } = usePageTransition();
+    const [isDataLocked, setIsDataLocked] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        async function loadLockState() {
+            try {
+                const user = await getAccountCached();
+                const doc = await getUserDocCached(user.$id);
+                const admitYear = Number(doc.admitYear) || ADMISSION.current;
+                const access = getCohortAccess(admitYear);
+                const editable =
+                    access.canEditStreamPrefs ||
+                    access.canEditSem1Grades ||
+                    access.canEditAllGrades ||
+                    access.canEditStreamResults;
+                if (!cancelled) setIsDataLocked(!editable);
+            } catch {
+                if (!cancelled) setIsDataLocked(false);
+            }
+        }
+        loadLockState();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const logout = async () => {
         try {
@@ -43,14 +72,25 @@ const LogoutButton = ({
                         <DialogContent className="bg-neutral-900 border-none md:w-2/5 w-2/3 pt-10">
                             <DialogTitle className="text-white text-center">
                             </DialogTitle>
-                            <Link href="/me">
+                            {isDataLocked ? (
                                 <button
                                     type="button"
-                                    className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all"
+                                    disabled
+                                    aria-disabled="true"
+                                    className="text-white py-2 rounded-sm w-full block bg-[#e64640] opacity-90 cursor-not-allowed"
                                 >
-                                    Edit My Data
+                                    Data is Now Locked
                                 </button>
-                            </Link>
+                            ) : (
+                                <Link href="/me">
+                                    <button
+                                        type="button"
+                                        className="text-white py-2 rounded-sm w-full block cursor-pointer hover:scale-103 transition-all bg-neutral-800 hover:bg-neutral-700"
+                                    >
+                                        Edit My Data
+                                    </button>
+                                </Link>
+                            )}
                             <Link href="/contact">
                                 <button
                                     type="button"
