@@ -51,8 +51,9 @@ function SignUpContent() {
     () => yearOptions[0]?.value ?? computeCurrentAdmitYear()
   );
 
-  const isPriorCohort = admitYear < computeCurrentAdmitYear();
   const isSpectator = admitYear === SPECTATOR_ADMIT_YEAR;
+  const canCollectHistoricalOutcome =
+    !isSpectator && getCohortAccess(admitYear).canEditStreamResults;
 
   const [gpa, setGpa] = useState("");
   const [streamIn, setStreamIn] = useState("");
@@ -96,7 +97,7 @@ function SignUpContent() {
         return;
       }
 
-      if (isPriorCohort && !isSpectator) {
+      if (canCollectHistoricalOutcome) {
         if (!gpa) {
           setError("Please enter your GPA");
           setIsSigningUp(false);
@@ -129,7 +130,7 @@ function SignUpContent() {
         Permission.delete(Role.user(newUser.$id)),
       ];
 
-      if (isPriorCohort && !isSpectator) {
+      if (canCollectHistoricalOutcome) {
         await database.createDocument(DATABASE_ID, COLL_USERS, newUser.$id, {
           gpa: parseFloat(gpa),
           math1za3: 0,
@@ -238,7 +239,7 @@ function SignUpContent() {
           emptyMessage="No year found."
         />
 
-        {isPriorCohort && !isSpectator && (
+        {canCollectHistoricalOutcome && (
           <div className="w-full mb-4 space-y-4">
             <div className="flex flex-col gap-2">
               <label className="text-neutral-300 text-sm font-medium text-center">
