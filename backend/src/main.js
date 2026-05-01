@@ -10,6 +10,7 @@ const COLL_CUTOFFS = 'cutoffs';
  * every year up to the current incoming cohort.
  */
 const COHORT_LAUNCH_YEAR = 24;
+const SPECTATOR_ADMIT_YEAR = 99;
 
 const STREAM_KEYS = ['chem', 'civ', 'comp', 'elec', 'engphys', 'mat', 'mech', 'tron', 'soft'];
 
@@ -94,6 +95,8 @@ export default async ({ req, res, log, error }) => {
 
   try {
     for (let y = COHORT_LAUNCH_YEAR; y <= maxYear; y++) {
+      // Spectator accounts are view-only and never participate in data pipelines.
+      if (y === SPECTATOR_ADMIT_YEAR) continue;
       const wf = getWorkflows(y, now);
       const anyActive = wf.inStreamPrefsWindow || wf.inGradesWindow || wf.inReportedCutoffsWindow;
       if (!anyActive) continue;

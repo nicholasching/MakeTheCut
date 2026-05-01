@@ -19,6 +19,8 @@ import { getCohortAccess } from "@/lib/scheduleConfig";
 import { calculateAverages } from "@/lib/gradeCalc";
 import { saveUserProfile } from "@/actions/logActions";
 
+const SPECTATOR_ADMIT_YEAR = 99;
+
 function convertGradeToNumber(input: string): string {
   if (!input) return "";
   const normalized = input.trim().toUpperCase();
@@ -99,6 +101,7 @@ export default function MePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
   useTransitionPageReady(ready);
 
   const showStreamPrefs = access.canEditStreamPrefs;
@@ -244,6 +247,8 @@ export default function MePage() {
 
         if (cancelled) return;
         setAdmitYear(ay);
+        const spectator = ay === SPECTATOR_ADMIT_YEAR;
+        setIsSpectator(spectator);
         const acc = getCohortAccess(ay);
         setAccess(acc);
 
@@ -252,7 +257,7 @@ export default function MePage() {
           !acc.canEditSem1Grades &&
           !acc.canEditAllGrades &&
           !acc.canEditStreamResults;
-        if (fullyLocked && hasDoc) {
+        if ((spectator || fullyLocked) && hasDoc) {
           navigate("/dashboard");
           return;
         }
@@ -636,17 +641,19 @@ export default function MePage() {
           </>
         )}
 
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <button
-            type="button"
-            className="bg-white text-black w-1/3 p-2 rounded-sm border-none hover:scale-105 transition-all duration-300 cursor-pointer mt-5"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting…" : "Submit"}
-          </button>
-          {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
-        </div>
+        {!isSpectator && (
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <button
+              type="button"
+              className="bg-white text-black w-1/3 p-2 rounded-sm border-none hover:scale-105 transition-all duration-300 cursor-pointer mt-5"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting…" : "Submit"}
+            </button>
+            {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
+          </div>
+        )}
       </div>
     </GridBackground>
   );

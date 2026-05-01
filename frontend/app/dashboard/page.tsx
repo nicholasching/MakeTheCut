@@ -40,6 +40,8 @@ import {
   getCohortAccess,
 } from "@/lib/scheduleConfig";
 
+const SPECTATOR_ADMIT_YEAR = 99;
+
 type DashboardGraphKey = "cutoffs" | "streamChoice" | "gradeDistribution";
 
 const initialChartReadyState: Record<DashboardGraphKey, boolean> = {
@@ -390,8 +392,9 @@ function DashboardContent() {
 
         if (doc) {
           const admitYear = (doc.admitYear as number | undefined) ?? dashboardYear;
+          const isSpectator = admitYear === SPECTATOR_ADMIT_YEAR;
           const a = getCohortAccess(admitYear);
-          const shouldEnforceGating = !a.streamResultsLocked;
+          const shouldEnforceGating = !isSpectator && !a.streamResultsLocked;
 
           // Apr 1 year N → Jun 1 year N+1: must have all three stream preferences set.
           if (shouldEnforceGating && a.canEditStreamPrefs) {

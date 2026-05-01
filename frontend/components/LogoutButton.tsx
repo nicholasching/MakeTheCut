@@ -9,6 +9,8 @@ import { ADMISSION } from "@/lib/appwriteDb";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { getAccountCached, getUserDocCached } from "@/lib/appwriteCache";
 
+const SPECTATOR_ADMIT_YEAR = 99;
+
 interface LogoutButtonProps {
     buttonText?: string;
     className?: string;
@@ -18,6 +20,7 @@ const LogoutButton = ({
 }: LogoutButtonProps) => {
     const { navigate } = usePageTransition();
     const [isDataLocked, setIsDataLocked] = useState(false);
+    const [isSpectator, setIsSpectator] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -26,15 +29,20 @@ const LogoutButton = ({
                 const user = await getAccountCached();
                 const doc = await getUserDocCached(user.$id);
                 const admitYear = Number(doc.admitYear) || ADMISSION.current;
+                const spectator = admitYear === SPECTATOR_ADMIT_YEAR;
+                setIsSpectator(spectator);
                 const access = getCohortAccess(admitYear);
                 const editable =
                     access.canEditStreamPrefs ||
                     access.canEditSem1Grades ||
                     access.canEditAllGrades ||
                     access.canEditStreamResults;
-                if (!cancelled) setIsDataLocked(!editable);
+                if (!cancelled) setIsDataLocked(spectator || !editable);
             } catch {
-                if (!cancelled) setIsDataLocked(false);
+                if (!cancelled) {
+                  setIsSpectator(false);
+                  setIsDataLocked(false);
+                }
             }
         }
         loadLockState();

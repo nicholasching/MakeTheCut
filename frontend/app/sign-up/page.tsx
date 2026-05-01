@@ -18,6 +18,8 @@ import {
   getSignUpAdmitYearOptions,
 } from "@/lib/scheduleConfig";
 
+const SPECTATOR_ADMIT_YEAR = 99;
+
 function SignUpContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,10 +28,15 @@ function SignUpContent() {
   const [isSigningUp, setIsSigningUp] = useState(false);
 
   const yearOptions = useMemo(
-    () =>
-      getSignUpAdmitYearOptions().filter(
+    () => {
+      const unlocked = getSignUpAdmitYearOptions().filter(
         (o) => !getCohortAccess(o.value).streamResultsLocked
-      ),
+      );
+      return [
+        ...unlocked,
+        { value: SPECTATOR_ADMIT_YEAR, label: "None Of The Above" },
+      ];
+    },
     []
   );
   const yearItems = useMemo(
@@ -45,6 +52,7 @@ function SignUpContent() {
   );
 
   const isPriorCohort = admitYear < computeCurrentAdmitYear();
+  const isSpectator = admitYear === SPECTATOR_ADMIT_YEAR;
 
   const [gpa, setGpa] = useState("");
   const [streamIn, setStreamIn] = useState("");
@@ -88,7 +96,7 @@ function SignUpContent() {
         return;
       }
 
-      if (isPriorCohort) {
+      if (isPriorCohort && !isSpectator) {
         if (!gpa) {
           setError("Please enter your GPA");
           setIsSigningUp(false);
@@ -121,7 +129,7 @@ function SignUpContent() {
         Permission.delete(Role.user(newUser.$id)),
       ];
 
-      if (isPriorCohort) {
+      if (isPriorCohort && !isSpectator) {
         await database.createDocument(DATABASE_ID, COLL_USERS, newUser.$id, {
           gpa: parseFloat(gpa),
           math1za3: 0,
@@ -230,7 +238,7 @@ function SignUpContent() {
           emptyMessage="No year found."
         />
 
-        {isPriorCohort && (
+        {isPriorCohort && !isSpectator && (
           <div className="w-full mb-4 space-y-4">
             <div className="flex flex-col gap-2">
               <label className="text-neutral-300 text-sm font-medium text-center">
@@ -279,6 +287,11 @@ function SignUpContent() {
               </label>
             </div>
           </div>
+        )}
+        {isSpectator && (
+          <p className="text-xs text-neutral-400 text-center mb-4">
+            A view-only account will be created. This is intended for administration, upper-year engineering students, and non-engineering students.
+          </p>
         )}
 
         <button
