@@ -58,6 +58,7 @@ const COURSES_ALL = [
   { value: "phys1e03", label: "Physics / 1E03" },
   { value: "chem1e03", label: "Chemistry / 1E03" },
   { value: "eng1p13", label: "Engineer / 1P13" },
+  { value: "total", label: "All Course Average" },
 ] as const;
 
 type CourseValue = (typeof COURSES_ALL)[number]["value"];
