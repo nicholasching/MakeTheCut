@@ -14,6 +14,9 @@ const INTENSITY_CENTER_REST = 0.4;
 const INTENSITY_CENTER_BUNCHED = 0.75;
 const INTENSITY_MID_REST = 0.2;
 const INTENSITY_MID_BUNCHED = 0.45;
+/** Outside <main> but still lerping to last in-bounds target — stop React updates once close enough. */
+const SETTLE_DIST_EPS = 0.75;
+const SETTLE_BUNCH_EPS = 0.03;
 
 // Strong s-curve: slow start, fast middle, slow end (like modal zoom-in)
 function smootherstep(t: number): number {
@@ -35,8 +38,13 @@ const GridBackground = forwardRef<HTMLElement, GridBackgroundProps>(({ children,
     const [shimmerState, setShimmerState] = useState<ShimmerState | null>(null);
     const targetPosRef = useRef<{ x: number; y: number } | null>(null);
     const rafRef = useRef<number>(0);
+    /** Last rendered shimmer position/bunch so re-entry after leave lerps from here instead of snapping. */
+    const lastSmoothedPosRef = useRef<{ x: number; y: number } | null>(null);
+    const lastSmoothedBunchRef = useRef(0);
+    const pointerInsideRef = useRef(false);
 
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+        pointerInsideRef.current = true;
         const rect = e.currentTarget.getBoundingClientRect();
         targetPosRef.current = {
             x: e.clientX - rect.left,
@@ -45,40 +53,49 @@ const GridBackground = forwardRef<HTMLElement, GridBackgroundProps>(({ children,
     }, []);
 
     const handleMouseLeave = useCallback(() => {
-        targetPosRef.current = null;
+        pointerInsideRef.current = false;
     }, []);
 
     useEffect(() => {
         const animate = () => {
             const target = targetPosRef.current;
-            if (target === null) {
-                setShimmerState(null);
-            } else {
+            // target stays at last in-bounds mouse position after leave so lerping can finish there.
+            if (target !== null) {
                 setShimmerState((prev) => {
-                    const prevPos = prev?.pos ?? target;
+                    const prevPos = prev?.pos ?? lastSmoothedPosRef.current ?? target;
                     const dx = target.x - prevPos.x;
                     const dy = target.y - prevPos.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
 
-                    // Shimmer position lerp
-                    const posLerp = prev === null
-                        ? target
-                        : (() => {
-                            const t = Math.min(distance / LERP_DISTANCE, 1);
-                            const eased = smootherstep(t);
-                            const factor = LERP_MIN + (LERP_MAX - LERP_MIN) * eased;
-                            return {
-                                x: prevPos.x + dx * factor,
-                                y: prevPos.y + dy * factor,
-                            };
-                        })();
+                    // Shimmer position lerp (same path for first hover and re-entry after leave)
+                    const posLerp = (() => {
+                        const t = Math.min(distance / LERP_DISTANCE, 1);
+                        const eased = smootherstep(t);
+                        const factor = LERP_MIN + (LERP_MAX - LERP_MIN) * eased;
+                        return {
+                            x: prevPos.x + dx * factor,
+                            y: prevPos.y + dy * factor,
+                        };
+                    })();
 
                     // Smoothed bunch ratio – sticky when shrinking, springy when expanding
                     const targetBunchRatio = Math.min(distance / SHIMMER_DISTANCE, 1);
-                    const prevBunch = prev?.smoothedBunchRatio ?? 0;
+                    const prevBunch = prev?.smoothedBunchRatio ?? lastSmoothedBunchRef.current;
                     const shrinking = targetBunchRatio > prevBunch;
                     const lerpFactor = shrinking ? BUNCH_RATIO_LERP_SHRINK : BUNCH_RATIO_LERP_EXPAND;
                     const smoothedBunchRatio = prevBunch + (targetBunchRatio - prevBunch) * lerpFactor;
+
+                    if (
+                        !pointerInsideRef.current &&
+                        prev &&
+                        Math.hypot(target.x - posLerp.x, target.y - posLerp.y) < SETTLE_DIST_EPS &&
+                        Math.abs(smoothedBunchRatio - targetBunchRatio) < SETTLE_BUNCH_EPS
+                    ) {
+                        return prev;
+                    }
+
+                    lastSmoothedPosRef.current = posLerp;
+                    lastSmoothedBunchRef.current = smoothedBunchRatio;
 
                     return { pos: posLerp, smoothedBunchRatio };
                 });
