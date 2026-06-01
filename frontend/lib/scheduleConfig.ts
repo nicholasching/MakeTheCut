@@ -14,8 +14,8 @@ export const SCHEDULE = {
   fullGradesOpen: (y: number) => new Date(2000 + y + 1, 3, 20),
   /** May 1 of year N+1 — ADMISSION.current advances */
   turnover: (y: number) => new Date(2000 + y + 1, 4, 1),
-  /** Jun 1 of year N+1 — stream results open, reported cutoffs bar (grades still editable until streamResultsLock) */
-  streamResultsOpen: (y: number) => new Date(2000 + y + 1, 5, 1),
+  /** Jun 4 of year N+1 — stream results open, reported cutoffs bar (grades still editable until streamResultsLock) */
+  streamResultsOpen: (y: number) => new Date(2000 + y + 1, 5, 4),
   /** Aug 1 of year N+1 — prior year archived; StreamChoiceGraph live for next */
   dashboardArchive: (y: number) => new Date(2000 + y + 1, 7, 1),
   /** May 1 of year N+2 — stream results permanently locked */

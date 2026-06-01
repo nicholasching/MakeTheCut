@@ -20,7 +20,7 @@ const SCHEDULE = {
   sem1GradesOpen:    (y) => new Date(2000 + y,      11, 20),
   fullGradesOpen:    (y) => new Date(2000 + y + 1,   3, 20),
   turnover:          (y) => new Date(2000 + y + 1,   4,  1),
-  streamResultsOpen: (y) => new Date(2000 + y + 1,   5,  1),
+  streamResultsOpen: (y) => new Date(2000 + y + 1,   5,  4),
   dashboardArchive:  (y) => new Date(2000 + y + 1,   7,  1),
   streamResultsLock: (y) => new Date(2000 + y + 2,   4,  1),
 };
