@@ -356,7 +356,7 @@ function DashboardContent() {
   const dashboardYear = computeCurrentDashboardYear();
   const priorDashboardYear = dashboardYear - 1;
   const completedYears = getCompletedYears();
-  const showLiveChoiceProjection = getCohortAccess(dashboardYear).hasFullGradeData;
+  const showLiveChoiceProjection = getCohortAccess(dashboardYear).showLiveChoiceProjection;
 
   useEffect(() => {
     async function initiatePage() {

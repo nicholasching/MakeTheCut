@@ -37,6 +37,7 @@ export interface CohortAccess {
   isArchived: boolean;
   hasGradeData: boolean;
   hasFullGradeData: boolean;
+  showLiveChoiceProjection: boolean;
   showReportedCutoffs: boolean;
   streamChoiceVisible: boolean;
 }
@@ -97,6 +98,7 @@ export function getCohortAccess(
       isArchived: true,
       hasGradeData: true,
       hasFullGradeData: true,
+      showLiveChoiceProjection: false,
       showReportedCutoffs: true,
       streamChoiceVisible: true,
     };
@@ -128,6 +130,9 @@ export function getCohortAccess(
 
   const hasFullGradeData = now >= SCHEDULE.fullGradesOpen(y);
 
+  const showLiveChoiceProjection =
+    hasFullGradeData && now < SCHEDULE.streamResultsOpen(y);
+
   const showReportedCutoffs = now >= SCHEDULE.streamResultsOpen(y);
 
   const streamChoiceVisible = y === computeCurrentDashboardYear(now);
@@ -141,6 +146,7 @@ export function getCohortAccess(
     isArchived,
     hasGradeData,
     hasFullGradeData,
+    showLiveChoiceProjection,
     showReportedCutoffs,
     streamChoiceVisible,
   };
