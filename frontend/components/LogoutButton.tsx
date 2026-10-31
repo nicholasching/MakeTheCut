@@ -51,14 +51,6 @@ const LogoutButton = ({
                                     Edit My Data
                                 </button>
                             </Link>
-                            <Link href="/contact">
-                                <button
-                                    type="button"
-                                    className="bg-neutral-800 text-white py-2 rounded-sm hover:bg-neutral-700 w-full block cursor-pointer hover:scale-103 transition-all"
-                                >
-                                    Contact Us
-                                </button>
-                            </Link>
                             <button onClick={logout} className="bg-[#e64640] text-white py-2 rounded-sm hover:bg-red-700 w-full block cursor-pointer hover:scale-103 transition-all mt-5">Logout</button>
                         </DialogContent>
                     </Dialog>

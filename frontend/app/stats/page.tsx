@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   ComposedChart,
@@ -13,6 +13,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Query } from "appwrite";
+import { toPng } from "html-to-image";
+import { Download } from "lucide-react";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
 import Footer from "@/components/Footer";
@@ -69,7 +71,7 @@ const CHANGELOG: ChangelogEntry[] = [
     features: [
       "Statistics & roadmap page with site traffic charts (7 days through all time)",
       "If you're already signed in, the home page offers a quick way to open your dashboard",
-      "Signed-in users can reach the team from Contact Us (account menu or footer).",
+      "Contact Us messaging (temporarily unavailable).",
     ],
     maintenance: [
       "Faster, more reliable data syncing so dashboards stay up to date",
@@ -178,6 +180,16 @@ function formatShortDate(dateStr: string): string {
   return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function formatShortDateWithYear(dateStr: string): string {
+  const d = new Date(dateStr + "T00:00:00Z");
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
     timeZone: "UTC",
   });
 }
@@ -601,7 +613,7 @@ function TrafficOverviewBody({
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="rgba(255,255,255,0.06)"
+                stroke="rgba(255,255,255,0.08)"
                 vertical
               />
               <XAxis
@@ -613,7 +625,7 @@ function TrafficOverviewBody({
                 interval={0}
                 tickLine={false}
                 axisLine={{
-                  stroke: "rgba(255,255,255,0.12)",
+                  stroke: "rgba(255,255,255,0.14)",
                   strokeWidth: 1,
                   strokeDasharray: "3 3",
                 }}
@@ -628,7 +640,7 @@ function TrafficOverviewBody({
               <YAxis
                 tickLine={false}
                 axisLine={{
-                  stroke: "rgba(255,255,255,0.12)",
+                  stroke: "rgba(255,255,255,0.14)",
                   strokeWidth: 1,
                   strokeDasharray: "3 3",
                 }}
@@ -721,10 +733,13 @@ function TrafficOverviewBody({
 // ---------------------------------------------------------------------------
 export default function StatsPage() {
   const sectionRef = useSectionTracking<HTMLDivElement>("Stats");
+  const trafficViewRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const [dailyAll, setDailyAll] = useState<DailyPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState<RangeKey>("7d");
+  const [isExportingChart, setIsExportingChart] = useState(false);
+  const [chartExportError, setChartExportError] = useState<string | null>(null);
 
   const yesterday = useMemo(() => getLastTrafficDayInclusiveUtc(), []);
 
@@ -878,7 +893,7 @@ export default function StatsPage() {
         secondaryLabel: "Daily average views",
         tertiary: peakDay ? peakDay.views.toLocaleString() : "—",
         tertiaryLabel: peakDay
-          ? `Peak day · ${formatShortDate(peakDay.date)}`
+          ? `Peak day · ${formatShortDateWithYear(peakDay.date)}`
           : "Peak day",
         compare: null,
         compareClass: "",
@@ -900,6 +915,40 @@ export default function StatsPage() {
   }, [chartData, range]);
 
   const showCompareCard = range === "7d" || range === "30d";
+  const isChartExportDisabled = loading || chartData.length === 0 || isExportingChart;
+
+  const handleExportTrafficChart = useCallback(async () => {
+    if (!trafficViewRef.current || isChartExportDisabled) return;
+    setChartExportError(null);
+    setIsExportingChart(true);
+    try {
+      const exportDate = new Date().toISOString().slice(0, 10);
+      const rangeLabel =
+        RANGE_OPTIONS.find((option) => option.key === range)?.shortLabel.toLowerCase() ??
+        "chart";
+      const dataUrl = await toPng(trafficViewRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#0a0a0a",
+        style: {
+          width: "1200px",
+          maxWidth: "1200px",
+          marginLeft: "auto",
+        },
+        filter: (node) =>
+          !(node instanceof HTMLElement && node.dataset.exportIgnore === "true"),
+      });
+      const downloadLink = document.createElement("a");
+      downloadLink.download = `makethecut-traffic-${rangeLabel}-${exportDate}.png`;
+      downloadLink.href = dataUrl;
+      downloadLink.click();
+    } catch (error) {
+      console.error("Failed to export traffic chart", error);
+      setChartExportError("Export failed. Please try again.");
+    } finally {
+      setIsExportingChart(false);
+    }
+  }, [isChartExportDisabled, range]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -920,35 +969,58 @@ export default function StatsPage() {
               <h2 className="text-xl font-semibold text-white">
                 Site Traffic
               </h2>
-              <div
-                className="flex flex-wrap gap-2"
-                role="tablist"
-                aria-label="Date range"
-              >
-                {RANGE_OPTIONS.map(({ key, label, shortLabel }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    role="tab"
-                    aria-label={label}
-                    aria-selected={range === key}
-                    onClick={() => setRange(key)}
-                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border ${
-                      range === key
-                        ? "bg-red-500/20 text-red-300 border-red-500/40"
-                        : "bg-white/[0.04] text-neutral-400 border-neutral-600/40 hover:bg-white/[0.07] hover:text-neutral-200"
-                    }`}
-                  >
-                    <span className="md:hidden" aria-hidden="true">
-                      {shortLabel}
-                    </span>
-                    <span className="hidden md:inline">{label}</span>
-                  </button>
-                ))}
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div
+                  className="flex flex-wrap gap-2"
+                  role="tablist"
+                  aria-label="Date range"
+                  data-export-ignore="true"
+                >
+                  {RANGE_OPTIONS.map(({ key, label, shortLabel }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      role="tab"
+                      aria-label={label}
+                      aria-selected={range === key}
+                      onClick={() => setRange(key)}
+                      className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 border ${
+                        range === key
+                          ? "bg-red-500/20 text-red-300 border-red-500/40"
+                          : "bg-white/[0.04] text-neutral-400 border-neutral-600/40 hover:bg-white/[0.07] hover:text-neutral-200"
+                      }`}
+                    >
+                      <span className="md:hidden" aria-hidden="true">
+                        {shortLabel}
+                      </span>
+                      <span className="hidden md:inline">{label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleExportTrafficChart}
+                  disabled={isChartExportDisabled}
+                  data-export-ignore="true"
+                  aria-label="Export chart image"
+                  title="Export chart image"
+                  className={`inline-flex items-center justify-center h-9 w-9 rounded-lg transition-all duration-200 border ${
+                    isChartExportDisabled
+                      ? "bg-white/[0.04] text-neutral-600 border-neutral-700/60 cursor-not-allowed"
+                      : "bg-white/[0.04] text-neutral-300 border-neutral-600/40 hover:bg-white/[0.08] hover:text-neutral-100"
+                  }`}
+                >
+                  <Download size={16} />
+                </button>
               </div>
             </div>
 
-            <div className="p-6 pb-3 md:p-8 md:pb-3">
+            <div ref={trafficViewRef} className="p-6 pb-3 md:p-8 md:pb-3">
+              {chartExportError && (
+                <p className="mb-4 text-xs text-red-300" data-export-ignore="true">
+                  {chartExportError}
+                </p>
+              )}
               {reduceMotion ? (
                 <div key={range} className="space-y-8">
                   <TrafficOverviewBody
