@@ -11,13 +11,15 @@ import Combobox from "@/components/Combobox";
 import ComboboxStreams from "@/components/ComboboxStream";
 import LogoutButton from "@/components/LogoutButton";
 import { Checkbox } from "@/components/ui/checkbox";
-import { account, database } from "../appwrite";
-import { ADMISSION, COLL_USERS, DATABASE_ID } from "@/lib/appwriteDb";
+import { ADMISSION } from "@/lib/appwriteDb";
+import { getAccountCached, getUserDocCached } from "@/lib/appwriteCache";
 import TextField from "@/components/TextField";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { calculateAverages } from "@/lib/gradeCalc";
 import { saveUserProfile } from "@/actions/logActions";
+
+const SPECTATOR_ADMIT_YEAR = 99;
 
 function convertGradeToNumber(input: string): string {
   if (!input) return "";
@@ -99,6 +101,7 @@ export default function MePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [isSpectator, setIsSpectator] = useState(false);
   useTransitionPageReady(ready);
 
   const showStreamPrefs = access.canEditStreamPrefs;
@@ -190,7 +193,7 @@ export default function MePage() {
     let cancelled = false;
     async function load() {
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         if (!loggedInUser.emailVerification) {
           navigate("/authenticate");
           return;
@@ -199,11 +202,7 @@ export default function MePage() {
         let ay = ADMISSION.current;
         let hasDoc = false;
         try {
-          const doc = await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          );
+          const doc = await getUserDocCached(loggedInUser.$id);
           hasDoc = true;
           const d = doc as Record<string, unknown>;
           ay = Number(d.admitYear) || ADMISSION.current;
@@ -248,6 +247,8 @@ export default function MePage() {
 
         if (cancelled) return;
         setAdmitYear(ay);
+        const spectator = ay === SPECTATOR_ADMIT_YEAR;
+        setIsSpectator(spectator);
         const acc = getCohortAccess(ay);
         setAccess(acc);
 
@@ -256,7 +257,7 @@ export default function MePage() {
           !acc.canEditSem1Grades &&
           !acc.canEditAllGrades &&
           !acc.canEditStreamResults;
-        if (fullyLocked && hasDoc) {
+        if ((spectator || fullyLocked) && hasDoc) {
           navigate("/dashboard");
           return;
         }
@@ -457,6 +458,9 @@ export default function MePage() {
       <div className="w-full md:w-1/2 lg:w-1/3 xl:w-1/4 flex flex-col mx-auto justify-center gap-5 text-center py-10 rounded-md">
         {showStreamPrefs && (
           <>
+            <h2 className="text-lg font-semibold text-white mt-1">
+              Stream Preferences
+            </h2>
             <ComboboxStreams
               value={stream1Choice}
               onChange={setStream1Choice}
@@ -486,6 +490,14 @@ export default function MePage() {
                 Please select three stream preferences to continue.
               </p>
             )}
+          </>
+        )}
+
+        {showGradeBlock && (
+          <>
+            <h2 className="text-lg font-semibold text-white mt-2">
+              Grades
+            </h2>
           </>
         )}
 
@@ -602,6 +614,9 @@ export default function MePage() {
 
         {showStreamResults && (
           <>
+            <h2 className="text-lg font-semibold text-white mt-2">
+              Stream Outcomes
+            </h2>
             <p className="text-neutral-300 text-sm -mb-2">
               What stream did you get into?
             </p>
@@ -626,17 +641,19 @@ export default function MePage() {
           </>
         )}
 
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <button
-            type="button"
-            className="bg-white text-black w-1/3 p-2 rounded-sm border-none hover:scale-105 transition-all duration-300 cursor-pointer mt-5"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Submitting…" : "Submit"}
-          </button>
-          {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
-        </div>
+        {!isSpectator && (
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <button
+              type="button"
+              className="bg-white text-black w-1/3 p-2 rounded-sm border-none hover:scale-105 transition-all duration-300 cursor-pointer mt-5"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Submitting…" : "Submit"}
+            </button>
+            {error && <p className="text-red-400 mt-2 text-xs">{error}</p>}
+          </div>
+        )}
       </div>
     </GridBackground>
   );

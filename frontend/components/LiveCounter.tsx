@@ -2,17 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { animate, motion, AnimatePresence } from "framer-motion";
-import { Query } from "appwrite";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import { database } from "./../app/appwrite";
 import {
   ADMISSION,
-  DATABASE_ID,
-  COLL_CUTOFFS,
-  COLL_TRAFFIC,
-  cutoffDocId,
-  priorCohortYear,
 } from "@/lib/appwriteDb";
+import { getCutoffTotalCached, listTrafficDocsCached } from "@/lib/appwriteCache";
+import { COHORT_LAUNCH_YEAR } from "@/lib/scheduleConfig";
 import {
   addDaysUtc,
   dailyToMap,
@@ -68,20 +63,20 @@ export default function LiveCounter({
   useEffect(() => {
     if (mode !== "contributions") return;
     const getContributions = async () => {
-      const total = await database.getDocument(
-        DATABASE_ID,
-        COLL_CUTOFFS,
-        cutoffDocId(ADMISSION.current, "total")
+      const years: number[] = [];
+      for (let y = COHORT_LAUNCH_YEAR; y <= ADMISSION.current; y++) years.push(y);
+      const totals = await Promise.all(
+        years.map((year) => getCutoffTotalCached(year))
       );
-      const total24 = await database.getDocument(
-        DATABASE_ID,
-        COLL_CUTOFFS,
-        cutoffDocId(priorCohortYear(), "total")
-      );
-      const contributions =
-        total.streamCount * 8 +
-        total24.streamCount * 10 +
-        total24.reportCutoff;
+      const contributions = totals.reduce((sum, totalDoc, idx) => {
+        const year = years[idx];
+        const streamCount =
+          typeof totalDoc.streamCount === "number" ? totalDoc.streamCount : 0;
+        const reportCutoff =
+          typeof totalDoc.reportCutoff === "number" ? totalDoc.reportCutoff : 0;
+        if (year === ADMISSION.current) return sum + streamCount * 8;
+        return sum + streamCount * 10 + reportCutoff;
+      }, 0);
       setTotalContributions(contributions);
     };
     getContributions();
@@ -93,9 +88,7 @@ export default function LiveCounter({
       setViews7d(null);
       setWowInfo(null);
       try {
-        const res = await database.listDocuments(DATABASE_ID, COLL_TRAFFIC, [
-          Query.limit(120),
-        ]);
+        const res = await listTrafficDocsCached(120);
         const docs = res.documents as unknown as TrafficMonthDoc[];
         const daily = expandDocsToDaily(docs, lastTrafficDay);
         const map = dailyToMap(daily);

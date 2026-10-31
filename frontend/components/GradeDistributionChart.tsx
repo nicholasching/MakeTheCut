@@ -33,15 +33,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { database } from "../app/appwrite";
 import {
   ADMISSION,
-  DATABASE_ID,
-  COLL_MARKS,
-  markDocId,
-  liveAcademicYearLabel,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
+import { getMarksCourseCached } from "@/lib/appwriteCache";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -62,6 +58,7 @@ const COURSES_ALL = [
   { value: "phys1e03", label: "Physics / 1E03" },
   { value: "chem1e03", label: "Chemistry / 1E03" },
   { value: "eng1p13", label: "Engineer / 1P13" },
+  { value: "total", label: "All Course Average" },
 ] as const;
 
 type CourseValue = (typeof COURSES_ALL)[number]["value"];
@@ -81,11 +78,7 @@ const initialChartData = Array.from({ length: 12 }, (_, i) => ({
 
 async function fetchDistribution(year: number, course: string) {
   try {
-    const document = await database.getDocument(
-      DATABASE_ID,
-      COLL_MARKS,
-      markDocId(year, course)
-    );
+    const document = await getMarksCourseCached(year, course);
     const grades = document.distribution.split(",").map(Number);
     grades.push(Number(document.average));
     return grades;
@@ -167,10 +160,10 @@ export default function GradeDistributionChart({
   const [popoverOpen, setPopoverOpen] = useState(false);
   const rafRef = useRef<number | null>(null);
 
-  const title =
-    year === ADMISSION.current
-      ? `${liveAcademicYearLabel()} Course Distributions`
-      : `${academicYearFullLabel(year)} Course Distributions`;
+  const isLive = !access.isArchived;
+  const title = isLive
+    ? `Live ${academicYearFullLabel(year)} Course Distributions`
+    : `${academicYearFullLabel(year)} Course Distributions`;
   const transitionReady = noData || !isLoading;
 
   useEffect(() => {
@@ -267,7 +260,6 @@ export default function GradeDistributionChart({
     return null;
   }
 
-  const isLive = year === ADMISSION.current;
   const cardClass = isLive
     ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
     : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";

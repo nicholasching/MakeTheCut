@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Bar, BarChart, CartesianGrid, ReferenceLine, XAxis, YAxis, Label, ResponsiveContainer, Cell, Tooltip as ChartTooltip } from "recharts";
-import { database } from "../app/appwrite";
-import { Query } from "appwrite";
 import {
   ADMISSION,
-  DATABASE_ID,
-  COLL_MARKS,
-  COLL_CUTOFFS,
   markDocId,
-  cutoffDocId,
 } from "@/lib/appwriteDb";
+import {
+  getCutoffTotalCached,
+  getMarksCourseCached,
+} from "@/lib/appwriteCache";
 import { CardDescription } from "@/components/ui/card";
 
 import {
@@ -49,32 +47,25 @@ const MARK_COURSE_IDS = [
 
 async function initPage() {
   try {
-    const markIds = MARK_COURSE_IDS.map((c) => markDocId(ADMISSION.current, c));
-    let documents = await database.listDocuments(DATABASE_ID, COLL_MARKS, [
-      Query.equal("$id", markIds),
-    ]);
+    const documents = await Promise.all(
+      MARK_COURSE_IDS.map((course) => getMarksCourseCached(ADMISSION.current, course))
+    );
 
-    documents.documents.forEach((doc) => {
-      const baseId = doc.$id.replace(/^\d+_/, "");
+    documents.forEach((doc) => {
+      const baseId = String(doc.$id || markDocId(ADMISSION.current, "math1za3")).replace(/^\d+_/, "");
       if (baseId === "math1za3") {
         courseData[0].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "math1zb3") {
+      } else if (baseId === "math1zb3") {
         courseData[1].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "math1zc3") {
+      } else if (baseId === "math1zc3") {
         courseData[2].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "phys1d03") {
+      } else if (baseId === "phys1d03") {
         courseData[3].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "phys1e03") {
+      } else if (baseId === "phys1e03") {
         courseData[4].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "chem1e03") {
+      } else if (baseId === "chem1e03") {
         courseData[5].average = parseFloat(String(doc.average || "0"));
-      }
-      if (baseId === "eng1p13") {
+      } else if (baseId === "eng1p13") {
         courseData[6].average = parseFloat(String(doc.average || "0"));
       }
     });
@@ -153,11 +144,7 @@ export default function CourseGradeChart() {
 
       // Fetch contribution count
       try {
-        const contributions = await database.getDocument(
-          DATABASE_ID,
-          COLL_CUTOFFS,
-          cutoffDocId(ADMISSION.current, "total")
-        );
+        const contributions = await getCutoffTotalCached(ADMISSION.current);
         setTotalContributions(contributions.streamCount);
       } catch (error) {
         console.error("Error fetching contribution count:", error);

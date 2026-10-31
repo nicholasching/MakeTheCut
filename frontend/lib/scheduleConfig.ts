@@ -14,8 +14,8 @@ export const SCHEDULE = {
   fullGradesOpen: (y: number) => new Date(2000 + y + 1, 3, 20),
   /** May 1 of year N+1 — ADMISSION.current advances */
   turnover: (y: number) => new Date(2000 + y + 1, 4, 1),
-  /** Jun 1 of year N+1 — stream results open, reported cutoffs bar (grades still editable until streamResultsLock) */
-  streamResultsOpen: (y: number) => new Date(2000 + y + 1, 5, 1),
+  /** Jun 4 of year N+1 — stream results open, reported cutoffs bar (grades still editable until streamResultsLock) */
+  streamResultsOpen: (y: number) => new Date(2000 + y + 1, 5, 4),
   /** Aug 1 of year N+1 — prior year archived; StreamChoiceGraph live for next */
   dashboardArchive: (y: number) => new Date(2000 + y + 1, 7, 1),
   /** May 1 of year N+2 — stream results permanently locked */
@@ -37,6 +37,7 @@ export interface CohortAccess {
   isArchived: boolean;
   hasGradeData: boolean;
   hasFullGradeData: boolean;
+  showLiveChoiceProjection: boolean;
   showReportedCutoffs: boolean;
   streamChoiceVisible: boolean;
 }
@@ -58,18 +59,27 @@ export function priorCohortYear(now = new Date()): number {
   return computeCurrentAdmitYear(now) - 1;
 }
 
+/** Smallest cohort year whose Aug 1 dashboard-archive gate is still in the future. */
+export function computeCurrentDashboardYear(now = new Date()): number {
+  let y = COHORT_LAUNCH_YEAR;
+  while (SCHEDULE.dashboardArchive(y) <= now) {
+    y++;
+  }
+  return y;
+}
+
 /** Incoming cohort can appear in sign-up from Apr 1 of their intake year. */
 export function incomingSignUpAvailable(now = new Date()): boolean {
   const inc = incomingCohortYear(now);
   return now >= SCHEDULE.streamPrefsOpen(inc);
 }
 
-/** Years with turnover passed (for dashboard archived sections), newest first. */
+/** Years with dashboard archive gate passed, newest first. */
 export function getCompletedYears(now = new Date()): number[] {
   const cur = computeCurrentAdmitYear(now);
   const out: number[] = [];
   for (let y = cur - 1; y >= COHORT_LAUNCH_YEAR; y--) {
-    if (SCHEDULE.turnover(y) <= now) out.push(y);
+    if (SCHEDULE.dashboardArchive(y) <= now) out.push(y);
   }
   return out;
 }
@@ -88,6 +98,7 @@ export function getCohortAccess(
       isArchived: true,
       hasGradeData: true,
       hasFullGradeData: true,
+      showLiveChoiceProjection: false,
       showReportedCutoffs: true,
       streamChoiceVisible: true,
     };
@@ -119,10 +130,12 @@ export function getCohortAccess(
 
   const hasFullGradeData = now >= SCHEDULE.fullGradesOpen(y);
 
+  const showLiveChoiceProjection =
+    hasFullGradeData && now < SCHEDULE.streamResultsOpen(y);
+
   const showReportedCutoffs = now >= SCHEDULE.streamResultsOpen(y);
 
-  const streamChoiceVisible =
-    y === cur && now >= SCHEDULE.dashboardArchive(y - 1);
+  const streamChoiceVisible = y === computeCurrentDashboardYear(now);
 
   return {
     canEditStreamPrefs,
@@ -133,6 +146,7 @@ export function getCohortAccess(
     isArchived,
     hasGradeData,
     hasFullGradeData,
+    showLiveChoiceProjection,
     showReportedCutoffs,
     streamChoiceVisible,
   };

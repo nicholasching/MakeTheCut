@@ -10,6 +10,7 @@ const COLL_CUTOFFS = 'cutoffs';
  * every year up to the current incoming cohort.
  */
 const COHORT_LAUNCH_YEAR = 24;
+const SPECTATOR_ADMIT_YEAR = 99;
 
 const STREAM_KEYS = ['chem', 'civ', 'comp', 'elec', 'engphys', 'mat', 'mech', 'tron', 'soft'];
 
@@ -19,7 +20,7 @@ const SCHEDULE = {
   sem1GradesOpen:    (y) => new Date(2000 + y,      11, 20),
   fullGradesOpen:    (y) => new Date(2000 + y + 1,   3, 20),
   turnover:          (y) => new Date(2000 + y + 1,   4,  1),
-  streamResultsOpen: (y) => new Date(2000 + y + 1,   5,  1),
+  streamResultsOpen: (y) => new Date(2000 + y + 1,   5,  4),
   dashboardArchive:  (y) => new Date(2000 + y + 1,   7,  1),
   streamResultsLock: (y) => new Date(2000 + y + 2,   4,  1),
 };
@@ -39,6 +40,7 @@ const SEAT_COUNTS = {
 function cutoffDocDefaults(overrides = {}) {
   return {
     streamCount: 0,
+    freeChoice: 0,
     streamCutoff: 4,
     firstChoice: 0,
     secondChoice: 0,
@@ -93,6 +95,8 @@ export default async ({ req, res, log, error }) => {
 
   try {
     for (let y = COHORT_LAUNCH_YEAR; y <= maxYear; y++) {
+      // Spectator accounts are view-only and never participate in data pipelines.
+      if (y === SPECTATOR_ADMIT_YEAR) continue;
       const wf = getWorkflows(y, now);
       const anyActive = wf.inStreamPrefsWindow || wf.inGradesWindow || wf.inReportedCutoffsWindow;
       if (!anyActive) continue;
@@ -147,12 +151,21 @@ export default async ({ req, res, log, error }) => {
 async function runStreamChoiceCounts(database, documents, year, log) {
   const choiceCounts = {};
   for (const k of STREAM_KEYS) {
-    choiceCounts[k] = { firstChoice: 0, secondChoice: 0, thirdChoice: 0 };
+    choiceCounts[k] = { firstChoice: 0, secondChoice: 0, thirdChoice: 0, freeChoice: 0 };
   }
+  let totalFreeChoice = 0;
 
   for (const doc of documents) {
     if (!doc.streams || doc.streams === 'null') continue;
     const prefs = doc.streams.split(',').map(s => s.trim().toLowerCase());
+    const isFreeChoice = doc.freechoice === true;
+    if (isFreeChoice) {
+      totalFreeChoice++;
+      const firstPref = prefs[0];
+      if (choiceCounts[firstPref]) {
+        choiceCounts[firstPref].freeChoice++;
+      }
+    }
     prefs.forEach((stream, idx) => {
       if (!choiceCounts[stream]) return;
       if (idx === 0) choiceCounts[stream].firstChoice++;
@@ -166,12 +179,14 @@ async function runStreamChoiceCounts(database, documents, year, log) {
       firstChoice: choiceCounts[k].firstChoice,
       secondChoice: choiceCounts[k].secondChoice,
       thirdChoice: choiceCounts[k].thirdChoice,
+      freeChoice: choiceCounts[k].freeChoice,
     });
   }
 
   const validCount = documents.filter(d => d.streams && d.streams !== 'null' && d.streams.trim() !== '').length;
   await patchCutoffDocument(database, `${year}_total`, {
     streamCount: validCount,
+    freeChoice: totalFreeChoice,
   });
 
   log(`   [choiceCounts] updated ${year}_* cutoff docs`);

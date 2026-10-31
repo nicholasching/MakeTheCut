@@ -5,6 +5,7 @@ import { usePageTransition } from "@/components/TransitionProvider";
 import { account, database, ID } from "../appwrite";
 import { Permission, Role } from "appwrite";
 import { COLL_USERS, DATABASE_ID } from "@/lib/appwriteDb";
+import { getAccountCached } from "@/lib/appwriteCache";
 import Link from "next/link";
 import GridBackground from "@/components/GridBackground";
 import HomeButton from "@/components/HomeButton";
@@ -13,8 +14,11 @@ import Combobox from "@/components/Combobox";
 import { useSectionTracking } from "@/hooks/useSectionTracking";
 import {
   computeCurrentAdmitYear,
+  getCohortAccess,
   getSignUpAdmitYearOptions,
 } from "@/lib/scheduleConfig";
+
+const SPECTATOR_ADMIT_YEAR = 99;
 
 function SignUpContent() {
   const [email, setEmail] = useState("");
@@ -23,7 +27,18 @@ function SignUpContent() {
   const [error, setError] = useState("");
   const [isSigningUp, setIsSigningUp] = useState(false);
 
-  const yearOptions = useMemo(() => getSignUpAdmitYearOptions(), []);
+  const yearOptions = useMemo(
+    () => {
+      const unlocked = getSignUpAdmitYearOptions().filter(
+        (o) => !getCohortAccess(o.value).streamResultsLocked
+      );
+      return [
+        ...unlocked,
+        { value: SPECTATOR_ADMIT_YEAR, label: "None Of The Above" },
+      ];
+    },
+    []
+  );
   const yearItems = useMemo(
     () =>
       yearOptions.map((o) => ({
@@ -36,7 +51,9 @@ function SignUpContent() {
     () => yearOptions[0]?.value ?? computeCurrentAdmitYear()
   );
 
-  const isPriorCohort = admitYear < computeCurrentAdmitYear();
+  const isSpectator = admitYear === SPECTATOR_ADMIT_YEAR;
+  const canCollectHistoricalOutcome =
+    !isSpectator && getCohortAccess(admitYear).canEditStreamResults;
 
   const [gpa, setGpa] = useState("");
   const [streamIn, setStreamIn] = useState("");
@@ -49,7 +66,7 @@ function SignUpContent() {
   useEffect(() => {
     async function initiatePage() {
       try {
-        await account.get();
+        await getAccountCached();
         if (!isSigningUp) {
           navigate("/dashboard");
         }
@@ -80,7 +97,7 @@ function SignUpContent() {
         return;
       }
 
-      if (isPriorCohort) {
+      if (canCollectHistoricalOutcome) {
         if (!gpa) {
           setError("Please enter your GPA");
           setIsSigningUp(false);
@@ -113,7 +130,7 @@ function SignUpContent() {
         Permission.delete(Role.user(newUser.$id)),
       ];
 
-      if (isPriorCohort) {
+      if (canCollectHistoricalOutcome) {
         await database.createDocument(DATABASE_ID, COLL_USERS, newUser.$id, {
           gpa: parseFloat(gpa),
           math1za3: 0,
@@ -222,7 +239,7 @@ function SignUpContent() {
           emptyMessage="No year found."
         />
 
-        {isPriorCohort && (
+        {canCollectHistoricalOutcome && (
           <div className="w-full mb-4 space-y-4">
             <div className="flex flex-col gap-2">
               <label className="text-neutral-300 text-sm font-medium text-center">
@@ -271,6 +288,11 @@ function SignUpContent() {
               </label>
             </div>
           </div>
+        )}
+        {isSpectator && (
+          <p className="text-xs text-neutral-400 text-center mb-4">
+            A view-only account will be created. This is intended for administration, upper-year engineering students, and non-engineering students.
+          </p>
         )}
 
         <button

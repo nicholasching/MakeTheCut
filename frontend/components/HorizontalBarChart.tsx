@@ -14,22 +14,20 @@ import {
   Cell,
   Tooltip as ChartTooltip,
 } from "recharts";
-import { account, database } from "../app/appwrite";
 import {
   ADMISSION,
-  COLL_USERS,
-  DATABASE_ID,
-  COLL_CUTOFFS,
-  COLL_MARKS,
   isActiveEng1Cohort,
   isGraduatedCohort,
-  listCutoffsForYear,
   streamKeyFromCutoffDocId,
-  cutoffDocId,
-  markDocId,
-  liveAcademicYearLabel,
   academicYearFullLabel,
 } from "@/lib/appwriteDb";
+import {
+  getAccountCached,
+  getCutoffTotalCached,
+  getMarksTotalCached,
+  getUserDocCached,
+  listCutoffsForYearCached,
+} from "@/lib/appwriteCache";
 import { getCohortAccess } from "@/lib/scheduleConfig";
 import { CardDescription } from "@/components/ui/card";
 import {
@@ -45,6 +43,7 @@ type Row = {
   GPA: number;
   reportCutoff: number;
   people: number;
+  freeChoicePeople: number;
 };
 
 const STREAM_ORDER = [
@@ -65,6 +64,7 @@ function emptyRows(): Row[] {
     GPA: 4,
     reportCutoff: 4,
     people: 0,
+    freeChoicePeople: 0,
   }));
 }
 
@@ -80,13 +80,17 @@ const chartConfigBoth = {
 const CustomTooltipEstimated = ({ active, payload }: { active?: boolean; payload?: { payload: Row }[] }) => {
   if (active && payload?.length) {
     const p = payload[0].payload;
+    const freeChoicePercent =
+      p.people > 0 ? ((p.freeChoicePeople / p.people) * 100).toFixed(1) : "0.0";
     return (
       <div className="bg-neutral-800 p-2 rounded border border-neutral-700 text-sm">
         <p className="mb-1">
           <strong>{p.stream}</strong>
         </p>
         <p className="text-[#f4ab33]">GPA Cutoff: {p.GPA.toFixed(2)}</p>
-        <p className="text-white">People Entering Stream: {p.people}</p>
+        <p className="text-white">
+          People Entering Stream: {p.people} ({freeChoicePercent}% FC)
+        </p>
       </div>
     );
   }
@@ -148,10 +152,11 @@ export default function HorizontalBarChart({
   const [shouldShowUserLine, setShouldShowUserLine] = useState(false);
   const [userGPA, setUserGPA] = useState(4);
   const [totalContributions, setTotalContributions] = useState(0);
+  const [totalFreeChoiceContributions, setTotalFreeChoiceContributions] = useState(0);
   const [totalReported, setTotalReported] = useState(0);
 
   /** Restore original per-year styling: live uses subtle white, archived uses dark overlay. */
-  const isLive = year === ADMISSION.current && !access.showReportedCutoffs;
+  const isLive = !access.isArchived && !access.showReportedCutoffs;
   const cardClass = isLive
     ? "bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl text-white w-full gap-0 pt-6 pb-4 overflow-hidden"
     : "bg-neutral-900/40 backdrop-blur-sm text-white w-full border border-neutral-600/30 rounded-2xl p-1 pt-6 pb-4 overflow-hidden";
@@ -180,13 +185,9 @@ export default function HorizontalBarChart({
       let ugpa = 4;
 
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         try {
-          const user = await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          );
+          const user = await getUserDocCached(loggedInUser.$id);
           const ay = (user as { admitYear?: number }).admitYear;
           ugpa = Number((user as { gpa?: number }).gpa) || 0;
           const acc = getCohortAccess(year);
@@ -205,12 +206,14 @@ export default function HorizontalBarChart({
           return;
         }
 
-        const cutoffDocs = await listCutoffsForYear(database, year);
+        const cutoffDocsRes = await listCutoffsForYearCached(year);
+        const cutoffDocs = cutoffDocsRes.documents;
         cutoffDocs.forEach(
           (doc: {
             $id: string;
             streamCutoff?: string | number;
             streamCount?: number;
+            freeChoice?: number;
             reportCutoff?: string | number;
           }) => {
             const key = streamKeyFromCutoffDocId(doc.$id);
@@ -218,6 +221,7 @@ export default function HorizontalBarChart({
             if (idx < 0) return;
             rows[idx].GPA = parseFloat(String(doc.streamCutoff)) || 4;
             rows[idx].people = doc.streamCount || 0;
+            rows[idx].freeChoicePeople = Number(doc.freeChoice) || 0;
             rows[idx].reportCutoff =
               parseFloat(String(doc.reportCutoff ?? 4)) || 4;
           }
@@ -225,19 +229,15 @@ export default function HorizontalBarChart({
 
         try {
           if (getCohortAccess(year).showReportedCutoffs) {
-            const totalDoc = await database.getDocument(
-              DATABASE_ID,
-              COLL_CUTOFFS,
-              cutoffDocId(year, "total")
-            );
-            setTotalContributions(Number(totalDoc.streamCount) || 0);
-            setTotalReported(Number(totalDoc.reportCutoff) || 0);
+            const totalCached = await getCutoffTotalCached(year);
+            setTotalContributions(Number(totalCached.streamCount) || 0);
+            setTotalFreeChoiceContributions(Number(totalCached.freeChoice) || 0);
+            setTotalReported(Number(totalCached.reportCutoff) || 0);
           } else {
-            const marksTotal = await database.getDocument(
-              DATABASE_ID,
-              COLL_MARKS,
-              markDocId(year, "total")
-            );
+            const [marksTotal, cutoffTotal] = await Promise.all([
+              getMarksTotalCached(year),
+              getCutoffTotalCached(year),
+            ]);
             const distributionStr = marksTotal.distribution || "";
             const distributionArr = distributionStr
               .split(",")
@@ -245,10 +245,12 @@ export default function HorizontalBarChart({
               .filter((x: number) => !isNaN(x));
             const sum = distributionArr.reduce((acc: number, val: number) => acc + val, 0);
             setTotalContributions(sum);
+            setTotalFreeChoiceContributions(Number(cutoffTotal.freeChoice) || 0);
             setTotalReported(0);
           }
         } catch {
           setTotalContributions(0);
+          setTotalFreeChoiceContributions(0);
           setTotalReported(0);
         }
 
@@ -292,7 +294,7 @@ export default function HorizontalBarChart({
 
   const title = access.showReportedCutoffs
     ? `${academicYearFullLabel(year)} Stream Cutoffs`
-    : `${liveAcademicYearLabel()} Estimated Stream Cutoffs`;
+    : `Live ${academicYearFullLabel(year)} Estimated Stream Cutoffs`;
 
   const barColors = [
     "#CC7400",
@@ -329,7 +331,9 @@ export default function HorizontalBarChart({
                     numbers will become statistically significant once we surpass 100 responses.
                   </p>
                 )}
-                <p>Current Contributions: {totalContributions}</p>
+                <p>
+                  Current Contributions: {totalContributions} | Free Choice: {totalFreeChoiceContributions}
+                </p>
               </>
             )}
           </CardDescription>

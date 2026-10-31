@@ -10,21 +10,37 @@ import HomeButton from "@/components/HomeButton";
 import LiveCounter from "@/components/LiveCounter";
 import LogoutButton from "@/components/LogoutButton";
 import Footer from "@/components/Footer";
-import { ChevronDown, Calculator, ClipboardList, Info, AlertCircle } from "lucide-react";
-import { account, database } from "../appwrite";
+import {
+  ChevronDown,
+  Calculator,
+  ClipboardList,
+  Info,
+  AlertCircle,
+  Sparkles,
+} from "lucide-react";
 import {
   usePageTransition,
   useTransitionPageReady,
 } from "@/components/TransitionProvider";
 import {
-  ADMISSION,
-  COLL_USERS,
-  DATABASE_ID,
   academicYearFullLabel,
   academicYearShortLabel,
-  priorCohortYear,
+  streamKeyFromCutoffDocId,
 } from "@/lib/appwriteDb";
-import { getCompletedYears, getCohortAccess } from "@/lib/scheduleConfig";
+import {
+  getAccountCached,
+  getCutoffTotalCached,
+  getMarksTotalCached,
+  getUserDocCached,
+  listCutoffsForYearCached,
+} from "@/lib/appwriteCache";
+import {
+  computeCurrentDashboardYear,
+  getCompletedYears,
+  getCohortAccess,
+} from "@/lib/scheduleConfig";
+
+const SPECTATOR_ADMIT_YEAR = 99;
 
 type DashboardGraphKey = "cutoffs" | "streamChoice" | "gradeDistribution";
 
@@ -34,15 +50,99 @@ const initialChartReadyState: Record<DashboardGraphKey, boolean> = {
   gradeDistribution: false,
 };
 
+type ChoiceBucket = 1 | 2 | 3;
+
+type ChoiceSummary = {
+  first: number;
+  second: number;
+  third: number;
+  denominator: number;
+  projected: ChoiceBucket | null;
+};
+
+const initialChoiceSummary: ChoiceSummary = {
+  first: 0,
+  second: 0,
+  third: 0,
+  denominator: 0,
+  projected: null,
+};
+
+function percentageText(count: number, denominator: number) {
+  if (!denominator || denominator <= 0) return "0.0%";
+  return `${((count / denominator) * 100).toFixed(1)}%`;
+}
+
+function LiveChoiceProjectionSection({
+  summary,
+}: {
+  summary: ChoiceSummary;
+}) {
+  const cards: { key: ChoiceBucket; title: string; value: number }[] = [
+    { key: 1, title: "First Choice", value: summary.first },
+    { key: 2, title: "Second Choice", value: summary.second },
+    { key: 3, title: "Third Choice", value: summary.third },
+  ];
+
+  return (
+    <section className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl p-6 shadow-2xl">
+      <div className="flex items-center justify-center mb-3">
+        <div className="text-center">
+          <h2 className="text-lg md:text-xl font-semibold text-white">
+            Live Stream Choice Outcomes
+          </h2>
+          <p className="text-xs md:text-sm text-neutral-400">
+            Percentage of students projected to receive each choice from live submissions.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {cards.map((card) => {
+          const isProjected = summary.projected === card.key;
+          return (
+            <div
+              key={card.key}
+              className={`rounded-xl border p-4 transition-all ${
+                isProjected
+                  ? "border-red-400/70 bg-red-500/10 shadow-[0_0_0_1px_rgba(248,113,113,0.35)]"
+                  : "border-neutral-600/40 bg-white/[0.02]"
+              }`}
+            >
+              <div className="flex items-center justify-center text-center">
+                <p className="text-sm text-neutral-300 font-medium">{card.title}</p>
+              </div>
+              <p className="text-3xl font-bold text-white text-center">
+                {percentageText(card.value, summary.denominator)}
+              </p>
+              <p className="text-xs text-neutral-500 mt-1 text-center">
+                {card.value} / {summary.denominator || 0} students
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function StatisticsDropdown({ year }: { year: number }) {
   const [isOpen, setIsOpen] = useState(false);
-  const archived = getCohortAccess(year).isArchived;
+  const [hasOpened, setHasOpened] = useState(false);
+
+  const toggleOpen = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) setHasOpened(true);
+      return next;
+    });
+  };
 
   return (
     <div className="w-full bg-white/[0.03] backdrop-blur-sm border border-neutral-600/40 rounded-2xl overflow-hidden shadow-2xl">
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleOpen}
         className="flex items-center justify-between w-full p-6 hover:bg-white/[0.04] transition-all duration-300 group"
       >
         <div className="flex items-center gap-3 flex-wrap">
@@ -63,23 +163,25 @@ function StatisticsDropdown({ year }: { year: number }) {
           isOpen ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="p-6 pt-2 space-y-8">
-          <div>
-            <HorizontalBarChart year={year} />
+        {hasOpened && (
+          <div className="p-6 pt-2 space-y-8">
+            <div>
+              <HorizontalBarChart year={year} />
+            </div>
+            <div>
+              <StreamChoiceGraph year={year} />
+            </div>
+            <div>
+              <GradeDistributionChart year={year} />
+            </div>
           </div>
-          <div>
-            <StreamChoiceGraph year={year} />
-          </div>
-          <div>
-            <GradeDistributionChart year={year} />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-function MethodologyDropdown() {
+function MethodologyDropdown({ priorYear }: { priorYear: number }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -141,7 +243,7 @@ function MethodologyDropdown() {
                 </li>
               </ul>
               <p className="mt-4 text-xs text-neutral-500 italic">
-                {academicYearShortLabel(priorCohortYear())} estimates are locked; no further updates.
+                {academicYearShortLabel(priorYear)} estimates are locked; no further updates.
               </p>
             </div>
 
@@ -197,7 +299,7 @@ function MethodologyDropdown() {
                 <ul className="space-y-1.5">
                   <li>• Stream preferences: real-time</li>
                   <li>• Reported cutoffs: as students report</li>
-                  <li>• Estimated cutoffs: locked for {academicYearShortLabel(priorCohortYear())}</li>
+                  <li>• Estimated cutoffs: locked for {academicYearShortLabel(priorYear)}</li>
                   <li>• Historical data: annual verification</li>
                 </ul>
               </div>
@@ -222,6 +324,9 @@ function DashboardContent() {
   const [, setUserName] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [chartReady, setChartReady] = useState(() => initialChartReadyState);
+  const [choiceSummary, setChoiceSummary] = useState<ChoiceSummary>(
+    initialChoiceSummary
+  );
   const setChartTransitionReady = useCallback(
     (key: DashboardGraphKey, ready: boolean) => {
       setChartReady((prev) =>
@@ -248,12 +353,15 @@ function DashboardContent() {
     chartReady.streamChoice &&
     chartReady.gradeDistribution;
   useTransitionPageReady(dashboardReady);
+  const dashboardYear = computeCurrentDashboardYear();
+  const priorDashboardYear = dashboardYear - 1;
   const completedYears = getCompletedYears();
+  const showLiveChoiceProjection = getCohortAccess(dashboardYear).showLiveChoiceProjection;
 
   useEffect(() => {
     async function initiatePage() {
       try {
-        const loggedInUser = await account.get();
+        const loggedInUser = await getAccountCached();
         if (!loggedInUser.emailVerification) {
           navigate("/authenticate");
           return;
@@ -263,19 +371,19 @@ function DashboardContent() {
         // ── Gating: check required data for each currently-open window ──
         let doc: Record<string, unknown> | null = null;
         try {
-          doc = (await database.getDocument(
-            DATABASE_ID,
-            COLL_USERS,
-            loggedInUser.$id
-          )) as unknown as Record<string, unknown>;
+          doc = (await getUserDocCached(loggedInUser.$id)) as unknown as Record<string, unknown>;
         } catch {
           // No user doc yet — redirect to /me whenever any window is open.
-          const a = getCohortAccess(ADMISSION.current);
+          const a = getCohortAccess(dashboardYear);
+          const shouldEnforceGating = !a.streamResultsLocked;
           if (
-            a.canEditStreamPrefs ||
-            a.canEditSem1Grades ||
-            a.canEditAllGrades ||
-            a.canEditStreamResults
+            shouldEnforceGating &&
+            (
+              a.canEditStreamPrefs ||
+              a.canEditSem1Grades ||
+              a.canEditAllGrades ||
+              a.canEditStreamResults
+            )
           ) {
             navigate("/me");
             return;
@@ -283,11 +391,13 @@ function DashboardContent() {
         }
 
         if (doc) {
-          const admitYear = (doc.admitYear as number | undefined) ?? ADMISSION.current;
+          const admitYear = (doc.admitYear as number | undefined) ?? dashboardYear;
+          const isSpectator = admitYear === SPECTATOR_ADMIT_YEAR;
           const a = getCohortAccess(admitYear);
+          const shouldEnforceGating = !isSpectator && !a.streamResultsLocked;
 
           // Apr 1 year N → Jun 1 year N+1: must have all three stream preferences set.
-          if (a.canEditStreamPrefs) {
+          if (shouldEnforceGating && a.canEditStreamPrefs) {
             const streams = doc.streams as string | undefined;
             const parts =
               streams && streams !== "null" ? streams.split(",").filter(Boolean) : [];
@@ -298,7 +408,7 @@ function DashboardContent() {
           }
 
           // Dec 20 → lock: must have at least one grade > 0 (any course).
-          if (a.canEditSem1Grades || a.canEditAllGrades) {
+          if (shouldEnforceGating && (a.canEditSem1Grades || a.canEditAllGrades)) {
             const gradeCols = [
               "math1za3", "math1zb3", "math1zc3",
               "phys1d03", "phys1e03", "chem1e03", "eng1p13",
@@ -316,13 +426,68 @@ function DashboardContent() {
           }
 
           // Jun 1 N+1 → May 1 N+2: must have streamIn set.
-          if (a.canEditStreamResults) {
+          if (shouldEnforceGating && a.canEditStreamResults) {
             const streamIn = doc.streamIn as string | undefined;
             if (!streamIn || streamIn === "null" || streamIn.trim() === "") {
               navigate("/me");
               return;
             }
           }
+        }
+
+        if (showLiveChoiceProjection) {
+          try {
+            const [cutoffTotalDoc, marksTotalDoc, allCutoffs] = await Promise.all([
+              getCutoffTotalCached(dashboardYear),
+              getMarksTotalCached(dashboardYear),
+              listCutoffsForYearCached(dashboardYear),
+            ]);
+
+            const first = Number(cutoffTotalDoc.firstChoice) || 0;
+            const second = Number(cutoffTotalDoc.secondChoice) || 0;
+            const third = Number(cutoffTotalDoc.thirdChoice) || 0;
+            const distribution = String(marksTotalDoc.distribution || "")
+              .split(",")
+              .map((n) => Number(n))
+              .filter((n) => !Number.isNaN(n));
+            const denominator = distribution.reduce((sum, n) => sum + n, 0);
+
+            let projected: ChoiceBucket | null = null;
+            if (doc) {
+              const userGpa = Number(doc.gpa) || 0;
+              const isFreeChoice = Boolean(doc.freechoice);
+              const streamChoices = String(doc.streams || "")
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean)
+                .slice(0, 3);
+
+              if (isFreeChoice && streamChoices.length > 0) {
+                projected = 1;
+              } else if (userGpa > 0 && streamChoices.length > 0) {
+                const cutoffByStream: Record<string, number> = {};
+                allCutoffs.documents.forEach((cDoc: { $id: string; streamCutoff?: number | string }) => {
+                  const key = streamKeyFromCutoffDocId(cDoc.$id);
+                  if (!key || key === "total") return;
+                  cutoffByStream[key] = Number(cDoc.streamCutoff) || 0;
+                });
+
+                if (streamChoices[0] && userGpa >= (cutoffByStream[streamChoices[0]] ?? 13)) {
+                  projected = 1;
+                } else if (streamChoices[1] && userGpa >= (cutoffByStream[streamChoices[1]] ?? 13)) {
+                  projected = 2;
+                } else if (streamChoices[2] && userGpa >= (cutoffByStream[streamChoices[2]] ?? 13)) {
+                  projected = 3;
+                }
+              }
+            }
+
+            setChoiceSummary({ first, second, third, denominator, projected });
+          } catch {
+            setChoiceSummary(initialChoiceSummary);
+          }
+        } else {
+          setChoiceSummary(initialChoiceSummary);
         }
         // ── End gating ──
       } catch {
@@ -332,7 +497,7 @@ function DashboardContent() {
       }
     }
     initiatePage();
-  }, [navigate]);
+  }, [navigate, dashboardYear, showLiveChoiceProjection]);
 
   if (isLoading) {
     return (
@@ -357,13 +522,19 @@ function DashboardContent() {
           </div>
           <div className="flex flex-col gap-8">
             <div className="z-10 flex flex-col gap-8">
+              {showLiveChoiceProjection && (
+                <LiveChoiceProjectionSection summary={choiceSummary} />
+              )}
               <HorizontalBarChart
+                year={dashboardYear}
                 onTransitionReadyChange={handleCutoffsTransitionReady}
               />
               <StreamChoiceGraph
+                year={dashboardYear}
                 onTransitionReadyChange={handleStreamChoiceTransitionReady}
               />
               <GradeDistributionChart
+                year={dashboardYear}
                 onTransitionReadyChange={handleGradeDistributionTransitionReady}
               />
             </div>
@@ -375,7 +546,7 @@ function DashboardContent() {
             </div>
 
             <div>
-              <MethodologyDropdown />
+              <MethodologyDropdown priorYear={priorDashboardYear} />
             </div>
           </div>
         </div>
